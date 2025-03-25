@@ -1,0 +1,4 @@
+Flask
+easyocr
+requests
+openai
