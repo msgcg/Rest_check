@@ -7,3 +7,4 @@ __pycache__/
 *.env
 uploads/
 .venv/
+src/__pycache__
