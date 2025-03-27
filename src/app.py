@@ -49,7 +49,7 @@ def upload():
         ]
     )
     recommendations = response.choices[0].message.content  # Correctly access the content attribute
-
+    popa ='penis'
 
 
 
