@@ -1,9 +1,15 @@
-# Receipt OCR Application
+# **Приложение для Распознавания Текста на Чеках (OCR)**
 
-## Overview
-This application uses Optical Character Recognition (OCR) to extract text from receipts and provides recommendations for splitting bills. It integrates with Google Gemini for enhanced processing capabilities.
+---
 
-## Requirements
+## **Обзор**
+
+Это приложение использует технологию оптического распознавания символов (OCR) для извлечения текста из изображений чеков и предлагает рекомендации по разделению суммы счета между участниками.
+
+---
+
+## **Требования**
+
 - Python 3.x
 - Flask
 - EasyOCR
@@ -13,16 +19,37 @@ This application uses Optical Character Recognition (OCR) to extract text from r
 - Google Generative AI
 - Pydantic
 
-## Setup
-1. Clone the repository.
-2. Install the required packages:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Run the application:
-   ```
-   python src/app.py
-   ```
+---
 
-## Note
-Make sure to use COMSS DNS on the server for proper functionality.
+## **Настройка**
+
+1.  **Склонируйте репозиторий:**
+    *   Загрузите или скопируйте файлы проекта на ваш локальный компьютер.
+        *(Если используется Git, команда: `git clone <URL репозитория>`)*
+
+2.  **Установите необходимые пакеты:**
+    *   Откройте терминал или командную строку в папке проекта и выполните команду:
+        ```bash
+        pip install -r requirements.txt
+        ```
+
+3.  **Настройте переменные окружения:**
+    *   Создайте в корневом каталоге проекта файл с именем `.env`.
+    *   Добавьте в этот файл следующие строки, указав ваш ключ API от Google:
+        ```dotenv
+        GOOGLE_API_KEY='ВАШ_GOOGLE_API_KEY'
+        UPLOAD_FOLDER='uploads'
+        ```
+        *(Замените `ВАШ_GOOGLE_API_KEY` на реальный ключ. Папка `uploads` будет использоваться для временного хранения загруженных изображений чеков).*
+
+4.  **Настройте DNS для доступа к Gemini API:**
+    *   Если Google Gemini API недоступен в вашем регионе, настройте использование ComssONE DNS (или другого аналогичного сервиса), чтобы обойти ограничения.
+
+5.  **Запустите приложение:**
+    *   В терминале или командной строке, находясь в папке проекта, выполните команду:
+        ```bash
+        python src/app.py
+        ```
+    *   После запуска приложение будет доступно в вашем веб-браузере по адресу, указанному в выводе Flask (обычно `http://127.0.0.1:5000/`).
+
+---
