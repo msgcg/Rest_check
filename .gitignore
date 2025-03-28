@@ -7,6 +7,5 @@ __pycache__/
 *.env
 uploads/
 .venv/
-*.pyc
-*.pyo
 src/__pycache__/
+

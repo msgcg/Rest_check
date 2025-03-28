@@ -7,116 +7,230 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #f4f4f4;
         }
         h1 {
             color: #333;
             text-align: center;
+            margin-top: 20px;
         }
-        form {
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-bottom: 20px;
-            text-align: center;
         }
         input[type="file"], input[type="number"] {
             margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 250px;
+            font-size: 16px;
+        }
+        input[type="file"] {
+            border: 2px solid #007bff;
+        }
+        .file-btn-wrapper {
+            margin-bottom: 20px;
         }
         button {
-            padding: 10px 15px;
-            background-color: #5cb85c;
+            padding: 12px 15px;
+            background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
+            width: 100%;
+            max-width: 250px;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #4cae4c;
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .filters button {
+            flex: 1;
+            margin: 0 5px;
+        }
+        .image-preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #preview {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        #status {
+            color: blue;
+            text-align: center;
+            display: none;
+            animation: fadeIn 1s forwards;
         }
         #result {
             margin-top: 20px;
-            border: 1px solid #ccc;
             padding: 10px;
             background-color: #fff;
-            border-radius: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        @media (max-width: 600px) {
+            .filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            .filters button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <script src="https://js.puter.com/v2/"></script>
+    <div class="container">
+        <h1>Receipt OCR</h1>
+        
+        <div class="input-wrapper">
+            <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
+            <div class="file-btn-wrapper">
+                <button id="upload-btn" onclick="upload_receipt()" disabled>Обработать изображение</button>
+            </div>
+            <input type="number" id="num-people-input" placeholder="Количество людей" required oninput="toggleUploadButton()">
+        </div>
     
-    <div>
-        <h3>OCR File Upload</h3>
-        <input type="file" id="image-input" accept="image/*">
-        <button onclick="processImage()">Process Image</button>
-        
-        <div style="margin-top: 20px;">
-            <h4>Preview:</h4>
-            <img id="preview" style="max-width: 500px; display: none;">
+        <div class="image-preview-wrapper" id="preview-wrapper" style="display: none;">
+            <img id="preview" style="display: none;">
         </div>
         
-        <div style="margin-top: 20px;">
-            <h4>Recommendations:</h4>
-            <div id="result" style="white-space: pre-wrap;"></div>
+        <div id="status" class="status"></div>
+        
+        <div class="filters" id="filters-wrapper" style="display: none;">
+            <button id="pay-less-btn" onclick="filter_recommendations('equally')">Поровну</button>
+            <button id="eat-more-btn" onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
+            <button id="pay-more-btn" onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто больше заплатил</button>
         </div>
+        
+        <div id="result" class="result"></div>
     </div>
+    
 
     <script>
-        const imageInput = document.getElementById('image-input');
-        const preview = document.getElementById('preview');
-        const result = document.getElementById('result');
+        let recommendations = {};
 
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        function previewImage() {
+            const file = document.getElementById('image-input').files[0];
             if (file) {
-                // Show image preview
-                preview.src = URL.createObjectURL(file);
+                const preview = document.getElementById('preview');
                 preview.style.display = 'block';
-                result.textContent = ''; // Clear previous result
+                preview.src = URL.createObjectURL(file);
+                document.getElementById('preview-wrapper').style.display = 'flex';
             }
-        });
+        }
 
-        async function processImage() {
-            const file = imageInput.files[0];
+        function filter_recommendations(filterType) {
+            // Обработка фильтров в зависимости от типа
+            let filteredResult = "";
+
+            if (filterType === "equally") {
+                filteredResult = recommendations.equally || "Рекомендации не получены.";
+            } else if (filterType === "who_more_eat_then_more_pay") {
+                filteredResult = recommendations.who_more_eat_then_more_pay || "Рекомендации не получены.";
+            } else if (filterType === "who_more_cost_then_more_pay") {
+                filteredResult = recommendations.who_more_cost_then_more_pay || "Рекомендации не получены.";
+            }
+
+            // Обновляем результат
+            document.getElementById("result").textContent = filteredResult;
+        }
+
+
+        function toggleUploadButton() {
+            const numPeople = document.getElementById('num-people-input').value;
+            const uploadButton = document.getElementById('upload-btn');
+            uploadButton.disabled = !numPeople;
+        }
+
+        async function upload_receipt() {
+            const file = document.getElementById('image-input').files[0];
             if (!file) {
-                alert('Please select an image first');
+                alert("Пожалуйста, выберите изображение!");
                 return;
             }
 
-            result.textContent = 'Processing image...';
-            
+            document.getElementById("status").textContent = "Обработка...";
+
+            const formData = new FormData();
+            formData.append("receipt_image", file);
+            formData.append("num_people", document.getElementById('num-people-input').value);
+
             try {
-                // Convert file to data URL
-                const dataUrl = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(file);
-                });
-                
-                // Now pass the data URL to img2txt
-                const text = await puter.ai.img2txt(dataUrl); // Extract text from image
-                
-                // Send the extracted text to the backend for improvement and recommendations
-                const response = await fetch('/upload-receipt', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ extracted_text: text })
+                const response = await fetch('/upload_receipt', {
+                    method: "POST",
+                    body: formData
                 });
 
-                const data = await response.json();
-                if (response.ok) {
-                    result.textContent = data.text || 'No recommendations found.';
-                } else {
-                    result.textContent = 'Error: ' + data.error;
+                if (!response.ok) {
+                    throw new Error("Ошибка при обработке");
                 }
+
+                recommendations = await response.json();
+                console.log("Received recommendations:", recommendations);
+
+                document.getElementById("status").textContent = "Обработка завершена";
+                document.getElementById("result").style.display = "block"; // Показываем блок результата
+
+                // Обновляем результат
+                if (recommendations && recommendations.equally) {
+                    document.getElementById("result").textContent = recommendations.equally;
+                } else {
+                    document.getElementById("result").textContent = "Рекомендации не получены.";
+                }
+
+                document.getElementById("filters-wrapper").style.display = "flex"; // Показываем фильтры
             } catch (error) {
-                result.textContent = 'Error: ' + error.message;
+                console.error("Ошибка загрузки:", error);
+                document.getElementById("status").textContent = "Ошибка при обработке";
+                document.getElementById("result").textContent = "Ошибка загрузки изображения";
             }
         }
+
     </script>
+    
 </body>
 </html>

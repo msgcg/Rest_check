@@ -1,89 +1,79 @@
-from flask import Flask, request, render_template
-from openai import OpenAI
-import requests
+from flask import Flask, request, render_template, jsonify
+import os
+from google import genai
+from src.ocr_module import process_image_with_gemini
+from pydantic import BaseModel
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')  # Set the upload folder from environment variable
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/upload-receipt', methods=['POST'])
+@app.route('/upload_receipt', methods=['POST'])
 def upload_receipt():
-    # Handle receipt image upload and OCR processing
     image_file = request.files.get('receipt_image')
     if not image_file:
-        return {'error': 'No image file provided'}, 400
+        return jsonify({'error': 'No image file provided'}), 400
 
-    # Call the OCR API to extract text from the image file
-    data = request.get_json()  # Get JSON data from the request
-    extracted_text = data.get('extracted_text', '')  # Extract the text from the request
+    # Get the original filename
+    original_filename = image_file.filename
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)  # Save with original filename
+
+    image_bytes = image_file.read()  # Read the file content into bytes
+
+    # Save the uploaded image temporarily
+    with open(filepath, 'wb') as f:
+        f.write(image_bytes)
+
+    # Process the image with Google Gemini
+    extracted_text = process_image_with_gemini(filepath)
+
     if not extracted_text:
-        return {'error': 'No extracted text provided'}, 400  # Return 400 if no text is provided
+        return jsonify({'error': 'No extracted text provided'}), 400  
 
-    # Improve the readability of the extracted text
-    improved_text_response = good_text(extracted_text)  # Improve the readability of the extracted text
-    improved_text = improved_text_response['text']
-
-    # Get number of people from form
+    # Extract number of people
     num_people_str = request.form.get('num_people', '')  
     try:
         num_people = int(num_people_str) if num_people_str else None
     except ValueError:
-        num_people = None  # Handle case where conversion fails
+        num_people = None  
 
-    # Get recommendations for splitting the bill
-    recommendations = get_recommendations(improved_text, num_people)
-    return recommendations
+    # Get recommendations without needing a recommendation_type
+    recommendations = get_recommendations(extracted_text, num_people)
+    return jsonify(recommendations)
 
-def ocr_api_extract_text(image_file):
-    # Call the OCR API to extract text from the image file
-    # Implement the actual API call here
-    # Example implementation of calling the OCR API
-    response = requests.post('YOUR_OCR_API_ENDPOINT', files={'file': image_file})
-    if response.status_code == 200:
-        return response.json().get('extracted_text', '')
-    else:
-        return None  # Return None if the API call fails
+class Recommendation(BaseModel):
+    equally: str
+    who_more_eat_then_more_pay: str
+    who_more_cost_then_more_pay: str
 
-def good_text(extracted_text):  # Accept extracted text as an argument
-    client = OpenAI(
-        api_key="AIzaSyDw3G8cGlm13Qua3HV_3Bx3V2v1R2t1RJA",  
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+def get_recommendations(extracted_text, num_people):  
+    prompt = f"""Приведи различные варианты распределения счета в ресторане на {num_people} человек.
+
+    Сам текст счета: {extracted_text}.
+
+    Приведи очень подробные красиво оформленные отступами рекомендации с конкретными цифрами и блюдами(при необхожимости).
+    """
+
+    client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=prompt,
+        config={
+            'response_mime_type': 'application/json',
+            'response_schema': list[Recommendation],
+        },
     )
-
-    response = client.chat.completions.create(
-        model="gemini-2.0-flash",
-        n=1,
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {
-                "role": "user",
-                "content": f"Make this restaurant summary more readable: {extracted_text}."
-            }
-        ]
-    )
-    text = response.choices[0].message.content  # Access the content attribute
-    return {'text': text}
-
-def get_recommendations(extracted_text, num_people):  # Accept extracted text and number of people as arguments
-    client = OpenAI(
-        api_key="AIzaSyDw3G8cGlm13Qua3HV_3Bx3V2v1R2t1RJA",  
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-    )
-
-    response = client.chat.completions.create(
-        model="gemini-2.0-flash",
-        n=1,
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {
-                "role": "user",
-                "content": f"Split the bill: {extracted_text} for {num_people} people. Use Russian to answer."
-            }
-        ]
-    )
-    recommendations = response.choices[0].message.content  # Access the content attribute
-    return {'text': recommendations}
+    # Use instantiated objects.
+    recs: list[Recommendation] = response.parsed
+    startelem = recs[0]
+    return {
+        "equally": startelem.equally,
+        "who_more_cost_then_more_pay": startelem.who_more_cost_then_more_pay,
+        "who_more_eat_then_more_pay": startelem.who_more_eat_then_more_pay
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)
