@@ -45,48 +45,77 @@
     </style>
 </head>
 <body>
-    <h1>Upload Receipt</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data" id="receiptForm">
-        <input type="file" name="receipt" accept="image/*" required>
-        <button type="submit">Submit</button>
-    </form>
-    <div id="result">
-        <label for="num_people">Number of People:</label>
-        <input type="number" id="num_people" name="num_people" min="1" required>
+    <script src="https://js.puter.com/v2/"></script>
+    
+    <div>
+        <h3>OCR File Upload</h3>
+        <input type="file" id="image-input" accept="image/*">
+        <button onclick="processImage()">Process Image</button>
         
-        <label for="tips">Tips:</label>
-        <input type="number" id="tips" name="tips" min="0" step="0.01" value="0">
+        <div style="margin-top: 20px;">
+            <h4>Preview:</h4>
+            <img id="preview" style="max-width: 500px; display: none;">
+        </div>
         
-        <button type="button" onclick="submitForm()">Get Recommendations</button>
+        <div style="margin-top: 20px;">
+            <h4>Recommendations:</h4>
+            <div id="result" style="white-space: pre-wrap;"></div>
+        </div>
     </div>
+
     <script>
-        function submitForm() {
-            const form = document.getElementById('receiptForm');
-            const formData = new FormData(form);
-            const numPeople = document.getElementById('num_people').value;
-            const tips = document.getElementById('tips').value;
+        const imageInput = document.getElementById('image-input');
+        const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
 
-            // Append additional data to the FormData object
-            formData.append('num_people', numPeople);
-            formData.append('tips', tips);
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Show image preview
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+                result.textContent = ''; // Clear previous result
+            }
+        });
 
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+        async function processImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image first');
+                return;
+            }
+
+            result.textContent = 'Processing image...';
+            
+            try {
+                // Convert file to data URL
+                const dataUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+                
+                // Now pass the data URL to img2txt
+                const text = await puter.ai.img2txt(dataUrl); // Extract text from image
+                
+                // Send the extracted text to the backend for improvement and recommendations
+                const response = await fetch('/upload-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ extracted_text: text })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    result.textContent = data.text || 'No recommendations found.';
+                } else {
+                    result.textContent = 'Error: ' + data.error;
                 }
-                return response.json();
-            })
-.then(data => {
-                document.getElementById('result').innerText = JSON.stringify(data, null, 2);  // Format JSON for better readability
-
-            })
-            .catch(error => {
-                document.getElementById('result').innerText = 'Error: ' + error.message;
-            });
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
         }
     </script>
 </body>
