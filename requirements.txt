@@ -2,3 +2,6 @@ Flask
 easyocr
 requests
 openai
+google
+google-generativeai
+pydantic

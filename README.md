@@ -1,7 +1,7 @@
 # Receipt OCR Application
 
 ## Overview
-This application uses Optical Character Recognition (OCR) to extract text from receipts and provides recommendations for splitting bills.
+This application uses Optical Character Recognition (OCR) to extract text from receipts and provides recommendations for splitting bills. It integrates with Google Gemini for enhanced processing capabilities.
 
 ## Requirements
 - Python 3.x
@@ -9,6 +9,9 @@ This application uses Optical Character Recognition (OCR) to extract text from r
 - EasyOCR
 - Requests
 - OpenAI
+- Google
+- Google Generative AI
+- Pydantic
 
 ## Setup
 1. Clone the repository.
