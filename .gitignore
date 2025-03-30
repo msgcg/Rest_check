@@ -5,7 +5,11 @@ __pycache__/
 *.db
 *.sqlite3
 *.env
-uploads/
+
+# My uploads folder
+uploads/*
+!uploads/.gitkeep
+
 .venv/
 src/__pycache__/
 
