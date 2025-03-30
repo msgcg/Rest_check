@@ -1,7 +1,9 @@
 Flask
-easyocr
 requests
 openai
 google
+google.genai
 google-generativeai
 pydantic
+mimetypes
+src

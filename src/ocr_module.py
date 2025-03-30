@@ -1,5 +1,4 @@
 import os
-import os
 import google.generativeai as genai
 import mimetypes
 

@@ -1,11 +1,11 @@
 from flask import Flask, request, render_template, jsonify
 import os
 from google import genai
-from src.ocr_module import process_image_with_gemini
+from ocr_module import process_image_with_gemini
 from pydantic import BaseModel
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')  # Set the upload folder from environment variable
+app.config['UPLOAD_FOLDER'] = 'uploads'  # Set the upload folder from environment variable
 
 @app.route('/')
 def index():

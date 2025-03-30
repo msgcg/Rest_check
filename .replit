@@ -1,0 +1,17 @@
+modules = ["web", "python-3.12"]
+run = "python src/app.py"
+
+[nix]
+channel = "stable-24_05"
+# .replitrun = "app.py"
+[env]
+FLASK_ENV = "development"
+FLASK_APP = "src/app.py"
+
+[deployment]
+run = ["sh", "-c", "python src/app.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 3000
+exposeLocalhost = true
