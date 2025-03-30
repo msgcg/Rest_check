@@ -3,33 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receipt OCR</title>
+    <title>ПоДЕЛИ!</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            background-color: #f0f0f0; /* Fallback color */
+            color: #000000;
         }
         h1 {
-            color: #333;
+            color: #08a552;
             text-align: center;
             margin-top: 20px;
+            font-weight: bold;
         }
         .container {
             width: 90%;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 30px auto;
             background-color: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 30px;
-            position: relative; /* Needed for absolute positioning of status */
-            min-height: 300px; /* Ensure container has height even when preview is hidden */
+            border-radius: 10px; /* Скругление основного контейнера */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Градиентная рамка для контейнера */
+            border: 4px solid transparent;
+            background-clip: padding-box;
+            border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
+            overflow: hidden;
         }
         .input-wrapper {
             display: flex;
@@ -37,48 +47,90 @@
             align-items: center;
             margin-bottom: 20px;
             width: 100%;
-            max-width: 300px; /* Consistent width */
+            max-width: 300px;
         }
-        input[type="file"], input[type="number"] {
+
+        /* --- Стили для обертки input[type=file] --- */
+        .file-input-gradient-border {
+            width: 100%;
+            padding: 3px; /* Толщина "рамки" */
+            margin: 10px 0;
+            border-radius: 13px; /* Скругление обертки (чуть больше внутреннего) */
+            background: linear-gradient(to right, #08a552, #9fe61f); /* Фон обертки */
+            box-sizing: border-box;
+        }
+
+        /* --- Измененные стили для input[type="file"] --- */
+        input[type="file"] {
+             border: none; /* Убрали рамку */
+             border-image: none;
+             background-clip: initial;
+             display: block;
+             width: 100%;
+             padding: 10px;
+             box-sizing: border-box;
+             font-size: 16px;
+             color: #333;
+             background-color: #ffffff; /* Белый фон обязателен! */
+             border-radius: 10px; /* !!! Скругление самого input !!! */
+             overflow: hidden;
+        }
+
+         input[type="file"]::file-selector-button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #08a552;
+            color: white;
+            border: none;
+            border-radius: 8px; /* Скругление кнопки */
+            cursor: pointer;
+            transition: background-color 0.3s;
+         }
+          input[type="file"]::file-selector-button:hover {
+             background-color: #067d40;
+          }
+
+        input[type="number"] {
             margin: 10px 0;
             padding: 12px;
             border: 2px solid #ccc;
-            border-radius: 10px;
-            width: 100%; /* Take full width of parent */
-            box-sizing: border-box; /* Include padding and border in width */
+            border-radius: 10px; /* Скругление поля ввода числа */
+            width: 100%;
+            box-sizing: border-box;
             font-size: 16px;
         }
-        input[type="file"] {
-            border: 2px solid #007bff;
-        }
+
         .file-btn-wrapper {
-            margin-bottom: 10px; /* Reduced margin */
-             width: 100%; /* Take full width of parent */
+            margin-bottom: 10px;
+             width: 100%;
         }
-        button {
+        button { /* Стиль для основной кнопки и кнопок фильтров */
             padding: 12px 15px;
-            background-color: #007bff;
+            background-color: #08a552;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 10px; /* Скругление кнопок */
             cursor: pointer;
-            width: 100%; /* Take full width of parent */
+            width: 100%;
             font-size: 16px;
+            font-weight: bold;
             transition: background-color 0.3s;
             box-sizing: border-box;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #067d40;
         }
         button:disabled {
-            background-color: #ccc;
+            background-color: #bdbdbd;
+            color: #757575;
             cursor: not-allowed;
+            border-image: none;
         }
         .filters {
             display: flex;
             justify-content: space-between;
             width: 100%;
-             max-width: 400px; /* Limit filter width */
+             max-width: 450px;
             margin-top: 20px;
         }
         .filters button {
@@ -86,120 +138,151 @@
             margin: 0 5px;
         }
         .image-preview-wrapper {
-            display: flex; /* Keep as flex for centering */
+            display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Center content vertically */
+            justify-content: center;
             margin-top: 20px;
             width: 100%;
-            min-height: 200px; /* Give it some minimum height */
+            min-height: 200px;
         }
         #preview {
-            max-width: 100%; /* Responsive width */
+            max-width: 100%;
             max-height: 300px;
-            height: auto; /* Maintain aspect ratio */
-            border-radius: 10px;
+            height: auto;
+            border-radius: 10px; /* Скругление превью */
             margin-top: 10px;
-            display: none; /* Initially hidden */
+            display: none;
+            border: 1px solid #ddd;
         }
-         /* --- Status Styles --- */
         #status {
-            display: none; /* Hidden by default */
-            position: absolute; /* Position over the preview area */
+            display: none;
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 1.5em;
             font-weight: bold;
-            color: #007bff;
+            color: #08a552;
             text-align: center;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8); /* Slight background */
-            border-radius: 10px;
-            z-index: 10; /* Ensure it's above other elements if needed */
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px; /* Скругление статуса */
+            z-index: 10;
+            border: 2px solid #08a552;
         }
         #status.processing {
              animation: pulsate 1.5s infinite ease-in-out;
+             border-color: #08a552;
         }
         #status.error {
-            color: red;
-            animation: none; /* Stop animation on error */
+            color: #cb0001;
+            border-color: #cb0001;
+            animation: none;
         }
          #status.success {
-             color: green;
-             animation: none; /* Stop animation on success */
+             color: #08a552;
+             border-color: #08a552;
+             animation: none;
         }
-
         @keyframes pulsate {
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
             50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-            100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
         }
-        /* --- Result Styles --- */
         #result {
             margin-top: 20px;
             padding: 15px;
-            background-color: #e9ecef; /* Light grey background */
-            border-radius: 10px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: none; /* Initially hidden */
+            background-color: #f8fdfa;
+            border-radius: 10px; /* Скругление области результата */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: none;
             width: 100%;
-            max-width: 550px; /* Control max width */
+            max-width: 550px;
             box-sizing: border-box;
-            white-space: pre-wrap; /* Respect whitespace and newlines */
-            line-height: 1.6; /* Improve readability */
-            text-align: left; /* Align text left for readability */
+            white-space: pre-wrap;
+            line-height: 1.6;
+            text-align: left;
+            color: #000000;
+             /* Легкая градиентная рамка для Result */
+             border: 2px solid transparent;
+             background-clip: padding-box;
+             border-image: linear-gradient(to right, #e0f0e8, #f0faf5) 1;
+             overflow: hidden;
         }
         #result b {
-            color: #333; /* Slightly darker bold text */
+            color: #08a552;
+            font-weight: bold;
         }
-
         @media (max-width: 600px) {
+             body {
+                 background-image: none !important;
+                 background-color: #f0f0f0;
+             }
              .container {
                  width: 95%;
                  padding: 15px;
+                 margin-top: 20px;
+                 margin-bottom: 20px;
+                 border-width: 3px;
             }
+             /* Стили для обертки на мобильных */
+             .file-input-gradient-border {
+                 padding: 2px; /* Чуть тоньше рамка */
+                 border-radius: 11px;
+             }
+             input[type="file"] {
+                 border-radius: 9px; /* Чуть меньше скругление */
+             }
             .filters {
                 flex-direction: column;
                 align-items: center;
-                max-width: 300px; /* Adjust filter width on small screens */
+                max-width: 300px;
             }
             .filters button {
                 width: 100%;
-                margin: 5px 0; /* Adjust margin for column layout */
+                margin: 5px 0;
             }
              #status {
-                 font-size: 1.2em; /* Smaller font on mobile */
-                 width: 80%; /* Adjust width */
+                 font-size: 1.2em;
+                 width: 80%;
             }
              #result {
-                 max-width: 100%; /* Full width on small screens */
+                 max-width: 100%;
             }
         }
     </style>
+
+    <!-- Динамический стиль для фона через Flask -->
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='images/splash.png') }}");
+        }
+    </style>
+
 </head>
 <body>
-    <!-- Keep container structure simple, status will overlay -->
     <div class="container">
-        <h1>Receipt OCR</h1>
+        <h1>ПоДЕЛИ!</h1>
 
         <div class="input-wrapper">
-            <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
-            <input type="number" id="num-people-input" placeholder="Количество людей" required oninput="toggleUploadButton()">
-            <div class="file-btn-wrapper">
-                <button id="upload-btn" onclick="upload_receipt()" disabled>Обработать изображение</button>
-            </div>
-        </div>
+             <!-- Обертка для input type="file" -->
+             <div class="file-input-gradient-border">
+                 <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
+             </div>
+             <input type="number" id="num-people-input" placeholder="Количество людей" required oninput="toggleUploadButton()">
+             <div class="file-btn-wrapper">
+                 <button id="upload-btn" onclick="upload_receipt()" disabled>Обработать изображение</button>
+             </div>
+         </div>
 
-         <!-- Status element (initially hidden) -->
-        <div id="status" class="status"></div>
 
-        <!-- Wrapper for preview OR processing status area -->
+         <div id="status" class="status"></div>
+
         <div class="image-preview-wrapper" id="preview-wrapper">
-            <img id="preview"> <!-- Image is inside -->
+            <img id="preview">
         </div>
 
-        <!-- Filters and Result appear below -->
         <div class="filters" id="filters-wrapper" style="display: none;">
             <button id="pay-less-btn" onclick="filter_recommendations('equally')">Поровну</button>
             <button id="eat-more-btn" onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
@@ -209,10 +292,10 @@
         <div id="result" class="result"></div>
     </div>
 
-
-    <script>
-        let recommendations = {}; // Store the full recommendation object
-
+    <!-- JavaScript (без изменений) -->
+     <script>
+         // ... (весь ваш JavaScript код) ...
+        let recommendations = {};
         const previewWrapper = document.getElementById('preview-wrapper');
         const previewElement = document.getElementById('preview');
         const statusElement = document.getElementById('status');
@@ -222,17 +305,16 @@
         const imageInput = document.getElementById('image-input');
         const numPeopleInput = document.getElementById('num-people-input');
 
-
         function previewImage() {
             const file = imageInput.files[0];
             if (file) {
                 previewElement.style.display = 'block';
                 previewElement.src = URL.createObjectURL(file);
-                previewWrapper.style.display = 'flex'; // Show preview area
-                statusElement.style.display = 'none'; // Hide status if it was visible
-                resultElement.style.display = 'none'; // Hide old results
-                filtersWrapper.style.display = 'none'; // Hide old filters
-                toggleUploadButton(); // Check if button should be enabled
+                previewWrapper.style.display = 'flex';
+                statusElement.style.display = 'none';
+                resultElement.style.display = 'none';
+                filtersWrapper.style.display = 'none';
+                toggleUploadButton();
             } else {
                  previewElement.style.display = 'none';
                  previewWrapper.style.display = 'none';
@@ -246,135 +328,88 @@
             uploadButton.disabled = !(numPeople && fileSelected && numPeople > 0);
         }
 
-        /**
-         * Formats text: replaces **text** with <b>text</b> and \n with <br>.
-         * @param {string} text - The input text.
-         * @returns {string} - Formatted HTML string.
-         */
         function formatOutputText(text) {
-            if (!text) return ""; // Handle null, undefined, or empty string
-
-            // 1. Replace **text** with <b>text</b> using a non-greedy regex
+            if (!text) return "";
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-
-            // 2. Replace newline characters (\n) with <br> tags
             formattedText = formattedText.replace(/\n/g, '<br>');
-
             return formattedText;
         }
-
 
         function displayRecommendations(filterType = 'equally') {
              let textToShow = "";
              switch (filterType) {
-                 case 'equally':
-                     textToShow = recommendations.equally;
-                     break;
-                 case 'who_more_eat_then_more_pay':
-                     textToShow = recommendations.who_more_eat_then_more_pay;
-                     break;
-                 case 'who_more_cost_then_more_pay':
-                      textToShow = recommendations.who_more_cost_then_more_pay;
-                      break;
-                 default:
-                      textToShow = recommendations.equally; // Default to equally
+                 case 'equally': textToShow = recommendations.equally; break;
+                 case 'who_more_eat_then_more_pay': textToShow = recommendations.who_more_eat_then_more_pay; break;
+                 case 'who_more_cost_then_more_pay': textToShow = recommendations.who_more_cost_then_more_pay; break;
+                 default: textToShow = recommendations.equally;
             }
-
-            // Format and display the result
              resultElement.innerHTML = formatOutputText(textToShow || "Рекомендации для этого фильтра не найдены.");
-             resultElement.style.display = "block"; // Ensure result is visible
+             resultElement.style.display = "block";
         }
-
 
         function filter_recommendations(filterType) {
-            displayRecommendations(filterType); // Use the helper to display
+            displayRecommendations(filterType);
         }
-
 
         async function upload_receipt() {
             const file = imageInput.files[0];
             const numPeople = numPeopleInput.value;
-
             if (!file || !numPeople || numPeople <= 0) {
                 alert("Пожалуйста, выберите изображение и укажите корректное количество людей (больше 0).");
                 return;
             }
-
-            // --- Start Processing Visuals ---
-            uploadButton.disabled = true; // Disable button during processing
-            previewWrapper.style.display = 'none'; // Hide image preview
-            resultElement.style.display = 'none'; // Hide previous results
-            filtersWrapper.style.display = 'none'; // Hide filters
-
+            uploadButton.disabled = true;
+            previewWrapper.style.display = 'none';
+            resultElement.style.display = 'none';
+            filtersWrapper.style.display = 'none';
             statusElement.textContent = "Обработка изображения...";
-            statusElement.className = 'status processing'; // Add class for animation
-            statusElement.style.display = 'block'; // Show status
-            // --- End Processing Visuals ---
+            statusElement.className = 'status processing';
+            statusElement.style.display = 'block';
 
             const formData = new FormData();
             formData.append("receipt_image", file);
             formData.append("num_people", numPeople);
 
             try {
-                const response = await fetch('/upload_receipt', {
-                    method: "POST",
-                    body: formData
-                });
-
-                // --- Handle Response ---
-                statusElement.style.display = 'none'; // Hide status initially after fetch
-                statusElement.classList.remove('processing'); // Remove animation class
+                const response = await fetch('/upload_receipt', { method: "POST", body: formData });
+                statusElement.style.display = 'none';
+                statusElement.classList.remove('processing');
 
                 if (!response.ok) {
-                    // Try to get error message from response body
                     let errorMsg = `Ошибка ${response.status}: ${response.statusText}`;
-                    try {
-                        const errorData = await response.json();
-                        errorMsg = errorData.detail || errorData.message || errorMsg;
-                    } catch (e) {
-                         // Ignore if response body is not JSON or empty
-                    }
-                    throw new Error(errorMsg); // Throw detailed error
+                    try { const errorData = await response.json(); errorMsg = errorData.detail || errorData.message || errorMsg; } catch (e) { /* ignore */ }
+                    throw new Error(errorMsg);
                 }
 
-                recommendations = await response.json(); // Store the full response
+                recommendations = await response.json();
                 console.log("Received recommendations:", recommendations);
-
-                // Display success message briefly (optional)
-                // statusElement.textContent = "Обработка завершена";
-                // statusElement.className = 'status success';
-                // statusElement.style.display = 'block';
-                // setTimeout(() => { statusElement.style.display = 'none'; }, 2000); // Hide after 2s
-
-                 // Display results using the default filter ('equally')
-                displayRecommendations('equally'); // Show formatted results
-
-                filtersWrapper.style.display = "flex"; // Show filter buttons
+                statusElement.textContent = "Обработка завершена";
+                statusElement.className = 'status success';
+                statusElement.style.display = 'block';
+                setTimeout(() => { statusElement.style.display = 'none'; }, 2000);
+                displayRecommendations('equally');
+                filtersWrapper.style.display = "flex";
 
             } catch (error) {
                 console.error("Ошибка загрузки:", error);
                 statusElement.textContent = `Ошибка: ${error.message || "Не удалось обработать изображение"}`;
-                statusElement.className = 'status error'; // Style as error
-                statusElement.style.display = 'block'; // Show error message persistently
-                resultElement.innerHTML = ""; // Clear result area on error
+                statusElement.className = 'status error';
+                statusElement.style.display = 'block';
+                resultElement.innerHTML = "";
                 resultElement.style.display = "none";
-                filtersWrapper.style.display = "none"; // Hide filters on error
+                filtersWrapper.style.display = "none";
             } finally {
-                 // Re-enable button only if inputs are still valid
                  toggleUploadButton();
             }
         }
 
-         // Initialize button state on page load
          window.onload = () => {
              toggleUploadButton();
-             // Ensure elements depending on JS are hidden initially if needed
               previewWrapper.style.display = 'none';
               statusElement.style.display = 'none';
               resultElement.style.display = 'none';
               filtersWrapper.style.display = 'none';
         };
-
     </script>
 
 </body>
