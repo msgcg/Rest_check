@@ -5,5 +5,3 @@ google
 google.genai
 google-generativeai
 pydantic
-mimetypes
-src
