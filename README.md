@@ -12,10 +12,10 @@
 
 - Python 3.x
 - Flask
-- EasyOCR
 - Requests
 - OpenAI
 - Google
+- Google.genai
 - Google Generative AI
 - Pydantic
 
