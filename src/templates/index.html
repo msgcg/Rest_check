@@ -214,10 +214,12 @@
             color: #08a552;
             font-weight: bold;
         }
+
+        /* --- Mobile Styles --- */
         @media (max-width: 600px) {
              body {
-                 background-image: none !important;
-                 background-color: #f0f0f0;
+                 /* REMOVED: background-image: none !important; */
+                 background-color: #f0f0f0; /* Keep this fallback */
              }
              .container {
                  width: 95%;
@@ -276,7 +278,6 @@
              </div>
          </div>
 
-
          <div id="status" class="status"></div>
 
         <div class="image-preview-wrapper" id="preview-wrapper">
@@ -294,7 +295,6 @@
 
     <!-- JavaScript (без изменений) -->
      <script>
-         // ... (весь ваш JavaScript код) ...
         let recommendations = {};
         const previewWrapper = document.getElementById('preview-wrapper');
         const previewElement = document.getElementById('preview');
@@ -330,7 +330,9 @@
 
         function formatOutputText(text) {
             if (!text) return "";
+            // Replace **bold** with <b>bold</b>
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // Replace newline characters with <br> tags
             formattedText = formattedText.replace(/\n/g, '<br>');
             return formattedText;
         }
@@ -343,6 +345,7 @@
                  case 'who_more_cost_then_more_pay': textToShow = recommendations.who_more_cost_then_more_pay; break;
                  default: textToShow = recommendations.equally;
             }
+             // Use formatOutputText here before setting innerHTML
              resultElement.innerHTML = formatOutputText(textToShow || "Рекомендации для этого фильтра не найдены.");
              resultElement.style.display = "block";
         }
@@ -359,11 +362,11 @@
                 return;
             }
             uploadButton.disabled = true;
-            previewWrapper.style.display = 'none';
+            previewWrapper.style.display = 'none'; // Hide preview during processing
             resultElement.style.display = 'none';
             filtersWrapper.style.display = 'none';
             statusElement.textContent = "Обработка изображения...";
-            statusElement.className = 'status processing';
+            statusElement.className = 'status processing'; // Add class for animation
             statusElement.style.display = 'block';
 
             const formData = new FormData();
@@ -372,39 +375,53 @@
 
             try {
                 const response = await fetch('/upload_receipt', { method: "POST", body: formData });
-                statusElement.style.display = 'none';
-                statusElement.classList.remove('processing');
+                statusElement.style.display = 'none'; // Hide status temporarily
+                statusElement.classList.remove('processing'); // Remove animation class
 
                 if (!response.ok) {
                     let errorMsg = `Ошибка ${response.status}: ${response.statusText}`;
-                    try { const errorData = await response.json(); errorMsg = errorData.detail || errorData.message || errorMsg; } catch (e) { /* ignore */ }
+                    try {
+                        // Try to parse more detailed error from JSON response
+                        const errorData = await response.json();
+                        errorMsg = errorData.detail || errorData.message || errorMsg;
+                    } catch (e) {
+                        // If response is not JSON or parsing fails, use the original message
+                    }
                     throw new Error(errorMsg);
                 }
 
                 recommendations = await response.json();
-                console.log("Received recommendations:", recommendations);
+                console.log("Received recommendations:", recommendations); // For debugging
+
+                // Show success status briefly
                 statusElement.textContent = "Обработка завершена";
                 statusElement.className = 'status success';
                 statusElement.style.display = 'block';
-                setTimeout(() => { statusElement.style.display = 'none'; }, 2000);
-                displayRecommendations('equally');
-                filtersWrapper.style.display = "flex";
+                setTimeout(() => { statusElement.style.display = 'none'; }, 2000); // Hide after 2 seconds
+
+                // Display results and filters
+                displayRecommendations('equally'); // Display default filter first
+                filtersWrapper.style.display = "flex"; // Show filter buttons
 
             } catch (error) {
                 console.error("Ошибка загрузки:", error);
                 statusElement.textContent = `Ошибка: ${error.message || "Не удалось обработать изображение"}`;
-                statusElement.className = 'status error';
+                statusElement.className = 'status error'; // Add error class
                 statusElement.style.display = 'block';
+                // Ensure results and filters are hidden on error
                 resultElement.innerHTML = "";
                 resultElement.style.display = "none";
                 filtersWrapper.style.display = "none";
             } finally {
+                 // Re-enable button only if conditions are met (in case user changed input during processing)
                  toggleUploadButton();
             }
         }
 
+         // Initial setup on page load
          window.onload = () => {
-             toggleUploadButton();
+             toggleUploadButton(); // Set initial button state
+              // Hide elements that shouldn't be visible initially
               previewWrapper.style.display = 'none';
               statusElement.style.display = 'none';
               resultElement.style.display = 'none';
