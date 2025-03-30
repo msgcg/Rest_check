@@ -27,11 +27,16 @@ def upload_receipt():
     with open(filepath, 'wb') as f:
         f.write(image_bytes)
 
-    # Process the image with Google Gemini
-    extracted_text = process_image_with_gemini(filepath)
+    try:
+        # Process the image with Google Gemini
+        extracted_text = process_image_with_gemini(filepath)
 
-    if not extracted_text:
-        return jsonify({'error': 'No extracted text provided'}), 400  
+        if not extracted_text:
+            return jsonify({'error': 'No extracted text provided'}), 400  
+    finally:
+        # Delete the file after processing
+        if os.path.exists(filepath):
+            os.remove(filepath)  
 
     # Extract number of people
     num_people_str = request.form.get('num_people', '')  
