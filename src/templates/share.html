@@ -18,7 +18,7 @@
             --shadow-color: rgba(8, 165, 82, 0.15); /* Shadow based on primary green */
             --border-thickness: 3px; /* Control border thickness */
             --widget-border-radius: 18px; /* Consistent rounding */
-            --paste-button-bg: #2db26c; /* New color for paste button */
+            /* --paste-button-bg: #2db26c; /* No longer needed */
             --disabled-button-bg: #aabbcc; /* Grey for disabled buttons */
         }
 
@@ -133,7 +133,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 10px; /* Adjust gap if needed after removing button */
             flex-wrap: wrap;
             margin-top: 30px;
             margin-bottom: 30px;
@@ -148,7 +148,7 @@
             padding: 8px 12px;
             width: auto;
             min-width: 120px;
-            max-width: 220px;
+            max-width: 220px; /* Might want to adjust max-width */
             text-align: right;
             background-color: #fdfdfd;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
@@ -176,27 +176,10 @@
             padding-left: 5px;
         }
 
-        #pasteAmountButton {
-            padding: 10px 15px;
-            font-size: 15px;
-            font-weight: 600;
-            background-color: var(--paste-button-bg);
-            color: var(--text-light);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s, opacity 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        #pasteAmountButton:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        #pasteAmountButton:active {
-             transform: translateY(0px);
-             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-             opacity: 0.95;
-        }
+        /* Styles for paste button removed */
+        /* #pasteAmountButton { ... } */
+        /* #pasteAmountButton:hover { ... } */
+        /* #pasteAmountButton:active { ... } */
 
         /* Specific styles for share section */
         .share-section {
@@ -284,13 +267,14 @@
     <!-- Receipt Card with Gradient Border -->
     <div class="receipt-card widget-bordered">
         <div class="widget-content">
-            <div class="receipt-title">Введите или вставьте сумму чека</div>
+            <div class="receipt-title">Введите сумму чека</div> <!-- Updated title -->
             <div class="amount-container">
                  <!-- Input type=text might offer more control over input behavior than type=number -->
                  <!-- Use inputmode="decimal" for mobile keyboards -->
                  <input type="text" inputmode="decimal" id="receiptAmountInput" value="0.00" placeholder="0.00">
                  <span class="currency-symbol">₽</span>
-                 <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button>
+                 <!-- Paste button removed -->
+                 <!-- <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button> -->
             </div>
         </div>
     </div>
@@ -322,7 +306,7 @@
     <script>
         // Get references to elements
         const amountInput = document.getElementById('receiptAmountInput');
-        const pasteButton = document.getElementById('pasteAmountButton');
+        // const pasteButton = document.getElementById('pasteAmountButton'); // Reference removed
         const shareVkButton = document.getElementById('shareVk');
         const shareTelegramButton = document.getElementById('shareTelegram');
 
@@ -437,45 +421,16 @@
             updateShareState(finalNumericValue); // Update state based on the final formatted number
          });
 
-        
+        // Paste button related code removed
+        /*
         function parsePastedAmount(Btext) {
-            if (!Btext) return null;
-            const BcleanedText = Btext.replace(/[^0-9.,]/g, '').replace(',', '.');
-            const Bvalue = parseFloat(BcleanedText);
-            return isNaN(Bvalue) || Bvalue < 0 ? null : Bvalue.toFixed(2);
+            // ... implementation removed ...
         }
         pasteButton.addEventListener('click', async () => {
-            let text = '';
-            try {
-                if (!navigator.clipboard || !navigator.clipboard.readText) {
-                     clipboardStatusSpan.textContent = 'API буфера обмена не поддерживается.';
-                     alert('Ваш браузер не поддерживает вставку из буфера обмена.');
-                     return;
-                }
-                const text = await navigator.clipboard.readText();
-                const parsed = parsePastedAmount(text);
-                // Set the input value directly from paste first
-                amountInput.value = parsed;
-                // Now format the input visually based on the pasted content
-                const finalNumericValue = formatInputVisually();
-
-                // Update the share state based on the final numeric value
-                updateShareState(finalNumericValue);
-            } catch (err) {
-                console.error('Ошибка вставки из буфера обмена:', err);
-                if (err.name === 'NotAllowedError') {
-                     alert('Доступ к буферу обмена не предоставлен. Вы используете Android 12+, где веб-приложениям запрещен доступ к буферу обмена, или вы запретили доступ в вашем браузере.');
-                } else if (err.name === 'NotFoundError') {
-                     alert('Не удалось найти текст в буфере обмена.');
-                } else {
-                     alert('Не удалось прочитать буфер обмена.');
-                }
-                // Attempt to format/update state based on whatever might be in the input now
-                 const fallbackNumericValue = formatInputVisually();
-                 updateShareState(fallbackNumericValue);
-            }
+            // ... implementation removed ...
         });
-        
+        */
+
 
     </script>
 </body>
