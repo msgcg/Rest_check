@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ПоДели - Поделиться чеком</title>
+    <title>ПоДЕЛИ! - Поделиться чеком</title>
     <style>
         /* Sber-inspired Palette */
         :root {
@@ -19,67 +19,93 @@
             --border-thickness: 3px; /* Control border thickness */
             --widget-border-radius: 18px; /* Consistent rounding */
             --paste-button-bg: #2db26c; /* New color for paste button */
+            --disabled-button-bg: #aabbcc; /* Grey for disabled buttons */
         }
 
+        /* Make body a flex container to push content down */
         body {
             font-family: 'Arial', sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 25px 20px;
+            padding: 25px 20px; /* Keep padding for spacing from screen edges */
             color: var(--text-dark);
+            background-image: url("/static/images/splash.png"); /* Combined background style */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+
+            /* Flexbox for bottom alignment */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            justify-content: flex-end; /* Push flex items (header, cards) to the bottom */
+            box-sizing: border-box; /* Include padding in min-height calculation */
+            margin: 0; /* Reset default margin */
+        }
+
+        /* Apply max-width and centering to the main content blocks */
+        .header,
+        .widget-bordered { /* Target the main blocks */
+            max-width: 600px; /* Set the max width */
+            width: 100%; /* Ensure they take available width up to max-width */
+            margin-left: auto; /* Center the blocks */
+            margin-right: auto; /* Center the blocks */
         }
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .logo {
             font-size: 28px;
             font-weight: bold;
-            color: var(--text-dark); /* Changed to black */
+            color: var(--text-dark);
             margin-bottom: 5px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
-        .header div:not(.logo) { /* Subtitle style */
+        .header div:not(.logo) {
             font-size: 16px;
-            color: var(--text-dark); /* Changed to black */
+            color: var(--text-dark);
             opacity: 0.9;
         }
 
         /* Outer container for border and shadow */
         .widget-bordered {
-            /* No background here! */
-            border-radius: var(--widget-border-radius); /* Rounding for the border and shadow */
-            box-shadow: 0 5px 20px var(--shadow-color); /* Shadow on the outer element */
-            margin-bottom: 40px;
-            position: relative; /* Needed for ::before */
-            z-index: 1; /* Context for ::before */
-            overflow: hidden; /* Clip the ::before element */
-            /* Add padding equal to border thickness to push content away from the edge */
-             padding: var(--border-thickness);
+            border-radius: var(--widget-border-radius);
+            box-shadow: 0 5px 20px var(--shadow-color);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            padding: var(--border-thickness);
         }
+
+        /* Adjust margins between the cards */
+        .receipt-card {
+             margin-bottom: 25px; /* Space between receipt and share card */
+        }
+        .share-section {
+             margin-bottom: 40px; /* Add some space at the very bottom */
+        }
+
 
         /* Gradient Border using ::before */
         .widget-bordered::before {
             content: '';
             position: absolute;
-            top: 0; /* Align with the outer container */
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--border-gradient); /* Gradient background */
-            z-index: -1; /* Behind the inner .widget-content */
-            border-radius: inherit; /* Match parent's rounding */
+            background: var(--border-gradient);
+            z-index: -1;
+            border-radius: inherit;
         }
 
         /* Inner container for white background and content padding */
         .widget-content {
-            background-color: var(--card-background); /* White background here */
-             /* Slightly smaller radius for perfect fit inside the border */
+            background-color: var(--card-background);
              border-radius: calc(var(--widget-border-radius) - var(--border-thickness));
-             padding: 25px; /* Actual content padding */
-             /* Ensure content height calculation works well */
+             padding: 25px;
              height: 100%;
              box-sizing: border-box;
         }
@@ -108,9 +134,8 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            /* Removed margin as padding is on .widget-content */
             flex-wrap: wrap;
-            margin-top: 30px; /* Add margin back if needed */
+            margin-top: 30px;
             margin-bottom: 30px;
         }
 
@@ -127,15 +152,21 @@
             text-align: right;
             background-color: #fdfdfd;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            -webkit-appearance: none;
+            -webkit-appearance: none; /* Keep this for iOS */
             margin: 0;
-            -moz-appearance: textfield;
+            -moz-appearance: textfield; /* For Firefox */
             transition: border-color 0.3s, box-shadow 0.3s;
         }
         #receiptAmountInput:focus {
             outline: none;
             border-color: var(--accent-green-yellow);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--accent-green-yellow);
+        }
+        /* Hide arrows for number input */
+        #receiptAmountInput::-webkit-outer-spin-button,
+        #receiptAmountInput::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .currency-symbol {
@@ -149,8 +180,8 @@
             padding: 10px 15px;
             font-size: 15px;
             font-weight: 600;
-            background-color: var(--paste-button-bg); /* Changed background color */
-            color: var(--text-light); /* Changed text color to black */
+            background-color: var(--paste-button-bg);
+            color: var(--text-light);
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -158,7 +189,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         #pasteAmountButton:hover {
-            opacity: 0.9; /* Adjusted hover effect slightly */
+            opacity: 0.9;
             transform: translateY(-1px);
         }
         #pasteAmountButton:active {
@@ -170,7 +201,6 @@
         /* Specific styles for share section */
         .share-section {
             /* Inherits .widget-bordered styles */
-            margin-top: 20px;
         }
 
         /* Adjust padding for the inner content */
@@ -206,21 +236,37 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s;
+            transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s, background-color 0.3s;
             background-color: var(--primary-green);
             box-shadow: 0 3px 8px var(--shadow-color);
             min-width: 150px;
         }
 
-        .share-button:hover {
+        .share-button:hover:not(:disabled) { /* Apply hover only if not disabled */
             opacity: var(--button-hover-opacity);
             transform: translateY(-2px);
             box-shadow: 0 5px 12px var(--shadow-color);
         }
-         .share-button:active {
+         .share-button:active:not(:disabled) { /* Apply active only if not disabled */
             transform: translateY(0px);
             box-shadow: 0 2px 5px var(--shadow-color);
         }
+
+        /* --- Styles for Disabled Share Buttons --- */
+        .share-button:disabled {
+            background-color: var(--disabled-button-bg); /* Greyed out background */
+            opacity: 0.6; /* Reduce opacity */
+            cursor: not-allowed; /* Indicate non-clickable */
+            box-shadow: none; /* Remove shadow */
+            transform: none; /* Prevent hover transform */
+        }
+
+        .share-button:disabled:hover { /* Keep disabled style on hover */
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+        /* --- End Disabled Styles --- */
 
         .icon {
             width: 22px;
@@ -228,12 +274,10 @@
         }
 
     </style>
-    <!-- Flask background style (kept as requested) -->
-    <style> body { background-image: url("/static/images/splash.png"); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; } </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">ПоДели!</div>
+        <div class="logo">ПоДЕЛИ!</div>
         <div>Поделитесь суммой из чека легко</div>
     </div>
 
@@ -242,7 +286,9 @@
         <div class="widget-content">
             <div class="receipt-title">Введите или вставьте сумму чека</div>
             <div class="amount-container">
-                 <input type="number" id="receiptAmountInput" step="0.01" min="0" value="0" placeholder="0.00">
+                 <!-- Input type=text might offer more control over input behavior than type=number -->
+                 <!-- Use inputmode="decimal" for mobile keyboards -->
+                 <input type="text" inputmode="decimal" id="receiptAmountInput" value="0.00" placeholder="0.00">
                  <span class="currency-symbol">₽</span>
                  <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button>
             </div>
@@ -252,17 +298,17 @@
     <!-- Share Section with Gradient Border -->
     <div class="share-section widget-bordered">
         <div class="widget-content">
-            <div class="share-title">Поделиться ссылкой</div>
+            <div class="share-title">Поделиться суммой</div>
             <div class="share-buttons">
-                <!-- VK Button -->
+                <!-- VK Button - Initially might be disabled -->
                 <button class="share-button" id="shareVk">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
                         <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/>
-                </svg>
-                ВКонтакте
+                    </svg>
+                    ВКонтакте
             </button>
 
-            <!-- Telegram Button -->
+            <!-- Telegram Button - Initially might be disabled -->
             <button class="share-button" id="shareTelegram">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
                     <path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/>
@@ -274,68 +320,157 @@
     </div>
 
     <script>
-        // JS code остается без изменений
+        // Get references to elements
         const amountInput = document.getElementById('receiptAmountInput');
         const pasteButton = document.getElementById('pasteAmountButton');
         const shareVkButton = document.getElementById('shareVk');
         const shareTelegramButton = document.getElementById('shareTelegram');
-        let currentAmount = 0;
-        const pageBaseUrl = window.location.origin + window.location.pathname;
+
+
         function parseAmount(text) {
-            if (!text) return null;
-            const cleanedText = text.replace(/[^0-9.,]/g, '').replace(',', '.');
-            const value = parseFloat(cleanedText);
-            return isNaN(value) || value < 0 ? null : value.toFixed(2);
-        }
-        function updateAmount(newAmount) {
-            currentAmount = parseFloat(newAmount) || 0;
-            const formattedAmountForDisplay = currentAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const formattedAmountForInput = currentAmount.toFixed(2);
-            if (amountInput.value !== formattedAmountForInput) {
-                 amountInput.value = formattedAmountForInput;
+            if (text === null || text === undefined || text === '') return null;
+            // Allow spaces, replace comma, remove invalid chars except dot
+            let cleanedText = String(text).replace(/\s/g, '').replace(',', '.').replace(/[^0-9.]/g, '');
+
+            // Ensure only one decimal point exists
+            const parts = cleanedText.split('.');
+            if (parts.length > 2) {
+                 // Reconstruct with only the first decimal point
+                 cleanedText = parts[0] + '.' + parts.slice(1).join('');
             }
-            const shareTextBase = `Твоя доля за вчерашние посиделки: ${formattedAmountForDisplay}₽ 😊`;
-            const shareUrlVk = `https://vk.com/share.php?title=${encodeURIComponent('Привет.')}&comment=${encodeURIComponent(shareTextBase)}`;
-            const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent('Привет.')}&text=${encodeURIComponent(shareTextBase)}`;
-            shareVkButton.onclick = () => window.open(shareUrlVk, '_blank', 'width=600,height=450,noopener,noreferrer');
-            shareTelegramButton.onclick = () => window.open(shareUrlTelegram, '_blank', 'width=600,height=450,noopener,noreferrer');
+            // If it ends with just '.', treat it as integer for now during typing
+             if (cleanedText.endsWith('.') && cleanedText.length > 1) {
+                  // Allow typing e.g. "12." without immediately parsing as NaN
+                  // But parseFloat will handle this correctly anyway
+             } else if (cleanedText === '.') {
+                return 0; // Treat just "." as 0 for parsing purpose
+             }
+
+
+            const value = parseFloat(cleanedText);
+            // Return null if NaN or negative
+            return isNaN(value) || value < 0 ? null : value;
         }
+
+        // Updates share button state and links based on a numeric value
+        function updateShareState(numericAmount) {
+            // Ensure numericAmount is a valid number, default to 0 if not
+            // Buttons enabled only if > 0
+            const currentValidAmount = (typeof numericAmount === 'number' && numericAmount > 0) ? numericAmount : 0;
+            const isAmountPositive = currentValidAmount > 0;
+
+            // --- Button Enabling/Disabling Logic ---
+            shareVkButton.disabled = !isAmountPositive;
+            shareTelegramButton.disabled = !isAmountPositive;
+            // --- End Button Logic ---
+
+            // Only generate share links and set handlers if the amount is positive
+            if (isAmountPositive) {
+                // Format for display in the message, always 2 decimals
+                const formattedAmountForDisplay = currentValidAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const shareTextBase = `Твоя доля за недавние посиделки: ${formattedAmountForDisplay}₽ 😊`; // Simplified text
+
+                const shareUrlVk = `https://vk.com/share.php?title=${encodeURIComponent('ПоДЕЛИ!: Сумма чека')}&comment=${encodeURIComponent(shareTextBase)}`;
+                const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent('Привет! ')}&text=${encodeURIComponent(shareTextBase)}`;
+
+                shareVkButton.onclick = () => window.open(shareUrlVk, '_blank', 'width=600,height=450,noopener,noreferrer');
+                shareTelegramButton.onclick = () => window.open(shareUrlTelegram, '_blank', 'width=600,height=450,noopener,noreferrer');
+            } else {
+                // Clear onclick handlers when buttons are disabled
+                shareVkButton.onclick = null;
+                shareTelegramButton.onclick = null;
+            }
+        }
+
+        // Formats the input field visually to two decimal places
+        function formatInputVisually() {
+            const currentValue = amountInput.value;
+            const parsed = parseAmount(currentValue);
+            // Determine the valid numeric amount (at least 0)
+            const finalNumericAmount = (parsed !== null && parsed >= 0) ? parsed : 0;
+            // Format the input field to 2 decimal places
+            amountInput.value = finalNumericAmount.toFixed(2);
+            // Return the numeric value for convenience
+            return finalNumericAmount;
+        }
+
+        // --- Initial Setup ---
         const urlParams = new URLSearchParams(window.location.search);
         const initialAmountParam = urlParams.get('amount');
-        const initialAmount = parseAmount(initialAmountParam) || 0;
-        updateAmount(initialAmount);
+        const initialParsedAmount = parseAmount(initialAmountParam);
+        // Set initial input value formatted, ensuring it's >= 0
+        const initialNumericValue = (initialParsedAmount !== null && initialParsedAmount >= 0) ? initialParsedAmount : 0;
+        amountInput.value = initialNumericValue.toFixed(2);
+        // Set initial button state based on parsed amount (must be > 0)
+        updateShareState(initialNumericValue);
+
+
+        // --- Event Listeners ---
         amountInput.addEventListener('input', (event) => {
-            const value = event.target.value;
-            if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
-                updateAmount(value || 0);
-            }
+            // Allow typing, don't format visually here.
+            // Filter input to allow only digits and one decimal point using regex replacement
+            let value = event.target.value;
+            value = value.replace(/[^0-9.]/g, ''); // Remove invalid chars
+             const parts = value.split('.');
+             if (parts.length > 2) { // If more than one dot
+                 value = parts[0] + '.' + parts.slice(1).join(''); // Keep only first dot
+             }
+             // Optional: Limit decimals during typing (can feel restrictive)
+             // if (parts.length === 2 && parts[1].length > 2) {
+             //     value = parts[0] + '.' + parts[1].substring(0, 2);
+             // }
+
+             // Update input value *if* it was cleaned
+             if (event.target.value !== value) {
+                event.target.value = value;
+             }
+
+
+            // Parse the current (potentially unformatted) value for state update
+            const parsedForState = parseAmount(value);
+            updateShareState(parsedForState); // Update button state based on live value
         });
+
          amountInput.addEventListener('change', (event) => {
-            const value = event.target.value;
-            const parsed = parseAmount(value);
-            updateAmount(parsed !== null ? parsed : 0);
+            // User finished editing (blur/enter). Now format and sync state.
+            const finalNumericValue = formatInputVisually(); // Formats input and returns the number
+            updateShareState(finalNumericValue); // Update state based on the final formatted number
          });
+
         pasteButton.addEventListener('click', async () => {
+            let text = '';
             try {
                 if (!navigator.clipboard || !navigator.clipboard.readText) {
-                     alert('Ваш браузер не поддерживает вставку из буфера обмена.');
+                     console.warn('Clipboard API not fully supported or permission denied.');
+                     alert('Ваш браузер не поддерживает автоматическую вставку из буфера обмена, или доступ не разрешен.');
                      return;
                 }
-                const text = await navigator.clipboard.readText();
-                const parsed = parseAmount(text);
-                if (parsed !== null) {
-                    updateAmount(parsed);
-                }
+                text = await navigator.clipboard.readText();
+
+                // Set the input value directly from paste first
+                amountInput.value = text;
+
+                // Now format the input visually based on the pasted content
+                const finalNumericValue = formatInputVisually();
+
+                // Update the share state based on the final numeric value
+                updateShareState(finalNumericValue);
+
             } catch (err) {
                 console.error('Ошибка вставки из буфера обмена:', err);
                 if (err.name === 'NotAllowedError') {
                      alert('Доступ к буферу обмена не предоставлен. Пожалуйста, разрешите доступ в настройках браузера или при появлении запроса.');
+                } else if (err.name === 'NotFoundError') {
+                     alert('Не удалось найти текст в буфере обмена.');
                 } else {
                      alert('Не удалось прочитать буфер обмена.');
                 }
+                // Attempt to format/update state based on whatever might be in the input now
+                 const fallbackNumericValue = formatInputVisually();
+                 updateShareState(fallbackNumericValue);
             }
         });
-        updateAmount(currentAmount);
+
     </script>
 </body>
 </html>

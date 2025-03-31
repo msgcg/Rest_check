@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контакты</title>
     <style>
-        /* --- Базовые стили и переменные --- */
-        :root {
+                /* --- Базовые стили и переменные --- */
+                :root {
             --primary-color: #08a552;
             --secondary-color: #9fe61f;
             --dark-green: #1e8a52;
@@ -38,53 +38,81 @@
             --clear-history-btn-hover-bg: #c82333;
         }
 
+        html {
+            height: 100%; /* Ensure html takes full height */
+        }
+
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0 0 80px 0; /* Увеличен отступ снизу */
+            margin: 0; /* Remove default body margin */
+            padding: 0; /* Remove explicit padding */
             background-color: #f0f0f0;
             color: var(--text-color);
             /* --- ФОН ТЕЛА страницы --- */
-            /* Flask/Jinja2 обработает этот url_for */
             background-image: url("{{ url_for('static', filename='images/splash.png') }}");
             background-repeat: no-repeat;
-            background-size: cover; /* или 'contain' в зависимости от нужного эффекта */
+            background-size: cover;
             background-position: center center;
             background-attachment: fixed; /* Чтобы фон не скроллился */
+
+            /* --- Flexbox для позиционирования контейнера --- */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Body takes at least full viewport height */
+            box-sizing: border-box; /* Include padding in height calculation if added */
         }
 
 
         h1, h2 {
             color: var(--primary-color);
             text-align: center;
-            margin-top: 20px;
-            margin-bottom: 30px;
+            margin-top: 20px; /* Reduced top margin inside container */
+            margin-bottom: 20px; /* Adjusted bottom margin */
             font-weight: bold;
         }
 
         .container {
             width: 90%;
             max-width: 700px;
-            margin: 30px auto;
+            /* --- Margin для позиционирования --- */
+            /* top: auto pushes down, left/right: auto centers horizontally, bottom: provides space */
+            margin: auto auto 20px auto; /* Changed margin */
             background-color: var(--white-color);
-            padding: 25px;
+            padding: 20px; /* Adjusted padding */
             border-radius: 15px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            position: relative;
-            min-height: 300px;
+            position: relative; /* Keep relative for absolute children like close buttons */
             border: 4px solid transparent;
             background-clip: padding-box;
             border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) 1;
-            overflow: hidden;
+            overflow: hidden; /* Keep for border-image */
+
+            /* --- Ограничение высоты и скроллинг ВНУТРИ контейнера --- */
+            max-height: calc(100vh - 40px); /* Limit height (viewport minus top/bottom space) */
+            overflow-y: auto; /* Allow scrolling within the container if content overflows */
+            display: flex; /* Use flex inside container too */
+            flex-direction: column; /* Stack elements vertically inside container */
         }
 
-        /* --- Список контактов --- */
-        #contact-list { display: flex; flex-direction: column; gap: 18px; }
+        /* Adjust list to take available space and enable its own scroll if needed (optional) */
+        #contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            flex-grow: 1; /* Allows list to expand if container has extra space */
+            overflow-y: auto; /* Optional: scroll only the list if needed */
+            margin-bottom: 20px; /* Space between list and bottom actions */
+            padding: 5px; /* Small padding around list */
+        }
         #contact-list p { /* Стиль для сообщения "Список пуст" */
              text-align: center;
              color: var(--grey-color);
              font-style: italic;
              margin-top: 20px;
+             flex-grow: 1; /* Center vertically when empty */
+             display: flex;
+             align-items: center;
+             justify-content: center;
         }
 
         /* --- Карточка контакта --- */
@@ -100,6 +128,7 @@
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0; /* Prevent cards from shrinking */
         }
         .contact-card:hover {
             background-color: var(--hover-green-bg);
@@ -185,11 +214,13 @@
 
         /* --- Кнопки добавления и истории --- */
         .bottom-actions {
-            margin-top: 30px;
+            margin-top: auto; /* Push actions to the bottom of the container */
+            padding-top: 15px; /* Add some space above buttons */
             display: flex;
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         .bottom-actions button {
             padding: 12px 25px;
@@ -209,6 +240,7 @@
         #history-btn:hover { background-color: #0073b1; }
 
         /* --- Общие стили для модальных окон --- */
+        /* ... (styles remain the same) ... */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -313,6 +345,7 @@
         .modal-actions .cancel-btn:hover { background-color: #666; }
 
         /* --- Стили для модального окна ИСТОРИИ --- */
+        /* ... (styles remain the same) ... */
         #history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; }
         #history-list li {
             padding: 12px 0;
@@ -355,7 +388,8 @@
 
 
         /* --- Стили: Модальное окно ДОБАВЛЕНИЯ контакта --- */
-        .photo-upload-container {
+        /* ... (styles remain the same) ... */
+         .photo-upload-container {
             display: flex;
             align-items: center;
             gap: 15px;
@@ -396,7 +430,9 @@
             white-space: nowrap;
         }
 
+
         /* --- Стили: Модальное окно ЗАПРОСА СУММЫ --- */
+        /* ... (styles remain the same) ... */
         #amount-request-modal .modal-content {
             max-width: 400px;
         }
@@ -426,29 +462,77 @@
             background-color: #fffafa; /* Light red background */
         }
 
+
          /* --- Адаптивность --- */
          @media (max-width: 600px) {
-             h1 { font-size: 1.5em; margin-bottom: 20px; }
-             .container { width: 95%; padding: 15px; border-width: 3px; margin-top: 20px; margin-bottom: 20px; }
-             .contact-card { padding: 12px; gap: 12px; flex-direction: column; align-items: center; text-align: center; } /* Stack elements on small screens */
-             .contact-photo img { width: 70px; height: 70px; margin-bottom: 10px; } /* Slightly larger photo on mobile */
-             .contact-details { align-items: center; } /* Center details text */
-             .contact-name { font-size: 1.1em; }
-             .contact-phone-display { font-size: 0.9em; }
-             .contact-actions { justify-content: center; } /* Center action buttons */
-             .action-button { padding: 8px 15px; font-size: 0.85em; } /* Slightly larger buttons */
-             .bottom-actions { flex-direction: column; gap: 12px; align-items: center; }
-             .bottom-actions button { width: 85%; max-width: 300px; padding: 14px; font-size: 1.05em; } /* Larger main buttons */
+             h1 { font-size: 1.4em; margin-bottom: 15px; } /* Slightly smaller heading */
+
+             .container {
+                width: 95%;
+                padding: 15px;
+                border-width: 3px;
+                margin: auto auto 15px auto; /* Adjust bottom margin for mobile */
+                max-height: calc(100vh - 30px); /* Adjust max-height for smaller margins */
+             }
+              /* Make list padding smaller on mobile */
+             #contact-list {
+                 gap: 12px;
+                 padding: 0px 2px; /* Minimal horizontal padding */
+             }
+
+             .contact-card {
+                padding: 12px;
+                gap: 12px;
+                /* Keep row layout for better info density, but center content vertically */
+                align-items: center;
+                /* Remove column stacking if not desired
+                flex-direction: column;
+                text-align: center; */
+             }
+             .contact-photo img {
+                width: 55px; /* Slightly smaller photo */
+                height: 55px;
+                /* margin-bottom: 10px; */ /* Removed if not stacking */
+             }
+             .contact-details {
+                 /* align-items: center; */ /* Removed if not stacking */
+             }
+             .contact-name { font-size: 1.05em; }
+             .contact-phone-display { font-size: 0.85em; }
+
+             .contact-actions {
+                 /* justify-content: center; */ /* Removed if not stacking */
+             }
+             .action-button { padding: 7px 12px; font-size: 0.8em; } /* Slightly smaller buttons */
+
+             .bottom-actions {
+                 flex-direction: row; /* Keep row layout maybe? Or column */
+                 gap: 10px;
+                 padding-top: 10px;
+                 /* align-items: center; */ /* If column */
+             }
+             .bottom-actions button {
+                 /* width: 85%; */ /* Removed if row */
+                 /* max-width: 300px; */ /* Removed if row */
+                 flex-grow: 1; /* Let buttons share space */
+                 padding: 12px; /* Adjust padding */
+                 font-size: 0.95em;
+             }
+
              .modal-content { padding: 20px 15px; max-width: 92%; } /* Adjust padding */
              .modal-close-btn { font-size: 1.7em; top: 8px; right: 10px; }
-             #history-list li { font-size: 0.9em; flex-direction: column; align-items: flex-start; text-align: left; } /* Stack history items */
+
+             #history-list li { font-size: 0.9em; /* Keep stacked layout for history */ flex-direction: column; align-items: flex-start; text-align: left; }
              .history-amount { margin-top: 5px; align-self: flex-end; } /* Move amount to bottom right */
              .history-details { margin-right: 0; width: 100%; } /* Full width for details */
              #clear-history-btn { font-size: 0.9em; padding: 10px 18px; }
-             .photo-upload-container { flex-direction: column; align-items: center; gap: 10px; } /* Center photo upload */
-             #contact-photo-preview { margin-bottom: 10px; }
+
+             /* Keep photo upload centered on mobile */
+             .photo-upload-container { flex-direction: column; align-items: center; gap: 10px; }
+             #contact-photo-preview { margin-bottom: 10px; width: 80px; height: 80px; }
              .file-upload-label { width: 100%; box-sizing: border-box; padding: 12px; }
              #photo-file-name { max-width: none; text-align: center; }
+
              .modal-actions { justify-content: space-around; } /* Space out modal buttons */
              #amount-request-modal .modal-content { max-width: 92%; }
          }
