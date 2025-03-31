@@ -18,7 +18,6 @@
             --shadow-color: rgba(8, 165, 82, 0.15); /* Shadow based on primary green */
             --border-thickness: 3px; /* Control border thickness */
             --widget-border-radius: 18px; /* Consistent rounding */
-            /* --paste-button-bg: #2db26c; /* No longer needed */
             --disabled-button-bg: #aabbcc; /* Grey for disabled buttons */
         }
 
@@ -176,11 +175,6 @@
             padding-left: 5px;
         }
 
-        /* Styles for paste button removed */
-        /* #pasteAmountButton { ... } */
-        /* #pasteAmountButton:hover { ... } */
-        /* #pasteAmountButton:active { ... } */
-
         /* Specific styles for share section */
         .share-section {
             /* Inherits .widget-bordered styles */
@@ -274,7 +268,6 @@
                  <input type="text" inputmode="decimal" id="receiptAmountInput" value="0.00" placeholder="0.00">
                  <span class="currency-symbol">₽</span>
                  <!-- Paste button removed -->
-                 <!-- <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button> -->
             </div>
         </div>
     </div>
@@ -306,7 +299,6 @@
     <script>
         // Get references to elements
         const amountInput = document.getElementById('receiptAmountInput');
-        // const pasteButton = document.getElementById('pasteAmountButton'); // Reference removed
         const shareVkButton = document.getElementById('shareVk');
         const shareTelegramButton = document.getElementById('shareTelegram');
 
@@ -322,7 +314,7 @@
                  // Reconstruct with only the first decimal point
                  cleanedText = parts[0] + '.' + parts.slice(1).join('');
             }
-            // If it ends with just '.', treat it as integer for now during typing
+             // If it ends with just '.', treat it as integer for now during typing
              if (cleanedText.endsWith('.') && cleanedText.length > 1) {
                   // Allow typing e.g. "12." without immediately parsing as NaN
                   // But parseFloat will handle this correctly anyway
@@ -338,20 +330,20 @@
 
         // Updates share button state and links based on a numeric value
         function updateShareState(numericAmount) {
-            // Ensure numericAmount is a valid number, default to 0 if not
-            // Buttons enabled only if > 0
-            const currentValidAmount = (typeof numericAmount === 'number' && numericAmount > 0) ? numericAmount : 0;
-            const isAmountPositive = currentValidAmount > 0;
+            // Buttons enabled only if >= 0.01
+            // Check if numericAmount is a valid number and meets the minimum threshold
+            const isValidForSharing = (typeof numericAmount === 'number' && numericAmount >= 0.01);
 
             // --- Button Enabling/Disabling Logic ---
-            shareVkButton.disabled = !isAmountPositive;
-            shareTelegramButton.disabled = !isAmountPositive;
+            shareVkButton.disabled = !isValidForSharing;
+            shareTelegramButton.disabled = !isValidForSharing;
             // --- End Button Logic ---
 
-            // Only generate share links and set handlers if the amount is positive
-            if (isAmountPositive) {
+            // Only generate share links and set handlers if the amount is valid for sharing
+            if (isValidForSharing) {
                 // Format for display in the message, always 2 decimals
-                const formattedAmountForDisplay = currentValidAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                // No need to re-check the value here, as it's already >= 0.01
+                const formattedAmountForDisplay = numericAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const shareTextBase = `Твоя доля за недавние посиделки: ${formattedAmountForDisplay}₽ 😊`; // Simplified text
 
                 const shareUrlVk = `https://vk.com/share.php?title=${encodeURIComponent('ПоДЕЛИ!: Сумма чека')}&comment=${encodeURIComponent(shareTextBase)}`;
@@ -366,32 +358,31 @@
             }
         }
 
-        // Formats the input field visually to two decimal places
-        function formatInputVisually() {
-            const currentValue = amountInput.value;
-            const parsed = parseAmount(currentValue);
-            // Determine the valid numeric amount (at least 0)
-            const finalNumericAmount = (parsed !== null && parsed >= 0) ? parsed : 0;
-            // Format the input field to 2 decimal places
-            amountInput.value = finalNumericAmount.toFixed(2);
-            // Return the numeric value for convenience
-            return finalNumericAmount;
-        }
+        // --- Helper Function removed (formatInputVisually logic moved into 'change' listener) ---
 
         // --- Initial Setup ---
         const urlParams = new URLSearchParams(window.location.search);
         const initialAmountParam = urlParams.get('amount');
-        const initialParsedAmount = parseAmount(initialAmountParam);
-        // Set initial input value formatted, ensuring it's >= 0
-        const initialNumericValue = (initialParsedAmount !== null && initialParsedAmount >= 0) ? initialParsedAmount : 0;
+        let initialParsedAmount = parseAmount(initialAmountParam);
+        let initialNumericValue;
+
+        // Apply the minimum threshold logic for initial amount as well
+        if (initialParsedAmount !== null && initialParsedAmount > 0 && initialParsedAmount < 0.01) {
+            initialNumericValue = 0; // Treat initial small fractions as 0
+        } else if (initialParsedAmount !== null && initialParsedAmount >= 0.01) {
+            initialNumericValue = initialParsedAmount; // Use valid initial amount
+        } else {
+            initialNumericValue = 0; // Default to 0
+        }
+
+        // Set initial input value formatted
         amountInput.value = initialNumericValue.toFixed(2);
-        // Set initial button state based on parsed amount (must be > 0)
+        // Set initial button state based on the potentially adjusted initial amount
         updateShareState(initialNumericValue);
 
 
         // --- Event Listeners ---
         amountInput.addEventListener('input', (event) => {
-            // Allow typing, don't format visually here.
             // Filter input to allow only digits and one decimal point using regex replacement
             let value = event.target.value;
             value = value.replace(/[^0-9.]/g, ''); // Remove invalid chars
@@ -399,38 +390,49 @@
              if (parts.length > 2) { // If more than one dot
                  value = parts[0] + '.' + parts.slice(1).join(''); // Keep only first dot
              }
-             // Optional: Limit decimals during typing (can feel restrictive)
-             // if (parts.length === 2 && parts[1].length > 2) {
-             //     value = parts[0] + '.' + parts[1].substring(0, 2);
-             // }
 
              // Update input value *if* it was cleaned
              if (event.target.value !== value) {
+                // Store cursor position
+                const start = event.target.selectionStart;
+                const end = event.target.selectionEnd;
                 event.target.value = value;
+                // Restore cursor position (relative to changes)
+                // This might not be perfect if characters were removed before the cursor
+                event.target.setSelectionRange(start - (event.target.value.length - value.length), end - (event.target.value.length - value.length));
              }
-
 
             // Parse the current (potentially unformatted) value for state update
             const parsedForState = parseAmount(value);
+            // Update button state based on live value, checking the >= 0.01 threshold
             updateShareState(parsedForState); // Update button state based on live value
         });
 
          amountInput.addEventListener('change', (event) => {
-            // User finished editing (blur/enter). Now format and sync state.
-            const finalNumericValue = formatInputVisually(); // Formats input and returns the number
-            updateShareState(finalNumericValue); // Update state based on the final formatted number
+            // User finished editing (blur/enter). Now format, enforce minimum, and sync state.
+            const parsedValue = parseAmount(event.target.value);
+            let finalNumericValue;
+
+            // Determine the final numeric value, enforcing the 0.01 minimum threshold
+            if (parsedValue !== null && parsedValue > 0 && parsedValue < 0.01) {
+                // If the value is positive but less than 0.01, treat it as 0.
+                finalNumericValue = 0;
+            } else if (parsedValue !== null && parsedValue >= 0.01) {
+                // If the value is 0.01 or more, use it.
+                finalNumericValue = parsedValue;
+            } else {
+                // Otherwise (negative, NaN, or exactly 0 initially), treat as 0.
+                finalNumericValue = 0;
+            }
+
+            // Format the input field visually based on the final corrected value
+            amountInput.value = finalNumericValue.toFixed(2);
+
+            // Update share state based on the final corrected numeric value
+            updateShareState(finalNumericValue);
          });
 
-        // Paste button related code removed
-        /*
-        function parsePastedAmount(Btext) {
-            // ... implementation removed ...
-        }
-        pasteButton.addEventListener('click', async () => {
-            // ... implementation removed ...
-        });
-        */
-
+        // --- Paste Button Code Removed ---
 
     </script>
 </body>
