@@ -437,25 +437,30 @@
             updateShareState(finalNumericValue); // Update state based on the final formatted number
          });
 
+        
+        function parsePastedAmount(Btext) {
+            if (!Btext) return null;
+            const BcleanedText = Btext.replace(/[^0-9.,]/g, '').replace(',', '.');
+            const Bvalue = parseFloat(BcleanedText);
+            return isNaN(Bvalue) || Bvalue < 0 ? null : Bvalue.toFixed(2);
+        }
         pasteButton.addEventListener('click', async () => {
             let text = '';
             try {
                 if (!navigator.clipboard || !navigator.clipboard.readText) {
-                     console.warn('Clipboard API not fully supported or permission denied.');
-                     alert('Ваш браузер не поддерживает автоматическую вставку из буфера обмена, или доступ не разрешен.');
+                     clipboardStatusSpan.textContent = 'API буфера обмена не поддерживается.';
+                     alert('Ваш браузер не поддерживает вставку из буфера обмена.');
                      return;
                 }
-                text = await navigator.clipboard.readText();
-
+                const text = await navigator.clipboard.readText();
+                const parsed = parsePastedAmount(text);
                 // Set the input value directly from paste first
-                amountInput.value = text;
-
+                amountInput.value = parsed;
                 // Now format the input visually based on the pasted content
                 const finalNumericValue = formatInputVisually();
 
                 // Update the share state based on the final numeric value
                 updateShareState(finalNumericValue);
-
             } catch (err) {
                 console.error('Ошибка вставки из буфера обмена:', err);
                 if (err.name === 'NotAllowedError') {
@@ -470,6 +475,7 @@
                  updateShareState(fallbackNumericValue);
             }
         });
+        
 
     </script>
 </body>
