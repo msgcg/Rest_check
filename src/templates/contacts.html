@@ -33,6 +33,9 @@
             --upload-btn-hover-bg: #f0f0f0;
             /* Цвет для ошибки валидации */
             --error-color: #dc3545;
+            /* Цвет для кнопки очистки истории */
+            --clear-history-btn-bg: var(--delete-color);
+            --clear-history-btn-hover-bg: #c82333;
         }
 
         body {
@@ -294,7 +297,7 @@
         .modal-actions .cancel-btn:hover { background-color: #666; }
 
         /* --- Стили для модального окна ИСТОРИИ --- */
-        #history-list { list-style: none; padding: 0; margin-top: 15px; }
+        #history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; /* Добавлен отступ снизу */}
         #history-list li {
             padding: 12px 0;
             border-bottom: 1px solid var(--border-green);
@@ -312,6 +315,24 @@
         .history-type-tg { color: var(--tg-color); } /* Цвет для TG запроса */
         .history-timestamp { font-size: 0.8em; color: var(--grey-color); display: block; margin-top: 3px; }
         .no-history { text-align: center; color: var(--grey-color); margin-top: 20px; font-style: italic; }
+        /* *** НОВОЕ: Стили для кнопки Очистки истории *** */
+        #clear-history-btn {
+            display: block; /* Чтобы margin: auto сработал */
+            margin: 25px auto 0; /* Отступ сверху и центрирование */
+            padding: 10px 20px;
+            background-color: var(--clear-history-btn-bg);
+            color: var(--white-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #clear-history-btn:hover {
+            background-color: var(--clear-history-btn-hover-bg);
+        }
+
 
         /* --- Стили: Модальное окно ДОБАВЛЕНИЯ контакта --- */
         /* Контейнер загрузки фото */
@@ -394,6 +415,8 @@
              .modal-content { padding: 20px; max-width: 90%; } /* Общее правило для всех модалок */
              .modal-close-btn { font-size: 1.6em; top: 8px; right: 10px; }
              #history-list li { font-size: 0.9em; }
+             /* *** НОВОЕ: Адаптивность кнопки очистки *** */
+             #clear-history-btn { font-size: 0.85em; padding: 9px 18px; }
              .photo-upload-container { flex-direction: column; align-items: flex-start; }
              #contact-photo-preview { margin-bottom: 10px; }
              .file-upload-label { width: 100%; box-sizing: border-box; }
@@ -427,6 +450,8 @@
             <button id="modal-close-history" class="modal-close-btn">×</button>
             <h2>История операций</h2>
             <ul id="history-list"></ul>
+            <!-- *** НОВАЯ КНОПКА *** -->
+            <button id="clear-history-btn">Очистить историю</button>
         </div>
     </div>
 
@@ -460,7 +485,7 @@
         </div>
     </div>
 
-    <!-- НОВОЕ: Модальное окно для ЗАПРОСА СУММЫ -->
+    <!-- Модальное окно для ЗАПРОСА СУММЫ -->
     <div id="amount-request-modal" class="modal-overlay">
         <div class="modal-content">
             <button id="modal-close-amount" class="modal-close-btn">×</button>
@@ -490,11 +515,12 @@
         const historyModal = document.getElementById('history-modal');
         const historyList = document.getElementById('history-list');
         const modalCloseHistoryButton = document.getElementById('modal-close-history');
+        const clearHistoryButton = document.getElementById('clear-history-btn'); // *** НОВОЕ ***
 
         // --- Модалка Добавления/Редактирования Контакта ---
         const addContactModal = document.getElementById('add-contact-modal');
         const addContactForm = document.getElementById('add-contact-form');
-        const addContactModalTitle = document.getElementById('add-contact-modal-title'); // Заголовок
+        const addContactModalTitle = document.getElementById('add-contact-modal-title');
         const modalCloseAddButton = document.getElementById('modal-close-add');
         const saveContactButton = document.getElementById('save-contact-btn');
         const cancelAddButton = document.getElementById('cancel-add-btn');
@@ -506,25 +532,25 @@
         const vkInput = document.getElementById('contact-vk-input');
         const tgInput = document.getElementById('contact-tg-input');
 
-        // --- НОВОЕ: Модалка Запроса Суммы ---
+        // --- Модалка Запроса Суммы ---
         const amountRequestModal = document.getElementById('amount-request-modal');
         const amountRequestForm = document.getElementById('amount-request-form');
-        const amountRequestModalTitle = document.getElementById('amount-request-modal-title'); // Заголовок (хотя можно и не менять)
-        const amountRequestInfo = document.getElementById('amount-request-info'); // Инфо о контакте
+        const amountRequestModalTitle = document.getElementById('amount-request-modal-title');
+        const amountRequestInfo = document.getElementById('amount-request-info');
         const modalCloseAmountButton = document.getElementById('modal-close-amount');
         const amountInput = document.getElementById('request-amount-input');
-        const amountErrorMessage = document.getElementById('amount-error-message'); // Сообщение об ошибке
+        const amountErrorMessage = document.getElementById('amount-error-message');
         const cancelAmountButton = document.getElementById('cancel-amount-btn');
         const sendRequestButton = document.getElementById('send-request-btn');
 
         let currentPhotoDataUrl = null;
-        let contactToEditId = null; // Для редактирования
+        let contactToEditId = null;
 
         // --- Управление данными (Local Storage) ---
         const CONTACTS_STORAGE_KEY = 'myContactsList_v3_local';
         const HISTORY_STORAGE_KEY = 'myContactsHistory_v3_req';
 
-        // --- Функции загрузки/сохранения (без изменений) ---
+        // --- Функции загрузки/сохранения ---
         function loadContacts() {
             const storedContacts = localStorage.getItem(CONTACTS_STORAGE_KEY);
             if (storedContacts) {
@@ -555,13 +581,35 @@
                  alert("Не удалось сохранить контакты. Возможно, превышен лимит хранилища.");
             }
         }
-        function loadHistory() { const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY); return storedHistory ? JSON.parse(storedHistory) : []; }
-        function saveHistory(history) { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); }
+
+        function loadHistory() {
+            const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+            if (storedHistory) {
+                try {
+                    const parsed = JSON.parse(storedHistory);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                    console.error("Ошибка парсинга истории:", e);
+                    return [];
+                }
+            } else {
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+             try {
+                 localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+             } catch (e) {
+                 console.error("Ошибка сохранения истории:", e);
+                 alert("Не удалось сохранить историю. Возможно, превышен лимит хранилища.");
+             }
+        }
 
         let contacts = loadContacts();
         let transferHistory = loadHistory();
 
-        // --- Генерация URL для фото-заглушки (без изменений) ---
+        // --- Генерация URL для фото-заглушки ---
         function getPlaceholderPhotoUrl(name) {
              const safeName = name || "??";
              const initials = safeName.split(' ').map(part => part.substring(0, 1)).slice(0, 2).join('').toUpperCase();
@@ -574,7 +622,7 @@
             return `https://via.placeholder.com/100/${bgColor}/${textColor}?text=${encodeURIComponent(textParam)}`;
         }
 
-        // --- Отрисовка списка контактов (без изменений в логике) ---
+        // --- Отрисовка списка контактов ---
         function renderContacts() {
             contactListContainer.innerHTML = '';
             if (contacts.length === 0) {
@@ -583,10 +631,10 @@
             }
             contacts.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-            contacts.forEach((contact) => { // Убрали index, будем использовать contact.id
+            contacts.forEach((contact) => {
                 const card = document.createElement('div');
                 card.classList.add('contact-card');
-                card.dataset.contactId = contact.id; // Используем ID контакта
+                card.dataset.contactId = contact.id;
 
                 const photoUrl = (contact.photo && contact.photo.startsWith('data:image')) ? contact.photo : getPlaceholderPhotoUrl(contact.name);
                 const phoneDisplay = contact.phone ? `+${contact.phone}` : 'Телефон не указан';
@@ -605,7 +653,6 @@
                             ${hasVk ? `<button data-link="${contact.vk}" data-type="vk" class="action-button vk-request-btn">Запрос в VK</button>` : ''}
                             ${hasTg ? `<button data-username="${contact.tg}" data-type="tg" class="action-button tg-request-btn">Запрос в TG</button>` : ''}
                              <button class="action-button delete-button">Удалить</button>
-                             <!-- Можно добавить кнопку Редактировать сюда -->
                              <!-- <button class="action-button edit-button">Редакт.</button> -->
                          </div>
                     </div>
@@ -614,13 +661,21 @@
             });
         }
 
-        // --- Отрисовка истории (без изменений) ---
+        // --- Отрисовка истории ---
         function renderHistory() {
             historyList.innerHTML = '';
-            if (transferHistory.length === 0) { historyList.innerHTML = '<li class="no-history">История операций пуста.</li>'; return; }
-            transferHistory.sort((a, b) => b.timestamp - a.timestamp);
+            // *** НОВОЕ: Показать/скрыть кнопку очистки в зависимости от наличия истории ***
+            clearHistoryButton.style.display = transferHistory.length > 0 ? 'block' : 'none';
 
-            transferHistory.forEach(entry => {
+            if (transferHistory.length === 0) {
+                historyList.innerHTML = '<li class="no-history">История операций пуста.</li>';
+                return;
+            }
+
+            // Сортировка остается прежней
+            const sortedHistory = [...transferHistory].sort((a, b) => b.timestamp - a.timestamp);
+
+            sortedHistory.forEach(entry => {
                 const li = document.createElement('li');
                 const date = new Date(entry.timestamp).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const amountFormatted = entry.amount ? `${entry.amount.toLocaleString('ru-RU')} ₽` : '';
@@ -646,7 +701,7 @@
             });
         }
 
-        // --- Добавление записи в историю (без изменений) ---
+        // --- Добавление записи в историю ---
         function addHistoryEntry(type, contact, amount = null) {
             const numericAmount = (typeof amount === 'number' && !isNaN(amount)) ? amount : null;
             const newEntry = {
@@ -657,73 +712,60 @@
             };
             transferHistory.push(newEntry);
             saveHistory(transferHistory);
-             // Обновляем историю в модалке, если она открыта
              if (historyModal.classList.contains('visible')) {
                  renderHistory();
              }
         }
 
-        // --- НОВОЕ: Показ модального окна ЗАПРОСА СУММЫ ---
+        // --- Показ модального окна ЗАПРОСА СУММЫ ---
         function showAmountRequestModal(contact, requestType) {
-            // Сохраняем данные для обработчика формы
             amountRequestForm.dataset.contactId = contact.id;
             amountRequestForm.dataset.requestType = requestType;
-
-            // Обновляем информацию в модалке
             const contactNameEl = amountRequestInfo.querySelector('b:first-of-type');
             const requestTypeEl = amountRequestInfo.querySelector('b:last-of-type');
             if (contactNameEl) contactNameEl.textContent = contact.name || 'Без имени';
             if (requestTypeEl) requestTypeEl.textContent = requestType.toUpperCase();
-
-            // Сброс формы и ошибок
             amountInput.value = '';
             amountInput.classList.remove('invalid');
             amountErrorMessage.style.display = 'none';
-
-            // Показ модалки
             amountRequestModal.classList.add('visible');
-            amountInput.focus(); // Фокус на поле ввода суммы
+            amountInput.focus();
         }
 
-        // --- НОВОЕ: Скрытие модального окна ЗАПРОСА СУММЫ ---
+        // --- Скрытие модального окна ЗАПРОСА СУММЫ ---
         function hideAmountRequestModal() {
             amountRequestModal.classList.remove('visible');
-            // Очистка данных при закрытии (на всякий случай)
             delete amountRequestForm.dataset.contactId;
             delete amountRequestForm.dataset.requestType;
         }
 
-        // --- ИЗМЕНЕННЫЙ: Обработчик кликов на списке контактов ---
+        // --- Обработчик кликов на списке контактов ---
         contactListContainer.addEventListener('click', (event) => {
             const card = event.target.closest('.contact-card');
             if (!card) return;
-
             const contactId = card.dataset.contactId;
-            const contact = contacts.find(c => String(c.id) === contactId); // Ищем контакт по ID
+            const contact = contacts.find(c => String(c.id) === contactId);
             if (!contact) return;
 
             const deleteBtn = event.target.closest('.delete-button');
-            const requestBtn = event.target.closest('.vk-request-btn, .tg-request-btn'); // Любая кнопка запроса
+            const requestBtn = event.target.closest('.vk-request-btn, .tg-request-btn');
 
-            // 1. Удаление
             if (deleteBtn) {
                  if (confirm(`Удалить контакт "${contact.name || 'Без имени'}"?`)) {
-                     contacts = contacts.filter(c => String(c.id) !== contactId); // Фильтруем по ID
+                     contacts = contacts.filter(c => String(c.id) !== contactId);
                      saveContacts(contacts);
                      renderContacts();
                  }
-                 return; // Предотвращаем активацию
+                 return;
             }
 
-            // 2. Запрос (VK или TG) -> Открываем модалку суммы
             if (requestBtn) {
-                event.preventDefault(); // Предотвращаем стандартное действие, если это ссылка
-                const requestType = requestBtn.dataset.type; // 'vk' или 'tg'
-                showAmountRequestModal(contact, requestType); // Показываем новую модалку
-                return; // Предотвращаем активацию карточки
+                event.preventDefault();
+                const requestType = requestBtn.dataset.type;
+                showAmountRequestModal(contact, requestType);
+                return;
             }
 
-            // 3. Активация карточки (если клик не по кнопке)
             if (!deleteBtn && !requestBtn) {
                 const wasActive = card.classList.contains('active');
                 contactListContainer.querySelectorAll('.contact-card').forEach(c => c.classList.remove('active'));
@@ -733,7 +775,7 @@
             }
         });
 
-        // --- НОВОЕ: Обработчик отправки формы ЗАПРОСА СУММЫ ---
+        // --- Обработчик отправки формы ЗАПРОСА СУММЫ ---
         amountRequestForm.addEventListener('submit', (event) => {
             event.preventDefault();
             amountInput.classList.remove('invalid');
@@ -742,16 +784,13 @@
             const amountRaw = amountInput.value;
             const amount = parseFloat(amountRaw.replace(',', '.'));
 
-            // Валидация
             if (isNaN(amount) || amount <= 0) {
-                // alert("Введите корректную положительную сумму."); // Заменяем на показ ошибки в модалке
                 amountInput.classList.add('invalid');
                 amountErrorMessage.style.display = 'block';
                 amountInput.focus();
                 return;
             }
 
-            // Получаем данные из data-атрибутов формы
             const contactId = amountRequestForm.dataset.contactId;
             const requestType = amountRequestForm.dataset.requestType;
             const contact = contacts.find(c => String(c.id) === contactId);
@@ -763,9 +802,9 @@
                 return;
             }
 
-            let requestUrl = '#'; // Заглушка
+            let requestUrl = '#';
             let historyType = '';
-            const message = `Привет! Твоя часть за еду: ${amount.toLocaleString('ru-RU')} ₽. Спасибо!`; // Пример сообщения
+            const message = `Привет! Твоя часть за еду: ${amount.toLocaleString('ru-RU')} ₽. Спасибо!`;
             const encodedMessage = encodeURIComponent(message);
 
             if (requestType === 'vk' && contact.vk) {
@@ -777,14 +816,14 @@
                     else requestUrl = `${vkProfileLink}?msg=${encodedMessage}`;
                 } else if (vkProfileLink.includes('vk.com/')) {
                     const username = vkProfileLink.split('vk.com/')[1]?.split('/')[0];
-                    if (username && !username.includes('id') && !username.includes('?')) {
-                        requestUrl = `https://vk.me/${username}?ref=app_request&message=${encodedMessage}`; // Добавлен ref
+                     if (username && !username.includes('id') && !username.includes('?') && username !== "im") { // Added check for "im"
+                        requestUrl = `https://vk.me/${username}?ref=app_request&message=${encodedMessage}`;
                     } else {
-                        requestUrl = `${vkProfileLink}?msg=${encodedMessage}`;
-                    }
+                         requestUrl = `${vkProfileLink}?msg=${encodedMessage}`; // Fallback for groups, etc.
+                     }
                 } else {
-                    requestUrl = `${vkProfileLink}?msg=${encodedMessage}`;
-                }
+                     requestUrl = `${vkProfileLink}?msg=${encodedMessage}`; // Fallback if link is just vk.me/xxx directly
+                 }
             } else if (requestType === 'tg' && contact.tg) {
                 historyType = 'request_tg';
                 let tgUsernameInput = contact.tg.replace(/^@/, '').replace(/^(https?:\/\/)?t\.me\//, '');
@@ -795,20 +834,19 @@
                 return;
             }
 
-            // Открываем ссылку и добавляем в историю
             window.open(requestUrl, '_blank', 'noopener,noreferrer');
             addHistoryEntry(historyType, contact, amount);
-            hideAmountRequestModal(); // Закрываем модалку после успеха
+            hideAmountRequestModal();
         });
 
 
-        // --- Логика модального окна добавления/редактирования контакта (почти без изменений) ---
+        // --- Логика модального окна добавления/редактирования контакта ---
         function showAddContactModal(contactIdToEdit = null) {
             addContactForm.reset();
             photoPreview.src = getPlaceholderPhotoUrl("??");
             photoFileName.textContent = 'Файл не выбран';
             currentPhotoDataUrl = null;
-            contactToEditId = contactIdToEdit; // Сохраняем ID для редактирования
+            contactToEditId = contactIdToEdit;
 
             if (contactToEditId) {
                 const contact = contacts.find(c => String(c.id) === String(contactToEditId));
@@ -822,9 +860,10 @@
                         photoPreview.src = contact.photo;
                         currentPhotoDataUrl = contact.photo;
                         photoFileName.textContent = "Фото загружено";
+                    } else {
+                         photoPreview.src = getPlaceholderPhotoUrl(contact.name); // Show placeholder if no photo
                     }
                 } else {
-                    // Если контакт не найден (маловероятно, но все же)
                     contactToEditId = null;
                      addContactModalTitle.textContent = "Добавить контакт";
                 }
@@ -837,7 +876,7 @@
         }
         function hideAddContactModal() {
              addContactModal.classList.remove('visible');
-             contactToEditId = null; // Сбрасываем ID при закрытии
+             contactToEditId = null;
         }
 
         photoInput.addEventListener('change', (event) => {
@@ -845,37 +884,62 @@
              if (file && file.type.startsWith('image/')) {
                  const reader = new FileReader();
                  reader.onload = (e) => {
-                    if (e.target.result.length > 2 * 1024 * 1024) {
-                        alert("Файл слишком большой (макс. 2MB).");
-                        currentPhotoDataUrl = null; // Сбрасываем
-                        // Не меняем превью, если редактируем и фото уже было
-                        if (!contactToEditId || !contacts.find(c => String(c.id) === String(contactToEditId))?.photo) {
-                            photoPreview.src = getPlaceholderPhotoUrl(nameInput.value || "??");
-                        }
-                        photoFileName.textContent = 'Файл не выбран';
-                        photoInput.value = '';
-                        return;
-                    }
+                     // Simple size check (approx 2MB)
+                     if (e.target.result.length > 2 * 1024 * 1024) {
+                         alert("Файл слишком большой (макс. 2MB). Фото не будет сохранено.");
+                         // Reset relevant fields, keep existing photo if editing
+                         const existingContact = contactToEditId ? contacts.find(c => String(c.id) === String(contactToEditId)) : null;
+                         if (existingContact && existingContact.photo) {
+                             photoPreview.src = existingContact.photo;
+                             photoFileName.textContent = "Фото загружено (старое)";
+                             currentPhotoDataUrl = existingContact.photo;
+                         } else {
+                             currentPhotoDataUrl = null;
+                             photoPreview.src = getPlaceholderPhotoUrl(nameInput.value || "??");
+                             photoFileName.textContent = 'Файл не выбран';
+                         }
+                         photoInput.value = ''; // Clear input
+                         return;
+                     }
                      currentPhotoDataUrl = e.target.result;
                      photoPreview.src = currentPhotoDataUrl;
-                     photoFileName.textContent = file.name; // Показываем имя файла
+                     photoFileName.textContent = file.name;
                  }
-                 reader.onerror = (e) => { /* ... обработка ошибки чтения ... */ }
+                 reader.onerror = (e) => {
+                    console.error("Ошибка чтения файла:", e);
+                    alert("Не удалось прочитать файл.");
+                    // Reset like above
+                    const existingContact = contactToEditId ? contacts.find(c => String(c.id) === String(contactToEditId)) : null;
+                     if (existingContact && existingContact.photo) {
+                         photoPreview.src = existingContact.photo;
+                         photoFileName.textContent = "Фото загружено (старое)";
+                         currentPhotoDataUrl = existingContact.photo;
+                     } else {
+                         currentPhotoDataUrl = null;
+                         photoPreview.src = getPlaceholderPhotoUrl(nameInput.value || "??");
+                         photoFileName.textContent = 'Файл не выбран';
+                     }
+                     photoInput.value = '';
+                 }
                  reader.readAsDataURL(file);
-                 // photoFileName.textContent = file.name; // Убрано отсюда, ставим в onload
-             } else {
-                 // Сбрасываем, только если не было фото при редактировании
-                  if (!contactToEditId || !contacts.find(c => String(c.id) === String(contactToEditId))?.photo) {
+             } else if (file) { // If a file was selected but it's not an image
+                 alert("Пожалуйста, выберите файл изображения.");
+                  // Reset like above
+                 const existingContact = contactToEditId ? contacts.find(c => String(c.id) === String(contactToEditId)) : null;
+                 if (existingContact && existingContact.photo) {
+                     photoPreview.src = existingContact.photo;
+                     photoFileName.textContent = "Фото загружено (старое)";
+                     currentPhotoDataUrl = existingContact.photo;
+                 } else {
                      currentPhotoDataUrl = null;
                      photoPreview.src = getPlaceholderPhotoUrl(nameInput.value || "??");
                      photoFileName.textContent = 'Файл не выбран';
-                  }
-                 if (file) {
-                     alert("Пожалуйста, выберите файл изображения.");
-                     photoInput.value = '';
                  }
+                 photoInput.value = '';
              }
+             // No action needed if no file was selected (input cleared by browser potentially)
         });
+
 
         addContactForm.addEventListener('submit', (event) => {
             event.preventDefault();
@@ -890,27 +954,50 @@
             if (phoneRaw) {
                 phone = phoneRaw.replace(/\D/g, '');
                 if (!/^\d{11}$/.test(phone)) {
-                     alert("Неверный формат номера телефона (требуется 11 цифр, например 79...). Телефон не будет сохранен.");
-                     phone = null;
+                     // Более мягкое предупреждение, если телефон введен, но некорректен
+                     if (phoneRaw) { // Only warn if something was actually entered
+                        alert("Неверный формат номера телефона (требуется 11 цифр, например 7...). Телефон не будет сохранен.");
+                     }
+                     phone = null; // Ensure phone is null if invalid
+                     phoneInput.value = ''; // Optionally clear the invalid input
                 }
             }
 
+            // Простая валидация ссылок (очень базовая)
+             const vkValid = !vkLink || vkLink.startsWith('http://') || vkLink.startsWith('https://') || vkLink.startsWith('vk.com') || vkLink.startsWith('vk.me');
+             const tgValid = !tgLinkRaw || tgLinkRaw.startsWith('@') || tgLinkRaw.startsWith('http://') || tgLinkRaw.startsWith('https://') || tgLinkRaw.startsWith('t.me');
+
+             if (!vkValid) {
+                 alert("Ссылка VK выглядит некорректно. Пожалуйста, проверьте ее.");
+                 vkInput.focus();
+                 return;
+             }
+             if (!tgValid) {
+                 alert("Ссылка/имя пользователя Telegram выглядит некорректно. Пожалуйста, проверьте ее.");
+                 tgInput.focus();
+                 return;
+             }
+
             const contactData = {
                 name: name,
-                photo: currentPhotoDataUrl,
-                phone: phone,
-                vk: vkLink || null,
-                tg: tgLinkRaw || null
+                photo: currentPhotoDataUrl, // Already validated or null
+                phone: phone, // Already validated or null
+                vk: vkLink || null, // Store as null if empty
+                tg: tgLinkRaw || null // Store as null if empty
             };
 
             if (contactToEditId) {
-                // Редактирование существующего
                 const index = contacts.findIndex(c => String(c.id) === String(contactToEditId));
                 if (index > -1) {
-                    contacts[index] = { ...contacts[index], ...contactData }; // Обновляем данные, сохраняя ID
+                    // Preserve ID, update the rest
+                    contacts[index] = { id: contacts[index].id, ...contactData };
+                } else {
+                    // Should not happen if UI is consistent, but handle defensively
+                     console.error("Не удалось найти контакт для редактирования:", contactToEditId);
+                     // Add as new instead? Or just show error? Let's add as new for now.
+                     contacts.push({ id: Date.now() + Math.random(), ...contactData });
                 }
             } else {
-                // Добавление нового
                 const newContact = {
                     id: Date.now() + Math.random(),
                     ...contactData
@@ -923,32 +1010,41 @@
             hideAddContactModal();
         });
 
-        // --- Показ/скрытие модального окна ИСТОРИИ (без изменений) ---
+        // --- Показ/скрытие модального окна ИСТОРИИ ---
         function showHistoryModal() { renderHistory(); historyModal.classList.add('visible'); }
         function hideHistoryModal() { historyModal.classList.remove('visible'); }
 
         // --- Навешивание базовых обработчиков ---
-        addContactButton.addEventListener('click', () => showAddContactModal()); // Показываем модалку для добавления
+        addContactButton.addEventListener('click', () => showAddContactModal());
         historyButton.addEventListener('click', showHistoryModal);
+
+        // *** НОВОЕ: Обработчик для кнопки очистки истории ***
+        clearHistoryButton.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите очистить всю историю операций? Это действие необратимо.")) {
+                transferHistory = []; // Очистить массив в памяти
+                localStorage.removeItem(HISTORY_STORAGE_KEY); // Удалить из localStorage
+                renderHistory(); // Перерисовать историю (покажет "пусто")
+            }
+        });
 
         // Закрытие модалок
         modalCloseHistoryButton.addEventListener('click', hideHistoryModal);
         modalCloseAddButton.addEventListener('click', hideAddContactModal);
         cancelAddButton.addEventListener('click', hideAddContactModal);
-        modalCloseAmountButton.addEventListener('click', hideAmountRequestModal); // НОВОЕ
-        cancelAmountButton.addEventListener('click', hideAmountRequestModal); // НОВОЕ
+        modalCloseAmountButton.addEventListener('click', hideAmountRequestModal);
+        cancelAmountButton.addEventListener('click', hideAmountRequestModal);
 
         // Закрытие по клику на оверлей
         historyModal.addEventListener('click', (event) => { if (event.target === historyModal) { hideHistoryModal(); } });
         addContactModal.addEventListener('click', (event) => { if (event.target === addContactModal) { hideAddContactModal(); } });
-        amountRequestModal.addEventListener('click', (event) => { if (event.target === amountRequestModal) { hideAmountRequestModal(); } }); // НОВОЕ
+        amountRequestModal.addEventListener('click', (event) => { if (event.target === amountRequestModal) { hideAmountRequestModal(); } });
 
         // Закрытие по Escape
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 if (historyModal.classList.contains('visible')) { hideHistoryModal(); }
                 if (addContactModal.classList.contains('visible')) { hideAddContactModal(); }
-                if (amountRequestModal.classList.contains('visible')) { hideAmountRequestModal(); } // НОВОЕ
+                if (amountRequestModal.classList.contains('visible')) { hideAmountRequestModal(); }
             }
         });
 
