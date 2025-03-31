@@ -294,11 +294,9 @@
             if (amountInput.value !== formattedAmountForInput) {
                  amountInput.value = formattedAmountForInput;
             }
-            const shareUrlWithParam = `${pageBaseUrl}?amount=${currentAmount.toFixed(2)}`;
-            const shareTextBase = `Я разделил(а) чек на ${formattedAmountForDisplay} ₽ с помощью ПоДели!`;
-            const shareCommentVk = `Отличный сервис для разделения чеков: ${shareUrlWithParam}`;
-            const shareUrlVk = `https://vk.com/share.php?url=${encodeURIComponent(shareUrlWithParam)}&title=${encodeURIComponent(shareTextBase)}&comment=${encodeURIComponent(shareCommentVk.substring(0, 800))}`;
-            const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent(shareUrlWithParam)}&text=${encodeURIComponent(shareTextBase + ' Присоединяйся: ' + shareUrlWithParam)}`;
+            const shareTextBase = `Твоя доля за вчерашние посиделки: ${formattedAmountForDisplay}₽ 😊`;
+            const shareUrlVk = `https://vk.com/share.php?title=${encodeURIComponent('Привет.')}&comment=${encodeURIComponent(shareTextBase)}`;
+            const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent('Привет.')}&text=${encodeURIComponent(shareTextBase)}`;
             shareVkButton.onclick = () => window.open(shareUrlVk, '_blank', 'width=600,height=450,noopener,noreferrer');
             shareTelegramButton.onclick = () => window.open(shareUrlTelegram, '_blank', 'width=600,height=450,noopener,noreferrer');
         }
