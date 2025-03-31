@@ -405,7 +405,7 @@
                 return; // Don't open SMS if no text
             }
             // SMS body has limitations, keep it concise
-            const body = text.substring(0, 150);
+            const body = text;
             console.log("SMS Body (encoded):", body);
             window.location.href = `sms:?body=${body}`;
             // No need to hideShareMenu here as it might navigate away
