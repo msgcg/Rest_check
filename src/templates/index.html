@@ -219,6 +219,7 @@
         const imageInput = document.getElementById('image-input');
         const numPeopleInput = document.getElementById('num-people-input');
         const tipAmountInput = document.getElementById('tip-amount-input');
+        const containerElement = document.querySelector('.container'); // *** NEW: Get the container ***
 
         // --- Tip Input Formatting ---
         function formatTipInput(inputElement) { let v=inputElement.value, n=v.replace(/[^0-9.,]/g,'').replace('₽','').replace(',','.'); const p=n.split('.'); if(p.length>2) n=p[0]+'.'+p.slice(1).join(''); if(n.length>1&&n.startsWith('0')&&!n.startsWith('0.')) n=n.substring(1); if(n==='.'||n===''){inputElement.value=''; return '';} const num=parseFloat(n); if(isNaN(num)||num<0){inputElement.value=''; return '';} inputElement.value=n+'₽'; return n; }
@@ -345,7 +346,6 @@
         // --- UPDATED VK Share ---
         function shareViaVK() {
             const description = getResultTextForSharing(); // The main content is the result
-            const url = window.location.href; // Share the link to the app itself
             const title = "ПоДЕЛИ! - Результат деления"; // Specific title for the shared link/app
 
             console.log("Sharing to VK - Title:", title);
@@ -362,7 +362,7 @@
 
             // VK share.php uses 'url', 'title' (for the link), and 'comment' (often used for preview text).
             // Pre-filling the user's actual post text is unreliable via URL parameters.
-            const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&comment=${encodeURIComponent(description.substring(0, 800))}`; // Limit comment length
+            const shareUrl = `https://vk.com/share.php?title=${encodeURIComponent(title)}&comment=${encodeURIComponent(description.substring(0, 800))}`; // Limit comment length
 
             console.log("VK Share URL:", shareUrl);
             window.open(shareUrl, '_blank', 'noopener,noreferrer');
@@ -389,8 +389,7 @@
             // Format: ?url=...&text=...
             // url: The link to generate a preview for (our app's URL)
             // text: The text to pre-fill in the message box (Title + our generated result)
-            const combinedText = `${title}\n\n${textToShare}`; // Add title and spacing
-            const shareUrl = `https://t.me/share/url?url=${url}&text=${combinedText}`; 
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('Привет. Вот результат расчета от ПоДЕЛИ!:')}&text=${textToShare}`; 
 
             console.log("Telegram Share URL:", shareUrl);
             window.open(shareUrl, '_blank', 'noopener,noreferrer');
@@ -541,17 +540,41 @@
                     throw new Error(errorMsg);
                 }
 
-                recommendations = await response.json();
-                console.log("Получены рекомендации:", recommendations); // Debug
+                // Parse the JSON response
+                const responseData = await response.json();
+                console.log("Получены данные:", responseData); // Debug the whole response
 
-                // Brief success message
-                statusElement.textContent = "Обработка завершена!";
-                statusElement.className = 'status success';
-                statusElement.style.display = 'block';
-                setTimeout(() => { statusElement.style.display = 'none'; }, 1500); // Hide success message
+                // **** NEW: Check the is_restaurant flag ****
+                if (responseData.is_restaurant === true) {
+                    console.log("Изображение определено как чек ресторана.");
+                    // Store the recommendations part of the response globally
+                    recommendations = responseData; // Assuming recommendations are the main part
 
-                displayRecommendations('equally'); // Display default filter
-                filtersWrapper.style.display = "flex"; // Show filter buttons
+                    // Brief success message
+                    statusElement.textContent = "Обработка завершена!";
+                    statusElement.className = 'status success';
+                    statusElement.style.display = 'block';
+                    setTimeout(() => { statusElement.style.display = 'none'; }, 1500); // Hide success message
+
+                    // Display results and filters because it IS a restaurant receipt
+                    displayRecommendations('equally'); // Display default filter
+                    filtersWrapper.style.display = "flex"; // Show filter buttons
+
+                } else {
+                    // Handle the case where it's NOT a restaurant receipt
+                    console.warn("Изображение НЕ определено как чек ресторана или флаг 'is_restaurant' отсутствует/false.");
+                    statusElement.textContent = "Ошибка: Загруженное изображение не похоже на чек из ресторана.";
+                    statusElement.className = 'status error'; // Use error style for clarity
+                    statusElement.style.display = 'block'; // Keep message visible
+
+                    // Ensure results and filters remain hidden
+                    resultElement.innerHTML = ""; // Already cleared, but good practice
+                    resultElement.style.display = "none";
+                    filtersWrapper.style.display = "none";
+                    hideShareMenu(); // Ensure share menu is hidden
+                    recommendations = {}; // Clear any potential old recommendations
+                }
+                 // **** END OF NEW CHECK ****
 
             } catch (error) {
                 console.error("Ошибка при обработке чека:", error);
@@ -563,13 +586,15 @@
                 resultElement.style.display = "none";
                 filtersWrapper.style.display = "none";
                 hideShareMenu();
+                recommendations = {}; // Clear recommendations on error
             } finally {
                 // Re-enable upload button based on current input state
+                // Only re-enable if inputs are still valid (might have been cleared)
                 toggleUploadButton();
             }
         }
 
-        // --- Initial Setup ---
+        // --- Initial Setup & Click Listener for Status Hiding ---
         window.onload = () => {
              toggleUploadButton();
              previewWrapper.style.display = 'none';
@@ -577,9 +602,30 @@
              resultElement.style.display = 'none';
              filtersWrapper.style.display = 'none';
              hideShareMenu();
-             // Format tip input if it has an initial value (usually not needed unless pre-filled)
+             // Format tip input if it has an initial value
              if (tipAmountInput.value) {
                  formatTipInput(tipAmountInput);
+             }
+
+             // *** UPDATED: Add click listener to the container to hide status message ***
+             if (containerElement) { // Check if container exists
+                 containerElement.addEventListener('click', (event) => {
+                     // --- Prevent hiding status if the click is on the upload button itself ---
+                     // We check if the direct target of the click or any of its parents up to the container
+                     // is the upload button. This handles cases where the click might be on text/icon inside the button.
+                     if (uploadButton && uploadButton.contains(event.target)) {
+                         // console.log("Clicked on upload button, not hiding status."); // Debug log
+                         return; // Do nothing, let upload_receipt handle the status
+                     }
+                     // --- End of check for upload button ---
+
+                     // Check if the status element is currently visible AND the click wasn't on the upload button
+                     if (statusElement.style.display !== 'none') {
+                        // console.log("Clicked elsewhere, hiding status."); // Debug log
+                         statusElement.style.display = 'none';
+                     }
+                     // We don't hide the share menu here, the existing document listener handles that.
+                 });
              }
         };
     </script>

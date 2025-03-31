@@ -69,13 +69,16 @@ class Recommendation(BaseModel):
     who_more_eat_then_more_pay: str
     who_more_cost_then_more_pay: str
     proportional_division_by_the_cost_of_orders: str
+    is_restaurant: bool
 
-def get_recommendations(extracted_text, num_people, tea_money):  
+def get_recommendations(extracted_text, num_people, tea_money):
+    if tea_money is None:
+        tea_money = 0  
     prompt = f"""Приведи различные варианты распределения счета в ресторане на {num_people} человек.
 
     Сам текст счета: {extracted_text}.
     Учитывай скидки.
-    Учитывай чаевые: {tea_money}, но обрати внимание, указаны ли они в чеке. Если они уже указаны, не учитывай {tea_money}.
+    Учитывай чаевые: {tea_money}, но обрати внимание, указаны ли они в чеке. Если они уже указаны (эта же цифра), не учитывай {tea_money}.
     Приведи очень подробные красиво оформленные отступами рекомендации с конкретными цифрами и блюдами(при необходимости).
 
 
@@ -83,7 +86,8 @@ def get_recommendations(extracted_text, num_people, tea_money):
     "equally": поровну,
     "who_more_cost_then_more_pay": Кто заказал на бОльшую стоимость, тот больше платит,
     "who_more_eat_then_more_pay": Кто больше съел, тот больше платит,
-    "proportional_division_by_the_cost_of_orders": Пропорциональное деление по стоимости заказов.
+    "proportional_division_by_the_cost_of_orders": Пропорциональное деление по стоимости заказов,
+    "is_restaurant": булевой индикатор, есть ли в данных чек. True если чек, False если нет.
 
     Если в текстовых данных не содержится чека из ресторана, скажи об этом.
     """
@@ -105,6 +109,7 @@ def get_recommendations(extracted_text, num_people, tea_money):
         "who_more_cost_then_more_pay": startelem.who_more_cost_then_more_pay,
         "who_more_eat_then_more_pay": startelem.who_more_eat_then_more_pay,
         "proportional_division_by_the_cost_of_orders": startelem.proportional_division_by_the_cost_of_orders,
+        "is_restaurant": startelem.is_restaurant
     }
 
 if __name__ == '__main__':
