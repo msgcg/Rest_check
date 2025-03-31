@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,16 +32,24 @@
 
         /* --- Main Buttons --- */
         .file-btn-wrapper { margin-top: 10px; width: 100%; }
-        button { /* Styles for Upload/Filter buttons primarily */
+        button#upload-btn { /* Only Upload/Filter buttons */
             padding: 12px 15px; background-color: #08a552; color: white; border: none; border-radius: 10px; cursor: pointer;
             width: 100%; font-size: 16px; font-weight: bold; transition: background-color 0.3s; box-sizing: border-box;
         }
-        button:hover { background-color: #067d40; }
-        button:disabled { background-color: #bdbdbd; color: #757575; cursor: not-allowed; border-image: none; }
+        button#upload-btn:hover { background-color: #067d40; }
+        button#upload-btn:disabled { background-color: #bdbdbd; color: #757575; cursor: not-allowed; border-image: none; }
 
         /* --- Filters --- */
         .filters { display: flex; justify-content: space-between; width: 100%; max-width: 450px; margin-top: 20px; }
-        .filters button { flex: 1; margin: 0 5px; }
+        .filters button {
+             flex: 1; margin: 0 5px; padding: 10px 12px; /* Slightly smaller padding */
+             background-color: #e8f5e9; /* Lighter green */ color: #08a552; /* Dark green text */
+             border: 1px solid #a5d6a7; border-radius: 8px; cursor: pointer;
+             font-size: 14px; font-weight: 600; /* Slightly less bold */ transition: background-color 0.3s, color 0.3s; box-sizing: border-box;
+        }
+        .filters button:hover { background-color: #c8e6c9; color: #067d40;}
+        .filters button:disabled { background-color: #eeeeee; color: #9e9e9e; cursor: not-allowed; border-color: #e0e0e0;}
+
 
         /* --- Image Preview --- */
         .image-preview-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; width: 100%; min-height: 200px; }
@@ -57,86 +65,110 @@
         /* --- Result Area --- */
         #result {
             margin-top: 20px;
-            padding: 15px; /* Standard padding, buttons positioned over this */
+            padding: 15px; /* Standard padding */
+            padding-top: 45px; /* Extra padding at the top to avoid overlap with absolute buttons */
             background-color: #f8fdfa; border-radius: 10px;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); display: none; width: 100%; max-width: 550px; box-sizing: border-box;
             white-space: pre-wrap; line-height: 1.6; text-align: left; color: #000000; border: 2px solid transparent;
             background-clip: padding-box; border-image: linear-gradient(to right, #e0f0e8, #f0faf5) 1; overflow: hidden; position: relative;
-             /* Add min-height if buttons ever overlap content weirdly */
-             /* min-height: 50px; */
+             min-height: 80px; /* Ensure enough space for buttons + some text */
         }
         #result b { color: #08a552; font-weight: bold; }
 
         /* --- Result Area Action Buttons (Copy & Share) --- */
         .result-action-btn {
              position: absolute;
-             top: 8px; /* Position from top */
-             z-index: 2; /* Ensure buttons are clickable above text */
+             top: 10px; /* Position from top */
+             z-index: 5; /* Ensure buttons are clickable */
              background-color: white; /* Button background */
-             color: #555;
-             font-size: 1.1em; /* Icon size */
+             color: #555; /* Icon color */
              cursor: pointer;
-             padding: 3px 6px; /* Inner padding */
+             padding: 5px; /* Padding around icon */
              line-height: 1; /* Prevent extra vertical space */
-             border-radius: 7px; /* Rounded corners */
+             border-radius: 8px; /* Rounded corners */
              /* Gradient Border */
              border: 2px solid transparent; /* Border thickness, initially transparent */
              border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
              background-clip: padding-box; /* IMPORTANT: Background inside border */
-             /* Reset inherited styles */
-             width: auto;
+             /* Reset inherited styles if any */
+             width: auto; height: auto;
              font-weight: normal;
-             box-shadow: none;
-             transition: color 0.2s, background-color 0.2s;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+             transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+             display: flex; /* Align icon */
+             align-items: center;
+             justify-content: center;
         }
         .result-action-btn:hover {
              color: #08a552;
              background-color: #f0f0f0; /* Subtle hover background */
+             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
-        .result-action-btn:active { color: #067d40; }
+        .result-action-btn:active { color: #067d40; background-color: #e0e0e0;}
+        .result-action-btn svg { /* Style for SVGs inside buttons */
+             width: 18px;
+             height: 18px;
+             fill: currentColor; /* Inherit color from button */
+        }
 
         /* Specific button positioning */
-        #copy-result-btn { right: 42px; /* Position copy button */ }
-        #share-result-btn { right: 8px; /* Position share button */ }
+        #copy-result-btn { right: 50px; /* Position copy button (leave space for share) */ }
+        #share-result-btn { right: 10px; /* Position share button */ }
 
         /* --- Share Menu --- */
         #share-menu {
-            display: none; position: absolute; top: 32px; /* Adjusted position below buttons */ right: 8px; background-color: white;
-            border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 5px 0;
-            z-index: 11; /* Above other elements */ min-width: 120px;
+            display: none; position: absolute; top: 45px; /* Position below buttons */ right: 10px; background-color: white;
+            border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px 0;
+            z-index: 11; /* Above other elements */ min-width: 150px; /* Wider for icons */
+            overflow: hidden; /* Clip rounded corners */
         }
-        #share-menu a { display: block; padding: 8px 15px; color: #333; text-decoration: none; font-size: 14px; white-space: nowrap; }
+        #share-menu a {
+            display: flex; /* Use flex for icon + text */
+            align-items: center; /* Vertically center icon and text */
+            padding: 10px 15px;
+            color: #333; text-decoration: none; font-size: 14px; white-space: nowrap;
+            transition: background-color 0.2s, color 0.2s;
+        }
         #share-menu a:hover { background-color: #f0f0f0; color: #08a552; }
+        #share-menu a svg { /* Style for SVGs inside menu links */
+             width: 18px; /* Adjusted size */
+             height: 18px; /* Adjusted size */
+             margin-right: 10px; /* Space between icon and text */
+             fill: currentColor; /* Inherit color from link (changes on hover) */
+             flex-shrink: 0; /* Prevent icon shrinking */
+        }
+        /* Ensure the span holding the text is styled correctly */
+        #share-menu a span {
+             line-height: 1; /* Match icon line height */
+        }
+
 
         /* --- Mobile Styles --- */
         @media (max-width: 600px) {
              body { background-color: #f0f0f0; }
              .container { width: 95%; padding: 15px; margin-top: 20px; margin-bottom: 20px; border-width: 3px; }
              .file-input-gradient-border { padding: 2px; border-radius: 11px; } input[type="file"] { border-radius: 9px; }
-             .filters { flex-direction: column; align-items: center; max-width: 300px; } .filters button { width: 100%; margin: 5px 0; }
+             .filters { flex-direction: column; align-items: center; max-width: 300px; } .filters button { width: 100%; margin: 5px 0; font-size: 13px; padding: 8px 10px;}
              #status { font-size: 1.2em; width: 80%; }
-             #result { max-width: 100%; padding: 15px; } /* Reset padding */
+             #result { max-width: 100%; padding: 15px; padding-top: 45px; } /* Ensure top padding */
              input[type="number"], input[type="text"].numeric-input { font-size: 15px; padding: 10px 12px; }
 
              .result-action-btn {
-                 top: 6px; /* Adjust position */
-                 font-size: 1.0em; /* Adjust size */
-                 padding: 2px 5px; /* Adjust padding */
+                 top: 8px; /* Adjust position */
+                 padding: 4px; /* Adjust padding */
                  border-width: 1px; /* Thinner border */
                  border-radius: 6px; /* Adjust rounding */
              }
-             #copy-result-btn { right: 38px; }
-             #share-result-btn { right: 6px; }
-             #share-menu { top: 28px; right: 6px; } /* Adjust menu position */
-        }
-    </style>
+              .result-action-btn svg { width: 16px; height: 16px; }
 
-    <!-- Динамический стиль для фона через Flask (если используется) -->
-    <style>
-        body {
-             background-image: url("{{ url_for('static', filename='images/splash.png') }}");
+             #copy-result-btn { right: 45px; }
+             #share-result-btn { right: 8px; }
+             #share-menu { top: 38px; right: 8px; min-width: 140px;} /* Adjust menu position */
+             #share-menu a { padding: 8px 12px; font-size: 13px;}
+             #share-menu a svg { width: 16px; height: 16px; margin-right: 8px;}
         }
     </style>
+    <style> body { background-image: url("{{ url_for('static', filename='images/splash.png') }}"); background-size: cover; background-position: center; background-repeat: no-repeat; } </style>
 
 </head>
 <body>
@@ -166,11 +198,11 @@
             <button onclick="filter_recommendations('equally')">Поровну</button>
             <button onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
             <button onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто больше заплатил</button>
-            <button onclick="filter_recommendations('proportional_division_by_the_cost_of_orders')">Пропорциональное деление по стоимости заказов</button>
+            <button onclick="filter_recommendations('proportional_division_by_the_cost_of_orders')">Пропорционально</button> <!-- Shortened text -->
          </div>
          <div id="result" class="result">
-             <!-- Action buttons and Share Menu will be inserted here by JS -->
-             <!-- Recommendation text will follow -->
+             <!-- Action buttons and Share Menu will be dynamically inserted here by JS -->
+             <!-- Recommendation text will follow the buttons/menu -->
          </div>
     </div>
 
@@ -188,7 +220,7 @@
         const numPeopleInput = document.getElementById('num-people-input');
         const tipAmountInput = document.getElementById('tip-amount-input');
 
-        // --- Tip Input Formatting (No changes) ---
+        // --- Tip Input Formatting ---
         function formatTipInput(inputElement) { let v=inputElement.value, n=v.replace(/[^0-9.,]/g,'').replace('₽','').replace(',','.'); const p=n.split('.'); if(p.length>2) n=p[0]+'.'+p.slice(1).join(''); if(n.length>1&&n.startsWith('0')&&!n.startsWith('0.')) n=n.substring(1); if(n==='.'||n===''){inputElement.value=''; return '';} const num=parseFloat(n); if(isNaN(num)||num<0){inputElement.value=''; return '';} inputElement.value=n+'₽'; return n; }
         function removeFormatting(inputElement) { inputElement.value = inputElement.value.replace('₽','').trim(); }
         tipAmountInput.addEventListener('focus', () => { removeFormatting(tipAmountInput); setTimeout(() => { tipAmountInput.setSelectionRange(tipAmountInput.value.length, tipAmountInput.value.length); }, 0); });
@@ -200,103 +232,206 @@
             const file = imageInput.files[0];
             hideShareMenu(); // Hide menu when preview changes
             if (file) {
-                previewElement.style.display = 'block'; previewElement.src = URL.createObjectURL(file); previewWrapper.style.display = 'flex';
-                statusElement.style.display = 'none'; resultElement.style.display = 'none'; filtersWrapper.style.display = 'none';
+                previewElement.src = URL.createObjectURL(file);
+                previewElement.style.display = 'block';
+                previewWrapper.style.display = 'flex';
+                statusElement.style.display = 'none';
+                resultElement.style.display = 'none';
+                resultElement.innerHTML = ''; // Clear results when new image is selected
+                filtersWrapper.style.display = 'none';
             } else {
-                 previewElement.style.display = 'none'; previewWrapper.style.display = 'none';
-                 resultElement.style.display = 'none'; filtersWrapper.style.display = 'none';
+                 previewElement.style.display = 'none';
+                 previewWrapper.style.display = 'none';
+                 resultElement.style.display = 'none';
+                 resultElement.innerHTML = '';
+                 filtersWrapper.style.display = 'none';
             }
             toggleUploadButton();
         }
 
         function toggleUploadButton() {
-            uploadButton.disabled = !(numPeopleInput.value && imageInput.files.length > 0 && numPeopleInput.value > 0);
+            const numPeopleValid = numPeopleInput.value && parseInt(numPeopleInput.value, 10) > 0;
+            uploadButton.disabled = !(numPeopleValid && imageInput.files.length > 0);
         }
 
         function formatOutputText(text) {
             if (!text) return "";
+            // Bold markdown (**text**) -> <b>text</b>
+            // Keep newlines as <br> for HTML rendering
             return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
 
-        // --- Result Text Extraction ---
+        // --- Result Text Extraction for Sharing/Copying ---
         function getResultTextForSharing() {
             const resultDiv = document.getElementById('result');
             if (!resultDiv) return "";
-            const clone = resultDiv.cloneNode(true);
-            // Remove buttons and share menu
-            clone.querySelectorAll('.result-action-btn, #share-menu').forEach(el => el.remove());
-            let text = clone.innerText || clone.textContent || "";
-            text = text.replace(/<br\s*\/?>/gi, '\n'); // Replace potential <br> tags with newlines
-            return text.trim();
+
+            // Create a temporary div to parse the HTML structure
+            const tempDiv = document.createElement('div');
+            // Get the innerHTML, excluding the action buttons and share menu
+            let contentHTML = resultDiv.innerHTML;
+            // Remove known elements by ID - more robust than class/tag removal if possible
+            const elementsToRemove = ['#copy-result-btn', '#share-result-btn', '#share-menu'];
+            elementsToRemove.forEach(selector => {
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = contentHTML; // Parse current HTML
+                const element = tempContainer.querySelector(selector);
+                if (element) {
+                    element.remove(); // Remove the element
+                    contentHTML = tempContainer.innerHTML; // Get updated HTML
+                }
+            });
+            tempDiv.innerHTML = contentHTML; // Put the cleaned HTML into the temp div
+
+            // Replace <br> tags with newlines for plain text output
+            tempDiv.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+
+            // Get the final plain text content
+            let text = tempDiv.innerText || tempDiv.textContent || "";
+            return text.trim(); // Trim leading/trailing whitespace
         }
 
         // --- Copy Functionality ---
         async function copyResultText() {
-            const copyButton = document.getElementById('copy-result-btn'); // Find button in DOM
-            if (!copyButton) return; // Exit if button not found
+            const copyButton = document.getElementById('copy-result-btn');
+            if (!copyButton) return;
             const textToCopy = getResultTextForSharing();
-            console.log("Text prepared for copying:", textToCopy);
+            console.log("Text prepared for copying:", textToCopy); // Debug
             if (!textToCopy) { console.warn("No text to copy."); return; }
 
             try {
                 await navigator.clipboard.writeText(textToCopy);
-                const originalContent = copyButton.innerHTML; copyButton.innerHTML = '✅'; copyButton.title = 'Скопировано!';
-                setTimeout(() => { copyButton.innerHTML = '📋'; copyButton.title = 'Скопировать результат'; }, 1500);
+                const originalIcon = copyButton.innerHTML; // Store original SVG
+                copyButton.innerHTML = '✅'; // Simple confirmation
+                copyButton.title = 'Скопировано!';
+                copyButton.style.color = '#08a552'; // Success color
+                setTimeout(() => {
+                     copyButton.innerHTML = originalIcon; // Restore original SVG
+                     copyButton.title = 'Скопировать результат';
+                     copyButton.style.color = ''; // Restore original color
+                }, 1500);
             } catch (err) {
-                console.error('Ошибка копирования: ', err); alert('Не удалось скопировать текст.');
-                const originalContent = copyButton.innerHTML; copyButton.innerHTML = '❌'; copyButton.title = 'Ошибка копирования';
-                 setTimeout(() => { copyButton.innerHTML = '📋'; copyButton.title = 'Скопировать результат'; }, 2000);
+                console.error('Ошибка копирования: ', err);
+                alert('Не удалось скопировать текст.');
+                 const originalIcon = copyButton.innerHTML; // Store original SVG
+                 copyButton.innerHTML = '❌'; // Error indicator
+                 copyButton.title = 'Ошибка копирования';
+                 copyButton.style.color = '#cb0001'; // Error color
+                 setTimeout(() => {
+                     copyButton.innerHTML = originalIcon; // Restore original SVG
+                     copyButton.title = 'Скопировать результат';
+                     copyButton.style.color = ''; // Restore original color
+                 }, 2000);
             }
+             hideShareMenu(); // Hide menu after copy attempt
         }
 
         // --- Share Functionality ---
         function toggleShareMenu() {
             const menu = document.getElementById('share-menu');
-            if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            if (menu) {
+                const isVisible = menu.style.display === 'block';
+                 menu.style.display = isVisible ? 'none' : 'block';
+            }
         }
 
         function hideShareMenu() {
              const menu = document.getElementById('share-menu');
-             if (menu) menu.style.display = 'none';
+             if (menu) {
+                 menu.style.display = 'none';
+             }
         }
 
+        // --- UPDATED VK Share ---
         function shareViaVK() {
-            const text = getResultTextForSharing();
-            const url = window.location.href;
-            const title = document.title;
-            console.log("Sharing to VK - Text:", text);
-            const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(text.substring(0, 500))}`;
+            const description = getResultTextForSharing(); // The main content is the result
+            const url = window.location.href; // Share the link to the app itself
+            const title = "ПоДЕЛИ! - Результат деления"; // Specific title for the shared link/app
+
+            console.log("Sharing to VK - Title:", title);
+            console.log("Sharing to VK - Description/Comment:", description); // Debug
+
+            if (!description) {
+                console.warn("No result text available for VK sharing description.");
+                 // Optionally, share just the link and title
+                 // const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+                 // window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                 // hideShareMenu();
+                 // return;
+            }
+
+            // VK share.php uses 'url', 'title' (for the link), and 'comment' (often used for preview text).
+            // Pre-filling the user's actual post text is unreliable via URL parameters.
+            const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&comment=${encodeURIComponent(description.substring(0, 800))}`; // Limit comment length
+
             console.log("VK Share URL:", shareUrl);
-            window.open(shareUrl, '_blank');
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
             hideShareMenu();
         }
 
+        // --- UPDATED Telegram Share ---
         function shareViaTelegram() {
-            const text = getResultTextForSharing();
-            console.log("Sharing to Telegram - Text:", text);
-            const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+            const textToShare = getResultTextForSharing(); // This goes into the message body
+            const url = window.location.href; // URL of the app to share
+            const title = "Результат из ПоДЕЛИ!"; // Title to prepend in the message
+
+            console.log("Sharing to Telegram - Text:", textToShare); // Debug
+
+             if (!textToShare) {
+                console.warn("No text available for Telegram sharing.");
+                // Optionally, still share the link to the app even without text:
+                // const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}`;
+                // window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                // hideShareMenu();
+                return; // Or just return if text is essential
+            }
+
+            // Format: ?url=...&text=...
+            // url: The link to generate a preview for (our app's URL)
+            // text: The text to pre-fill in the message box (Title + our generated result)
+            const combinedText = `${title}\n\n${textToShare}`; // Add title and spacing
+            const shareUrl = `https://t.me/share/url?url=${url}&text=${combinedText}`; 
+
             console.log("Telegram Share URL:", shareUrl);
-            window.open(shareUrl, '_blank');
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
             hideShareMenu();
         }
 
         function shareViaSMS() {
             const text = getResultTextForSharing();
-            console.log("Sharing via SMS - Text:", text);
-            const body = encodeURIComponent(text.substring(0, 160) + "\n(Из ПоДЕЛИ!)");
+            console.log("Sharing via SMS - Text:", text); // Debug
+             if (!text) {
+                console.warn("No text available for SMS sharing.");
+                return; // Don't open SMS if no text
+            }
+            // SMS body has limitations, keep it concise
+            const body = text.substring(0, 150);
             console.log("SMS Body (encoded):", body);
             window.location.href = `sms:?body=${body}`;
+            // No need to hideShareMenu here as it might navigate away
         }
 
         // Close share menu if clicked outside
         document.addEventListener('click', function(event) {
             const menu = document.getElementById('share-menu');
-            // Need to check click target against the actual share button, not a wrapper
-            const shareButton = document.getElementById('share-result-btn');
-            if (menu && menu.style.display === 'block' && !menu.contains(event.target) && (!shareButton || !shareButton.contains(event.target))) {
-                hideShareMenu();
+            const shareButton = document.getElementById('share-result-btn'); // Get the share button itself
+
+            // Check if menu exists, is visible, click is outside menu AND outside share button
+            if (menu && menu.style.display === 'block' && !menu.contains(event.target) && shareButton && !shareButton.contains(event.target)) {
+                 hideShareMenu();
             }
         });
+
+
+        // --- SVG Icons ---
+        const svgIconCopy = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+        const svgIconShare = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>`;
+
+        // --- NEW SVG Icons ---
+        const svgIconVK = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/></svg>`;
+        const svgIconTelegram = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/></svg>`;
+        const svgIconSMS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>`; // Message bubble
+
 
         // --- Display Results & Filters ---
         function displayRecommendations(filterType = 'equally') {
@@ -306,67 +441,146 @@
                  case 'who_more_eat_then_more_pay': textToShow = recommendations.who_more_eat_then_more_pay; break;
                  case 'who_more_cost_then_more_pay': textToShow = recommendations.who_more_cost_then_more_pay; break;
                  case 'proportional_division_by_the_cost_of_orders': textToShow = recommendations.proportional_division_by_the_cost_of_orders; break;
-                 default: textToShow = recommendations.equally;
-            }
-
-             resultElement.innerHTML = ''; // Clear previous content
-
-             // Insert Share Menu first (so buttons overlay it if needed by z-index)
-             // Then Insert Action Buttons directly (NO wrappers)
-             resultElement.insertAdjacentHTML('beforeend', `
-                <div id="share-menu">
-                    <a href="#" onclick="shareViaVK(); return false;">ВКонтакте</a>
-                    <a href="#" onclick="shareViaTelegram(); return false;">Telegram</a>
-                    <a href="#" onclick="shareViaSMS(); return false;">SMS</a>
-                </div>
-                <button id="copy-result-btn" class="result-action-btn" title="Скопировать результат" onclick="copyResultText()">📋</button>
-                <button id="share-result-btn" class="result-action-btn" title="Поделиться" onclick="toggleShareMenu()">🔗</button>
-             `);
-
-             // Insert the formatted recommendation text AFTER the buttons
-             const textContainer = document.createElement('div');
-             textContainer.style.paddingTop = '5px'; // Add a small gap below buttons if needed
-             textContainer.innerHTML = formatOutputText(textToShow || "Рекомендации не найдены.");
-             // Append the text content nodes
-             while (textContainer.firstChild) {
-                 resultElement.appendChild(textContainer.firstChild);
+                 default: textToShow = recommendations.equally; // Fallback
              }
 
+             resultElement.innerHTML = ''; // Clear previous content including old buttons/menu
+
+             // Create and insert Action Buttons and Share Menu
+              const buttonsAndMenuHTML = `
+                 <button id="copy-result-btn" class="result-action-btn" title="Скопировать результат" onclick="copyResultText()">${svgIconCopy}</button>
+                 <button id="share-result-btn" class="result-action-btn" title="Поделиться" onclick="toggleShareMenu()">${svgIconShare}</button>
+                 <div id="share-menu">
+                     <a href="#" onclick="shareViaVK(); return false;">
+                         ${svgIconVK}
+                         <span>ВКонтакте</span>
+                     </a>
+                     <a href="#" onclick="shareViaTelegram(); return false;">
+                         ${svgIconTelegram}
+                         <span>Telegram</span>
+                     </a>
+                     <a href="#" onclick="shareViaSMS(); return false;">
+                          ${svgIconSMS}
+                          <span>SMS</span>
+                     </a>
+                 </div>`;
+             resultElement.insertAdjacentHTML('afterbegin', buttonsAndMenuHTML); // Insert at the beginning
+
+             // Insert the formatted recommendation text AFTER the buttons/menu structure
+             const textContainer = document.createElement('div');
+             textContainer.style.paddingTop = '5px'; // Optional: Small gap below buttons if needed
+             textContainer.innerHTML = formatOutputText(textToShow || "Рекомендации не найдены.");
+             resultElement.appendChild(textContainer); // Append the text content
 
              resultElement.style.display = "block";
-             hideShareMenu(); // Start with menu hidden
+             hideShareMenu(); // Ensure menu is hidden initially
         }
 
         function filter_recommendations(filterType) {
+             if (!recommendations || Object.keys(recommendations).length === 0) {
+                 console.warn("No recommendations loaded to filter.");
+                 return; // Don't try to display if no data
+             }
             displayRecommendations(filterType);
-             hideShareMenu(); // Hide menu when filter changes
+             // No need to hideShareMenu here, displayRecommendations does it
         }
 
-        // --- Upload Logic (No changes needed here) ---
+        // --- Upload Logic ---
         async function upload_receipt() {
-            const file = imageInput.files[0]; const numPeople = numPeopleInput.value; let tipString = tipAmountInput.value.replace('₽','').trim().replace(',','.'); const tipAmount = parseFloat(tipString)||0;
-            if (!file || !numPeople || numPeople <= 0) { alert("Выберите изображение и укажите количество людей (> 0)."); return; }
-            if (tipAmount < 0) { alert("Сумма чаевых не может быть отрицательной."); tipAmountInput.value = ''; formatTipInput(tipAmountInput); tipAmountInput.focus(); return; }
-            uploadButton.disabled = true; previewWrapper.style.display = 'none'; resultElement.style.display = 'none'; filtersWrapper.style.display = 'none'; hideShareMenu(); statusElement.textContent = "Обработка..."; statusElement.className = 'status processing'; statusElement.style.display = 'block';
-            const formData = new FormData(); formData.append("receipt_image", file); formData.append("num_people", numPeople); formData.append("tea_money", tipAmount);
+            const file = imageInput.files[0];
+            const numPeople = numPeopleInput.value;
+            let tipString = tipAmountInput.value.replace('₽','').trim().replace(',','.');
+            const tipAmount = parseFloat(tipString) || 0; // Default to 0 if invalid/empty
+
+            if (!file || !numPeople || parseInt(numPeople, 10) <= 0) {
+                alert("Пожалуйста, выберите изображение чека и укажите корректное количество людей (> 0).");
+                return;
+            }
+            if (tipAmount < 0) {
+                 alert("Сумма чаевых не может быть отрицательной.");
+                 tipAmountInput.value = ''; // Clear invalid input
+                 // formatTipInput(tipAmountInput); // Reformat (optional)
+                 tipAmountInput.focus();
+                 return;
+            }
+
+            uploadButton.disabled = true;
+            previewWrapper.style.display = 'none'; // Hide preview during processing
+            resultElement.style.display = 'none';
+            resultElement.innerHTML = ''; // Clear previous results/buttons
+            filtersWrapper.style.display = 'none';
+            hideShareMenu();
+            statusElement.textContent = "Обработка...";
+            statusElement.className = 'status processing';
+            statusElement.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append("receipt_image", file);
+            formData.append("num_people", numPeople);
+            formData.append("tea_money", tipAmount); // Send numeric tip value
+
             try {
-                const response = await fetch('/upload_receipt', { method: "POST", body: formData });
-                statusElement.style.display = 'none'; statusElement.classList.remove('processing');
-                if (!response.ok) { let eMsg=`Ошибка ${response.status}`; try {const eD=await response.json(); eMsg=eD.detail||eD.message||eMsg;} catch(e){} throw new Error(eMsg); }
-                recommendations = await response.json(); console.log("Рекомендации:", recommendations);
-                statusElement.textContent = "Обработка завершена"; statusElement.className = 'status success'; statusElement.style.display = 'block'; setTimeout(() => { statusElement.style.display = 'none'; }, 2000);
-                displayRecommendations('equally'); filtersWrapper.style.display = "flex";
+                // IMPORTANT: Replace '/upload_receipt' with your actual backend API endpoint URL
+                const response = await fetch('/upload_receipt', { // <--- MAKE SURE THIS IS YOUR CORRECT ENDPOINT
+                     method: "POST",
+                     body: formData
+                 });
+
+                statusElement.style.display = 'none'; // Hide status temporarily
+                statusElement.classList.remove('processing');
+
+                if (!response.ok) {
+                    let errorMsg = `Ошибка ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.detail || errorData.message || errorMsg; // Try to get server error detail
+                    } catch (e) {
+                         // If response is not JSON or empty
+                         errorMsg = `Ошибка ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                recommendations = await response.json();
+                console.log("Получены рекомендации:", recommendations); // Debug
+
+                // Brief success message
+                statusElement.textContent = "Обработка завершена!";
+                statusElement.className = 'status success';
+                statusElement.style.display = 'block';
+                setTimeout(() => { statusElement.style.display = 'none'; }, 1500); // Hide success message
+
+                displayRecommendations('equally'); // Display default filter
+                filtersWrapper.style.display = "flex"; // Show filter buttons
+
             } catch (error) {
-                console.error("Ошибка загрузки:", error); statusElement.textContent = `Ошибка: ${error.message||"Сбой обработки"}`; statusElement.className = 'status error'; statusElement.style.display = 'block';
-                resultElement.innerHTML = ""; resultElement.style.display = "none"; filtersWrapper.style.display = "none"; hideShareMenu();
-            } finally { toggleUploadButton(); }
+                console.error("Ошибка при обработке чека:", error);
+                statusElement.textContent = `Ошибка: ${error.message || "Не удалось обработать чек"}`;
+                statusElement.className = 'status error';
+                statusElement.style.display = 'block'; // Keep error visible
+                // Ensure result/filters remain hidden on error
+                resultElement.innerHTML = "";
+                resultElement.style.display = "none";
+                filtersWrapper.style.display = "none";
+                hideShareMenu();
+            } finally {
+                // Re-enable upload button based on current input state
+                toggleUploadButton();
+            }
         }
 
         // --- Initial Setup ---
         window.onload = () => {
-             toggleUploadButton(); previewWrapper.style.display = 'none'; statusElement.style.display = 'none';
-             resultElement.style.display = 'none'; filtersWrapper.style.display = 'none'; hideShareMenu();
-             formatTipInput(tipAmountInput);
+             toggleUploadButton();
+             previewWrapper.style.display = 'none';
+             statusElement.style.display = 'none';
+             resultElement.style.display = 'none';
+             filtersWrapper.style.display = 'none';
+             hideShareMenu();
+             // Format tip input if it has an initial value (usually not needed unless pre-filled)
+             if (tipAmountInput.value) {
+                 formatTipInput(tipAmountInput);
+             }
         };
     </script>
 

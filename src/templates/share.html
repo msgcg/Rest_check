@@ -12,13 +12,13 @@
             --accent-teal: #42e3b4; /* Lighter teal/green */
             --text-dark: #1a1a1a; /* Darker than pure black for text */
             --text-light: #ffffff;
-            /* Removed --background-light as we use a gradient now */
-            --card-background: #ffffff;
-            --debug-background: #e8f5e9; /* Light green for debug */
-            --debug-border: #c8e6c9;
-            --border-gradient: linear-gradient(135deg, var(--primary-green), var(--accent-green-yellow));
+            --card-background: #ffffff; /* White background for the card */
+            --border-gradient: linear-gradient(135deg, var(--primary-green), var(--accent-green-yellow)); /* Gradient for the border */
             --button-hover-opacity: 0.85;
             --shadow-color: rgba(8, 165, 82, 0.15); /* Shadow based on primary green */
+            --border-thickness: 3px; /* Control border thickness */
+            --widget-border-radius: 18px; /* Consistent rounding */
+            --paste-button-bg: #2db26c; /* New color for paste button */
         }
 
         body {
@@ -26,12 +26,7 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 25px 20px;
-            /* === UPDATED BACKGROUND === */
-            background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-teal) 100%);
-            background-attachment: fixed; /* Keep gradient fixed during scroll */
-            min-height: 100vh; /* Ensure gradient covers full height */
-            /* === END UPDATE === */
-            color: var(--text-dark); /* Default text color (mostly used within cards) */
+            color: var(--text-dark);
         }
 
         .header {
@@ -42,63 +37,69 @@
         .logo {
             font-size: 28px;
             font-weight: bold;
-            /* === UPDATED COLOR === */
-            color: var(--text-light);
+            color: var(--text-dark); /* Changed to black */
             margin-bottom: 5px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Slightly stronger shadow for light text on gradient */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
         .header div:not(.logo) { /* Subtitle style */
             font-size: 16px;
-             /* === UPDATED COLOR === */
-            color: var(--text-light);
+            color: var(--text-dark); /* Changed to black */
             opacity: 0.9;
         }
 
-        /* ... rest of the CSS remains the same ... */
-
-        .debug-info {
-            background-color: var(--debug-background);
-            border: 1px solid var(--debug-border);
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin: 25px 0;
-            font-family: monospace;
-            font-size: 12px;
-            text-align: left;
-            color: #333; /* Keep debug text dark on its light background */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .receipt-card {
-            background-color: var(--card-background); /* White card stands out on gradient */
-            border-radius: 18px;
-            padding: 25px;
-            box-shadow: 0 5px 20px var(--shadow-color);
+        /* Outer container for border and shadow */
+        .widget-bordered {
+            /* No background here! */
+            border-radius: var(--widget-border-radius); /* Rounding for the border and shadow */
+            box-shadow: 0 5px 20px var(--shadow-color); /* Shadow on the outer element */
             margin-bottom: 40px;
-            position: relative;
-            z-index: 1;
-            overflow: hidden;
+            position: relative; /* Needed for ::before */
+            z-index: 1; /* Context for ::before */
+            overflow: hidden; /* Clip the ::before element */
+            /* Add padding equal to border thickness to push content away from the edge */
+             padding: var(--border-thickness);
         }
 
-        /* Gradient Border Effect using pseudo-element */
-        .receipt-card::before {
+        /* Gradient Border using ::before */
+        .widget-bordered::before {
             content: '';
             position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            background: var(--border-gradient); /* Green-to-yellow gradient border */
-            z-index: -1;
-            border-radius: inherit;
+            top: 0; /* Align with the outer container */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border-gradient); /* Gradient background */
+            z-index: -1; /* Behind the inner .widget-content */
+            border-radius: inherit; /* Match parent's rounding */
         }
 
+        /* Inner container for white background and content padding */
+        .widget-content {
+            background-color: var(--card-background); /* White background here */
+             /* Slightly smaller radius for perfect fit inside the border */
+             border-radius: calc(var(--widget-border-radius) - var(--border-thickness));
+             padding: 25px; /* Actual content padding */
+             /* Ensure content height calculation works well */
+             height: 100%;
+             box-sizing: border-box;
+        }
+
+
+        /* Specific styles for receipt card */
+        .receipt-card {
+             /* Inherits .widget-bordered styles */
+        }
+
+        /* Adjust padding for the inner content */
+         .receipt-card .widget-content {
+             padding: 25px;
+         }
 
         .receipt-title {
             font-size: 22px;
             margin-bottom: 20px;
             text-align: center;
-            color: var(--primary-green); /* Keep title green inside white card */
+            color: var(--primary-green);
             font-weight: 600;
         }
 
@@ -107,22 +108,24 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin: 30px 0; /* More vertical space */
+            /* Removed margin as padding is on .widget-content */
             flex-wrap: wrap;
+            margin-top: 30px; /* Add margin back if needed */
+            margin-bottom: 30px;
         }
 
         #receiptAmountInput {
-            font-size: 42px; /* Even larger amount */
+            font-size: 42px;
             font-weight: bold;
             color: var(--primary-green);
-            border: 2px solid var(--primary-green); /* Themed border */
-            border-radius: 10px; /* Rounded input */
-            padding: 8px 12px; /* Adjust padding */
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 8px 12px;
             width: auto;
             min-width: 120px;
             max-width: 220px;
             text-align: right;
-            background-color: #fdfdfd; /* Slightly off-white input background */
+            background-color: #fdfdfd;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
             -webkit-appearance: none;
             margin: 0;
@@ -131,268 +134,210 @@
         }
         #receiptAmountInput:focus {
             outline: none;
-            border-color: var(--accent-green-yellow); /* Highlight on focus */
+            border-color: var(--accent-green-yellow);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--accent-green-yellow);
         }
 
         .currency-symbol {
-            font-size: 42px; /* Match input size */
+            font-size: 42px;
             font-weight: bold;
             color: var(--primary-green);
-            padding-left: 5px; /* Space before symbol */
+            padding-left: 5px;
         }
 
         #pasteAmountButton {
-            padding: 10px 15px; /* More padding */
+            padding: 10px 15px;
             font-size: 15px;
-            font-weight: 600; /* Bolder text */
-            /* Themed paste button */
-            background-color: var(--accent-green-yellow);
-            color: var(--primary-green);
+            font-weight: 600;
+            background-color: var(--paste-button-bg); /* Changed background color */
+            color: var(--text-light); /* Changed text color to black */
             border: none;
-            border-radius: 8px; /* Rounded corners */
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s, transform 0.1s, opacity 0.3s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         #pasteAmountButton:hover {
-            background-color: #8bc34a; /* Darken accent color on hover */
-            transform: translateY(-1px); /* Subtle lift effect */
+            opacity: 0.9; /* Adjusted hover effect slightly */
+            transform: translateY(-1px);
         }
         #pasteAmountButton:active {
-             transform: translateY(0px); /* Press effect */
+             transform: translateY(0px);
              box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+             opacity: 0.95;
         }
 
+        /* Specific styles for share section */
         .share-section {
-            text-align: center;
-             background-color: rgba(255, 255, 255, 0.5); /* Slightly transparent white background */
-             padding: 20px;
-             border-radius: 15px; /* Rounded section */
-             margin-top: 20px;
+            /* Inherits .widget-bordered styles */
+            margin-top: 20px;
         }
+
+        /* Adjust padding for the inner content */
+         .share-section .widget-content {
+             padding: 20px; /* Slightly less padding */
+         }
+
 
         .share-title {
-            margin-bottom: 20px; /* More space */
-            font-size: 20px; /* Larger title */
+            margin-bottom: 20px;
+            font-size: 20px;
             color: var(--primary-green);
             font-weight: 600;
+            text-align: center;
         }
 
         .share-buttons {
             display: flex;
             justify-content: center;
-            gap: 20px; /* More gap */
+            gap: 20px;
             flex-wrap: wrap;
         }
 
         .share-button {
-            padding: 12px 25px; /* Larger buttons */
+            padding: 12px 25px;
             border: none;
-            border-radius: 25px; /* Pill shape */
+            border-radius: 25px;
             color: var(--text-light);
             font-weight: bold;
             font-size: 15px;
             cursor: pointer;
-            display: inline-flex; /* Use inline-flex for better alignment */
+            display: inline-flex;
             align-items: center;
-            justify-content: center; /* Center content */
-            gap: 10px; /* More gap for icon */
+            justify-content: center;
+            gap: 10px;
             transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s;
-            background-color: var(--primary-green); /* Unified button color */
-            box-shadow: 0 3px 8px var(--shadow-color); /* Themed shadow */
-            min-width: 150px; /* Ensure buttons have some width */
+            background-color: var(--primary-green);
+            box-shadow: 0 3px 8px var(--shadow-color);
+            min-width: 150px;
         }
 
         .share-button:hover {
             opacity: var(--button-hover-opacity);
-            transform: translateY(-2px); /* Lift effect on hover */
-            box-shadow: 0 5px 12px var(--shadow-color); /* Enhanced shadow on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px var(--shadow-color);
         }
          .share-button:active {
-            transform: translateY(0px); /* Press effect */
+            transform: translateY(0px);
             box-shadow: 0 2px 5px var(--shadow-color);
         }
 
         .icon {
-            width: 22px; /* Slightly larger icon */
+            width: 22px;
             height: 22px;
         }
 
-        /* Remove specific button colors if using unified theme */
-        /* .vk-button { background-color: #4C75A3; } */
-        /* .telegram-button { background-color: #0088cc; } */
-
     </style>
-    <!-- Flask background style placeholder -->
-    <!-- <style> body { background-image: url("{{ url_for('static', filename='images/splash.png') }}"); background-size: cover; background-position: center; background-repeat: no-repeat; } </style> -->
+    <!-- Flask background style (kept as requested) -->
+    <style> body { background-image: url("/static/images/splash.png"); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; } </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">ПоДели</div>
-        <div>Поделитесь суммой из чека легко!</div> <!-- Slightly modified text -->
-    </div>
-
-    <!-- Debug Info (can be removed for production) -->
-    <div class="debug-info" id="debugInfo">
-        <div><strong>Отладка:</strong></div>
-        <div>URL: <span id="debugUrl"></span></div>
-        <div>Параметры: <span id="debugParams"></span></div>
-        <div>Текущая Сумма: <span id="debugAmount">0 ₽</span></div>
-        <div>Clipboard Status: <span id="clipboardStatus"></span></div>
+        <div class="logo">ПоДели!</div>
+        <div>Поделитесь суммой из чека легко</div>
     </div>
 
     <!-- Receipt Card with Gradient Border -->
-    <div class="receipt-card">
-        <div class="receipt-title">Введите или вставьте сумму чека</div>
-        <div class="amount-container">
-             <input type="number" id="receiptAmountInput" step="0.01" min="0" value="0" placeholder="0.00"> <!-- Added placeholder -->
-             <span class="currency-symbol">₽</span>
-             <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button>
+    <div class="receipt-card widget-bordered">
+        <div class="widget-content">
+            <div class="receipt-title">Введите или вставьте сумму чека</div>
+            <div class="amount-container">
+                 <input type="number" id="receiptAmountInput" step="0.01" min="0" value="0" placeholder="0.00">
+                 <span class="currency-symbol">₽</span>
+                 <button id="pasteAmountButton" title="Вставить сумму из буфера обмена">📋 Вставить</button>
+            </div>
         </div>
     </div>
 
-    <!-- Share Section -->
-    <div class="share-section">
-        <div class="share-title">Поделиться ссылкой</div>
-        <div class="share-buttons">
-            <!-- VK Button -->
-            <button class="share-button" id="shareVk"> <!-- Removed specific class vk-button -->
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                    <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/>
+    <!-- Share Section with Gradient Border -->
+    <div class="share-section widget-bordered">
+        <div class="widget-content">
+            <div class="share-title">Поделиться ссылкой</div>
+            <div class="share-buttons">
+                <!-- VK Button -->
+                <button class="share-button" id="shareVk">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                        <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/>
                 </svg>
                 ВКонтакте
             </button>
 
             <!-- Telegram Button -->
-            <button class="share-button" id="shareTelegram"> <!-- Removed specific class telegram-button -->
+            <button class="share-button" id="shareTelegram">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
                     <path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/>
                 </svg>
                 Telegram
             </button>
         </div>
+        </div>
     </div>
 
     <script>
-        // --- Elements ---
+        // JS code остается без изменений
         const amountInput = document.getElementById('receiptAmountInput');
         const pasteButton = document.getElementById('pasteAmountButton');
         const shareVkButton = document.getElementById('shareVk');
         const shareTelegramButton = document.getElementById('shareTelegram');
-        const debugUrlSpan = document.getElementById('debugUrl');
-        const debugParamsSpan = document.getElementById('debugParams');
-        const debugAmountSpan = document.getElementById('debugAmount');
-        const clipboardStatusSpan = document.getElementById('clipboardStatus');
-
-        // --- State ---
         let currentAmount = 0;
-        // Construct URL without query params for cleaner sharing base
         const pageBaseUrl = window.location.origin + window.location.pathname;
-
-        // --- Functions ---
-
         function parseAmount(text) {
             if (!text) return null;
             const cleanedText = text.replace(/[^0-9.,]/g, '').replace(',', '.');
             const value = parseFloat(cleanedText);
             return isNaN(value) || value < 0 ? null : value.toFixed(2);
         }
-
         function updateAmount(newAmount) {
             currentAmount = parseFloat(newAmount) || 0;
-             // Format with Russian locale for display purposes elsewhere
             const formattedAmountForDisplay = currentAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-             // Format consistently with dot and 2 decimals for input value
             const formattedAmountForInput = currentAmount.toFixed(2);
-
-            // Update input field value
             if (amountInput.value !== formattedAmountForInput) {
                  amountInput.value = formattedAmountForInput;
             }
-
-            // Update debug info
-            debugAmountSpan.textContent = formattedAmountForDisplay + ' ₽';
-
-             // Generate the URL *with* the current amount parameter
-             const shareUrlWithParam = `${pageBaseUrl}?amount=${currentAmount.toFixed(2)}`;
-
-            // Update share links and text
+            const shareUrlWithParam = `${pageBaseUrl}?amount=${currentAmount.toFixed(2)}`;
             const shareTextBase = `Я разделил(а) чек на ${formattedAmountForDisplay} ₽ с помощью ПоДели!`;
-            // VK uses the URL in the 'url' param and text in 'title'
-            const shareUrlVk = `https://vk.com/share.php?url=${encodeURIComponent(shareUrlWithParam)}&title=${encodeURIComponent(shareTextBase)}`;
-            // Telegram uses text + URL in the 'text' param, and URL again in 'url'
-            const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent(shareUrlWithParam)}&text=${encodeURIComponent(shareTextBase + ' Присоединяйся: ' + shareUrlWithParam)}`; // Added call to action
-
-            // Update click handlers
+            const shareCommentVk = `Отличный сервис для разделения чеков: ${shareUrlWithParam}`;
+            const shareUrlVk = `https://vk.com/share.php?url=${encodeURIComponent(shareUrlWithParam)}&title=${encodeURIComponent(shareTextBase)}&comment=${encodeURIComponent(shareCommentVk.substring(0, 800))}`;
+            const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent(shareUrlWithParam)}&text=${encodeURIComponent(shareTextBase + ' Присоединяйся: ' + shareUrlWithParam)}`;
             shareVkButton.onclick = () => window.open(shareUrlVk, '_blank', 'width=600,height=450,noopener,noreferrer');
             shareTelegramButton.onclick = () => window.open(shareUrlTelegram, '_blank', 'width=600,height=450,noopener,noreferrer');
         }
-
-        // --- Initialization ---
-        debugUrlSpan.textContent = window.location.href; // Show full initial URL
         const urlParams = new URLSearchParams(window.location.search);
         const initialAmountParam = urlParams.get('amount');
-        const paramsText = Array.from(urlParams.entries()).map(([key, value]) => `${key}=${value}`).join(', ');
-        debugParamsSpan.textContent = paramsText || 'нет параметров';
-
         const initialAmount = parseAmount(initialAmountParam) || 0;
-        updateAmount(initialAmount); // Initialize display, debug, and share links
-
-        // --- Event Listeners ---
+        updateAmount(initialAmount);
         amountInput.addEventListener('input', (event) => {
             const value = event.target.value;
-            // Use a simple regex to allow numbers and one decimal point
-            if (/^\d*\.?\d{0,2}$/.test(value)) {
-                updateAmount(value || 0); // Treat empty string as 0
-            } else if (value === '') {
-                 updateAmount(0);
+            if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
+                updateAmount(value || 0);
             }
-            // If the input is invalid based on the regex, do nothing,
-            // allowing the user to correct it without state changing unexpectedly.
-            // Consider adding visual feedback for invalid input if desired.
         });
-
-         // Update amount on 'change' too (e.g., when focus is lost after typing)
-         // This helps ensure the formatting is correct if the user leaves the field
          amountInput.addEventListener('change', (event) => {
             const value = event.target.value;
-            const parsed = parseAmount(value); // Parse and format correctly
+            const parsed = parseAmount(value);
             updateAmount(parsed !== null ? parsed : 0);
          });
-
         pasteButton.addEventListener('click', async () => {
-            clipboardStatusSpan.textContent = 'Запрос доступа...';
             try {
                 if (!navigator.clipboard || !navigator.clipboard.readText) {
-                     clipboardStatusSpan.textContent = 'API буфера обмена не поддерживается.';
                      alert('Ваш браузер не поддерживает вставку из буфера обмена.');
                      return;
                 }
                 const text = await navigator.clipboard.readText();
-                clipboardStatusSpan.textContent = `Вставлено: "${text}"`;
                 const parsed = parseAmount(text);
                 if (parsed !== null) {
                     updateAmount(parsed);
-                    clipboardStatusSpan.textContent += ` -> Распознано: ${parseFloat(parsed).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`;
-                } else {
-                    clipboardStatusSpan.textContent += ' -> Сумма не распознана.';
                 }
             } catch (err) {
                 console.error('Ошибка вставки из буфера обмена:', err);
-                clipboardStatusSpan.textContent = `Ошибка: ${err.message}.`;
                 if (err.name === 'NotAllowedError') {
-                     clipboardStatusSpan.textContent += ' Доступ к буферу обмена запрещен.';
                      alert('Доступ к буферу обмена не предоставлен. Пожалуйста, разрешите доступ в настройках браузера или при появлении запроса.');
                 } else {
                      alert('Не удалось прочитать буфер обмена.');
                 }
             }
         });
-
-        // Ensure initial handlers are set correctly
         updateAmount(currentAmount);
-
     </script>
 </body>
 </html>
