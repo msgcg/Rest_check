@@ -6,259 +6,135 @@
     <title>ПоДЕЛИ!</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center center;
-            background-color: #f0f0f0; /* Fallback color */
-            color: #000000;
+            font-family: Arial, sans-serif; margin: 0; padding: 0; background-size: cover; background-repeat: no-repeat;
+            background-attachment: fixed; background-position: center center; background-color: #f0f0f0; color: #000000;
         }
-        h1 {
-            color: #08a552;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
-        }
+        h1 { color: #08a552; text-align: center; margin-top: 20px; font-weight: bold; }
         .container {
-            width: 90%;
-            max-width: 600px;
-            margin: 30px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px; /* Скругление основного контейнера */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Градиентная рамка для контейнера */
-            border: 4px solid transparent;
-            background-clip: padding-box;
-            border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
-            overflow: hidden;
+            width: 90%; max-width: 600px; margin: 30px auto; background-color: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative; min-height: 300px; display: flex; flex-direction: column;
+            align-items: center; border: 4px solid transparent; background-clip: padding-box; border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
+            overflow: visible;
         }
-        .input-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 300px;
-        }
+        .input-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%; max-width: 300px; }
 
-        /* --- Стили для обертки input[type=file] --- */
-        .file-input-gradient-border {
-            width: 100%;
-            padding: 3px; /* Толщина "рамки" */
-            margin: 10px 0;
-            border-radius: 13px; /* Скругление обертки (чуть больше внутреннего) */
-            background: linear-gradient(to right, #08a552, #9fe61f); /* Фон обертки */
-            box-sizing: border-box;
-        }
+        /* --- File Input --- */
+        .file-input-gradient-border { width: 100%; padding: 3px; margin: 10px 0 5px 0; border-radius: 13px; background: linear-gradient(to right, #08a552, #9fe61f); box-sizing: border-box; }
+        input[type="file"] { border: none; display: block; width: 100%; padding: 10px; box-sizing: border-box; font-size: 16px; color: #333; background-color: #ffffff; border-radius: 10px; overflow: hidden; }
+        input[type="file"]::file-selector-button { padding: 10px 15px; margin-right: 10px; background-color: #08a552; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
+        input[type="file"]::file-selector-button:hover { background-color: #067d40; }
 
-        /* --- Измененные стили для input[type="file"] --- */
-        input[type="file"] {
-             border: none; /* Убрали рамку */
-             border-image: none;
-             background-clip: initial;
-             display: block;
-             width: 100%;
-             padding: 10px;
-             box-sizing: border-box;
-             font-size: 16px;
-             color: #333;
-             background-color: #ffffff; /* Белый фон обязателен! */
-             border-radius: 10px; /* !!! Скругление самого input !!! */
-             overflow: hidden;
-        }
+        /* --- Number/Text Inputs --- */
+        input[type="number"], input[type="text"].numeric-input { padding: 12px 15px; border: 2px solid #ccc; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 16px; background-color: #fff; color: #333; }
+        input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; margin: 0; }
+        input::placeholder { color: #aaa; opacity: 1; } input:-ms-input-placeholder { color: #aaa; } input::-ms-input-placeholder { color: #aaa; }
+        .input-container { width: 100%; margin: 5px 0; box-sizing: border-box; position: relative; }
 
-         input[type="file"]::file-selector-button {
-            padding: 10px 15px;
-            margin-right: 10px;
-            background-color: #08a552;
-            color: white;
-            border: none;
-            border-radius: 8px; /* Скругление кнопки */
-            cursor: pointer;
-            transition: background-color 0.3s;
-         }
-          input[type="file"]::file-selector-button:hover {
-             background-color: #067d40;
-          }
+        /* --- Main Buttons --- */
+        .file-btn-wrapper { margin-top: 10px; width: 100%; }
+        button { /* Styles for Upload/Filter buttons primarily */
+            padding: 12px 15px; background-color: #08a552; color: white; border: none; border-radius: 10px; cursor: pointer;
+            width: 100%; font-size: 16px; font-weight: bold; transition: background-color 0.3s; box-sizing: border-box;
+        }
+        button:hover { background-color: #067d40; }
+        button:disabled { background-color: #bdbdbd; color: #757575; cursor: not-allowed; border-image: none; }
 
-        input[type="number"] {
-            margin: 10px 0;
-            padding: 12px;
-            border: 2px solid #ccc;
-            border-radius: 10px; /* Скругление поля ввода числа */
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
+        /* --- Filters --- */
+        .filters { display: flex; justify-content: space-between; width: 100%; max-width: 450px; margin-top: 20px; }
+        .filters button { flex: 1; margin: 0 5px; }
 
-        .file-btn-wrapper {
-            margin-bottom: 10px;
-             width: 100%;
-        }
-        button { /* Стиль для основной кнопки и кнопок фильтров */
-            padding: 12px 15px;
-            background-color: #08a552;
-            color: white;
-            border: none;
-            border-radius: 10px; /* Скругление кнопок */
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            box-sizing: border-box;
-        }
-        button:hover {
-            background-color: #067d40;
-        }
-        button:disabled {
-            background-color: #bdbdbd;
-            color: #757575;
-            cursor: not-allowed;
-            border-image: none;
-        }
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-             max-width: 450px;
-            margin-top: 20px;
-        }
-        .filters button {
-            flex: 1;
-            margin: 0 5px;
-        }
-        .image-preview-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-            width: 100%;
-            min-height: 200px;
-        }
-        #preview {
-            max-width: 100%;
-            max-height: 300px;
-            height: auto;
-            border-radius: 10px; /* Скругление превью */
-            margin-top: 10px;
-            display: none;
-            border: 1px solid #ddd;
-        }
-        #status {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #08a552;
-            text-align: center;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px; /* Скругление статуса */
-            z-index: 10;
-            border: 2px solid #08a552;
-        }
-        #status.processing {
-             animation: pulsate 1.5s infinite ease-in-out;
-             border-color: #08a552;
-        }
-        #status.error {
-            color: #cb0001;
-            border-color: #cb0001;
-            animation: none;
-        }
-         #status.success {
-             color: #08a552;
-             border-color: #08a552;
-             animation: none;
-        }
-        @keyframes pulsate {
-            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-            100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-        }
+        /* --- Image Preview --- */
+        .image-preview-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; width: 100%; min-height: 200px; }
+        #preview { max-width: 100%; max-height: 300px; height: auto; border-radius: 10px; margin-top: 10px; display: none; border: 1px solid #ddd; }
+
+        /* --- Status Indicator --- */
+        #status { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; font-weight: bold; color: #08a552; text-align: center; padding: 20px; background-color: rgba(255, 255, 255, 0.9); border-radius: 10px; z-index: 10; border: 2px solid #08a552; }
+        #status.processing { animation: pulsate 1.5s infinite ease-in-out; border-color: #08a552; }
+        #status.error { color: #cb0001; border-color: #cb0001; animation: none; }
+        #status.success { color: #08a552; border-color: #08a552; animation: none; }
+        @keyframes pulsate { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+
+        /* --- Result Area --- */
         #result {
             margin-top: 20px;
-            padding: 15px;
-            background-color: #f8fdfa;
-            border-radius: 10px; /* Скругление области результата */
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-            display: none;
-            width: 100%;
-            max-width: 550px;
-            box-sizing: border-box;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            text-align: left;
-            color: #000000;
-             /* Легкая градиентная рамка для Result */
-             border: 2px solid transparent;
-             background-clip: padding-box;
-             border-image: linear-gradient(to right, #e0f0e8, #f0faf5) 1;
-             overflow: hidden;
+            padding: 15px; /* Standard padding, buttons positioned over this */
+            background-color: #f8fdfa; border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); display: none; width: 100%; max-width: 550px; box-sizing: border-box;
+            white-space: pre-wrap; line-height: 1.6; text-align: left; color: #000000; border: 2px solid transparent;
+            background-clip: padding-box; border-image: linear-gradient(to right, #e0f0e8, #f0faf5) 1; overflow: hidden; position: relative;
+             /* Add min-height if buttons ever overlap content weirdly */
+             /* min-height: 50px; */
         }
-        #result b {
-            color: #08a552;
-            font-weight: bold;
+        #result b { color: #08a552; font-weight: bold; }
+
+        /* --- Result Area Action Buttons (Copy & Share) --- */
+        .result-action-btn {
+             position: absolute;
+             top: 8px; /* Position from top */
+             z-index: 2; /* Ensure buttons are clickable above text */
+             background-color: white; /* Button background */
+             color: #555;
+             font-size: 1.1em; /* Icon size */
+             cursor: pointer;
+             padding: 3px 6px; /* Inner padding */
+             line-height: 1; /* Prevent extra vertical space */
+             border-radius: 7px; /* Rounded corners */
+             /* Gradient Border */
+             border: 2px solid transparent; /* Border thickness, initially transparent */
+             border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
+             background-clip: padding-box; /* IMPORTANT: Background inside border */
+             /* Reset inherited styles */
+             width: auto;
+             font-weight: normal;
+             box-shadow: none;
+             transition: color 0.2s, background-color 0.2s;
         }
+        .result-action-btn:hover {
+             color: #08a552;
+             background-color: #f0f0f0; /* Subtle hover background */
+        }
+        .result-action-btn:active { color: #067d40; }
+
+        /* Specific button positioning */
+        #copy-result-btn { right: 42px; /* Position copy button */ }
+        #share-result-btn { right: 8px; /* Position share button */ }
+
+        /* --- Share Menu --- */
+        #share-menu {
+            display: none; position: absolute; top: 32px; /* Adjusted position below buttons */ right: 8px; background-color: white;
+            border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 5px 0;
+            z-index: 11; /* Above other elements */ min-width: 120px;
+        }
+        #share-menu a { display: block; padding: 8px 15px; color: #333; text-decoration: none; font-size: 14px; white-space: nowrap; }
+        #share-menu a:hover { background-color: #f0f0f0; color: #08a552; }
 
         /* --- Mobile Styles --- */
         @media (max-width: 600px) {
-             body {
-                 /* REMOVED: background-image: none !important; */
-                 background-color: #f0f0f0; /* Keep this fallback */
+             body { background-color: #f0f0f0; }
+             .container { width: 95%; padding: 15px; margin-top: 20px; margin-bottom: 20px; border-width: 3px; }
+             .file-input-gradient-border { padding: 2px; border-radius: 11px; } input[type="file"] { border-radius: 9px; }
+             .filters { flex-direction: column; align-items: center; max-width: 300px; } .filters button { width: 100%; margin: 5px 0; }
+             #status { font-size: 1.2em; width: 80%; }
+             #result { max-width: 100%; padding: 15px; } /* Reset padding */
+             input[type="number"], input[type="text"].numeric-input { font-size: 15px; padding: 10px 12px; }
+
+             .result-action-btn {
+                 top: 6px; /* Adjust position */
+                 font-size: 1.0em; /* Adjust size */
+                 padding: 2px 5px; /* Adjust padding */
+                 border-width: 1px; /* Thinner border */
+                 border-radius: 6px; /* Adjust rounding */
              }
-             .container {
-                 width: 95%;
-                 padding: 15px;
-                 margin-top: 20px;
-                 margin-bottom: 20px;
-                 border-width: 3px;
-            }
-             /* Стили для обертки на мобильных */
-             .file-input-gradient-border {
-                 padding: 2px; /* Чуть тоньше рамка */
-                 border-radius: 11px;
-             }
-             input[type="file"] {
-                 border-radius: 9px; /* Чуть меньше скругление */
-             }
-            .filters {
-                flex-direction: column;
-                align-items: center;
-                max-width: 300px;
-            }
-            .filters button {
-                width: 100%;
-                margin: 5px 0;
-            }
-             #status {
-                 font-size: 1.2em;
-                 width: 80%;
-            }
-             #result {
-                 max-width: 100%;
-            }
+             #copy-result-btn { right: 38px; }
+             #share-result-btn { right: 6px; }
+             #share-menu { top: 28px; right: 6px; } /* Adjust menu position */
         }
     </style>
 
-    <!-- Динамический стиль для фона через Flask -->
+    <!-- Динамический стиль для фона через Flask (если используется) -->
     <style>
         body {
-            background-image: url("{{ url_for('static', filename='images/splash.png') }}");
+             background-image: url("{{ url_for('static', filename='images/splash.png') }}");
         }
     </style>
 
@@ -268,34 +144,40 @@
         <h1>ПоДЕЛИ!</h1>
 
         <div class="input-wrapper">
-             <!-- Обертка для input type="file" -->
              <div class="file-input-gradient-border">
                  <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
              </div>
-             <input type="number" id="num-people-input" placeholder="Количество людей" required oninput="toggleUploadButton()">
+             <div class="input-container">
+                 <input type="number" id="num-people-input" placeholder="Количество людей" required min="1" oninput="toggleUploadButton()">
+             </div>
+             <div class="input-container">
+                 <input type="text" id="tip-amount-input" class="numeric-input" placeholder="Сумма чаевых" inputmode="decimal">
+             </div>
              <div class="file-btn-wrapper">
                  <button id="upload-btn" onclick="upload_receipt()" disabled>Обработать изображение</button>
              </div>
          </div>
 
          <div id="status" class="status"></div>
-
-        <div class="image-preview-wrapper" id="preview-wrapper">
-            <img id="preview">
-        </div>
-
-        <div class="filters" id="filters-wrapper" style="display: none;">
-            <button id="pay-less-btn" onclick="filter_recommendations('equally')">Поровну</button>
-            <button id="eat-more-btn" onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
-            <button id="pay-more-btn" onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто больше заплатил</button>
-        </div>
-
-        <div id="result" class="result"></div>
+         <div class="image-preview-wrapper" id="preview-wrapper">
+             <img id="preview">
+         </div>
+         <div class="filters" id="filters-wrapper" style="display: none;">
+            <button onclick="filter_recommendations('equally')">Поровну</button>
+            <button onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
+            <button onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто больше заплатил</button>
+            <button onclick="filter_recommendations('proportional_division_by_the_cost_of_orders')">Пропорциональное деление по стоимости заказов</button>
+         </div>
+         <div id="result" class="result">
+             <!-- Action buttons and Share Menu will be inserted here by JS -->
+             <!-- Recommendation text will follow -->
+         </div>
     </div>
 
-    <!-- JavaScript (без изменений) -->
-     <script>
-        let recommendations = {};
+    <script>
+        let recommendations = {}; // Global object for recommendations
+
+        // --- DOM Elements (get static ones) ---
         const previewWrapper = document.getElementById('preview-wrapper');
         const previewElement = document.getElementById('preview');
         const statusElement = document.getElementById('status');
@@ -304,128 +186,187 @@
         const uploadButton = document.getElementById('upload-btn');
         const imageInput = document.getElementById('image-input');
         const numPeopleInput = document.getElementById('num-people-input');
+        const tipAmountInput = document.getElementById('tip-amount-input');
 
+        // --- Tip Input Formatting (No changes) ---
+        function formatTipInput(inputElement) { let v=inputElement.value, n=v.replace(/[^0-9.,]/g,'').replace('₽','').replace(',','.'); const p=n.split('.'); if(p.length>2) n=p[0]+'.'+p.slice(1).join(''); if(n.length>1&&n.startsWith('0')&&!n.startsWith('0.')) n=n.substring(1); if(n==='.'||n===''){inputElement.value=''; return '';} const num=parseFloat(n); if(isNaN(num)||num<0){inputElement.value=''; return '';} inputElement.value=n+'₽'; return n; }
+        function removeFormatting(inputElement) { inputElement.value = inputElement.value.replace('₽','').trim(); }
+        tipAmountInput.addEventListener('focus', () => { removeFormatting(tipAmountInput); setTimeout(() => { tipAmountInput.setSelectionRange(tipAmountInput.value.length, tipAmountInput.value.length); }, 0); });
+        tipAmountInput.addEventListener('blur', () => { formatTipInput(tipAmountInput); });
+        tipAmountInput.addEventListener('input', () => { let c=tipAmountInput.selectionStart, o=tipAmountInput.value, v=o.replace(/[^0-9.,]/g,'').replace(',','.'); const p=v.split('.'); if(p.length>2)v=p[0]+'.'+p.slice(1).join(''); if(v.length>1&&v.startsWith('0')&&!v.startsWith('0.')){v=v.substring(1); if(c>0)c--;} if(v!==o.replace('₽','').trim()){tipAmountInput.value=v; try{tipAmountInput.setSelectionRange(c,c);}catch(e){console.warn("Cursor err:",e);}} });
+
+        // --- Core App Functions ---
         function previewImage() {
             const file = imageInput.files[0];
+            hideShareMenu(); // Hide menu when preview changes
             if (file) {
-                previewElement.style.display = 'block';
-                previewElement.src = URL.createObjectURL(file);
-                previewWrapper.style.display = 'flex';
-                statusElement.style.display = 'none';
-                resultElement.style.display = 'none';
-                filtersWrapper.style.display = 'none';
-                toggleUploadButton();
+                previewElement.style.display = 'block'; previewElement.src = URL.createObjectURL(file); previewWrapper.style.display = 'flex';
+                statusElement.style.display = 'none'; resultElement.style.display = 'none'; filtersWrapper.style.display = 'none';
             } else {
-                 previewElement.style.display = 'none';
-                 previewWrapper.style.display = 'none';
-                 toggleUploadButton();
+                 previewElement.style.display = 'none'; previewWrapper.style.display = 'none';
+                 resultElement.style.display = 'none'; filtersWrapper.style.display = 'none';
             }
+            toggleUploadButton();
         }
 
         function toggleUploadButton() {
-            const numPeople = numPeopleInput.value;
-            const fileSelected = imageInput.files.length > 0;
-            uploadButton.disabled = !(numPeople && fileSelected && numPeople > 0);
+            uploadButton.disabled = !(numPeopleInput.value && imageInput.files.length > 0 && numPeopleInput.value > 0);
         }
 
         function formatOutputText(text) {
             if (!text) return "";
-            // Replace **bold** with <b>bold</b>
-            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-            // Replace newline characters with <br> tags
-            formattedText = formattedText.replace(/\n/g, '<br>');
-            return formattedText;
+            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
 
+        // --- Result Text Extraction ---
+        function getResultTextForSharing() {
+            const resultDiv = document.getElementById('result');
+            if (!resultDiv) return "";
+            const clone = resultDiv.cloneNode(true);
+            // Remove buttons and share menu
+            clone.querySelectorAll('.result-action-btn, #share-menu').forEach(el => el.remove());
+            let text = clone.innerText || clone.textContent || "";
+            text = text.replace(/<br\s*\/?>/gi, '\n'); // Replace potential <br> tags with newlines
+            return text.trim();
+        }
+
+        // --- Copy Functionality ---
+        async function copyResultText() {
+            const copyButton = document.getElementById('copy-result-btn'); // Find button in DOM
+            if (!copyButton) return; // Exit if button not found
+            const textToCopy = getResultTextForSharing();
+            console.log("Text prepared for copying:", textToCopy);
+            if (!textToCopy) { console.warn("No text to copy."); return; }
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                const originalContent = copyButton.innerHTML; copyButton.innerHTML = '✅'; copyButton.title = 'Скопировано!';
+                setTimeout(() => { copyButton.innerHTML = '📋'; copyButton.title = 'Скопировать результат'; }, 1500);
+            } catch (err) {
+                console.error('Ошибка копирования: ', err); alert('Не удалось скопировать текст.');
+                const originalContent = copyButton.innerHTML; copyButton.innerHTML = '❌'; copyButton.title = 'Ошибка копирования';
+                 setTimeout(() => { copyButton.innerHTML = '📋'; copyButton.title = 'Скопировать результат'; }, 2000);
+            }
+        }
+
+        // --- Share Functionality ---
+        function toggleShareMenu() {
+            const menu = document.getElementById('share-menu');
+            if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function hideShareMenu() {
+             const menu = document.getElementById('share-menu');
+             if (menu) menu.style.display = 'none';
+        }
+
+        function shareViaVK() {
+            const text = getResultTextForSharing();
+            const url = window.location.href;
+            const title = document.title;
+            console.log("Sharing to VK - Text:", text);
+            const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(text.substring(0, 500))}`;
+            console.log("VK Share URL:", shareUrl);
+            window.open(shareUrl, '_blank');
+            hideShareMenu();
+        }
+
+        function shareViaTelegram() {
+            const text = getResultTextForSharing();
+            console.log("Sharing to Telegram - Text:", text);
+            const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+            console.log("Telegram Share URL:", shareUrl);
+            window.open(shareUrl, '_blank');
+            hideShareMenu();
+        }
+
+        function shareViaSMS() {
+            const text = getResultTextForSharing();
+            console.log("Sharing via SMS - Text:", text);
+            const body = encodeURIComponent(text.substring(0, 160) + "\n(Из ПоДЕЛИ!)");
+            console.log("SMS Body (encoded):", body);
+            window.location.href = `sms:?body=${body}`;
+        }
+
+        // Close share menu if clicked outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('share-menu');
+            // Need to check click target against the actual share button, not a wrapper
+            const shareButton = document.getElementById('share-result-btn');
+            if (menu && menu.style.display === 'block' && !menu.contains(event.target) && (!shareButton || !shareButton.contains(event.target))) {
+                hideShareMenu();
+            }
+        });
+
+        // --- Display Results & Filters ---
         function displayRecommendations(filterType = 'equally') {
              let textToShow = "";
              switch (filterType) {
                  case 'equally': textToShow = recommendations.equally; break;
                  case 'who_more_eat_then_more_pay': textToShow = recommendations.who_more_eat_then_more_pay; break;
                  case 'who_more_cost_then_more_pay': textToShow = recommendations.who_more_cost_then_more_pay; break;
+                 case 'proportional_division_by_the_cost_of_orders': textToShow = recommendations.proportional_division_by_the_cost_of_orders; break;
                  default: textToShow = recommendations.equally;
             }
-             // Use formatOutputText here before setting innerHTML
-             resultElement.innerHTML = formatOutputText(textToShow || "Рекомендации для этого фильтра не найдены.");
+
+             resultElement.innerHTML = ''; // Clear previous content
+
+             // Insert Share Menu first (so buttons overlay it if needed by z-index)
+             // Then Insert Action Buttons directly (NO wrappers)
+             resultElement.insertAdjacentHTML('beforeend', `
+                <div id="share-menu">
+                    <a href="#" onclick="shareViaVK(); return false;">ВКонтакте</a>
+                    <a href="#" onclick="shareViaTelegram(); return false;">Telegram</a>
+                    <a href="#" onclick="shareViaSMS(); return false;">SMS</a>
+                </div>
+                <button id="copy-result-btn" class="result-action-btn" title="Скопировать результат" onclick="copyResultText()">📋</button>
+                <button id="share-result-btn" class="result-action-btn" title="Поделиться" onclick="toggleShareMenu()">🔗</button>
+             `);
+
+             // Insert the formatted recommendation text AFTER the buttons
+             const textContainer = document.createElement('div');
+             textContainer.style.paddingTop = '5px'; // Add a small gap below buttons if needed
+             textContainer.innerHTML = formatOutputText(textToShow || "Рекомендации не найдены.");
+             // Append the text content nodes
+             while (textContainer.firstChild) {
+                 resultElement.appendChild(textContainer.firstChild);
+             }
+
+
              resultElement.style.display = "block";
+             hideShareMenu(); // Start with menu hidden
         }
 
         function filter_recommendations(filterType) {
             displayRecommendations(filterType);
+             hideShareMenu(); // Hide menu when filter changes
         }
 
+        // --- Upload Logic (No changes needed here) ---
         async function upload_receipt() {
-            const file = imageInput.files[0];
-            const numPeople = numPeopleInput.value;
-            if (!file || !numPeople || numPeople <= 0) {
-                alert("Пожалуйста, выберите изображение и укажите корректное количество людей (больше 0).");
-                return;
-            }
-            uploadButton.disabled = true;
-            previewWrapper.style.display = 'none'; // Hide preview during processing
-            resultElement.style.display = 'none';
-            filtersWrapper.style.display = 'none';
-            statusElement.textContent = "Обработка изображения...";
-            statusElement.className = 'status processing'; // Add class for animation
-            statusElement.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append("receipt_image", file);
-            formData.append("num_people", numPeople);
-
+            const file = imageInput.files[0]; const numPeople = numPeopleInput.value; let tipString = tipAmountInput.value.replace('₽','').trim().replace(',','.'); const tipAmount = parseFloat(tipString)||0;
+            if (!file || !numPeople || numPeople <= 0) { alert("Выберите изображение и укажите количество людей (> 0)."); return; }
+            if (tipAmount < 0) { alert("Сумма чаевых не может быть отрицательной."); tipAmountInput.value = ''; formatTipInput(tipAmountInput); tipAmountInput.focus(); return; }
+            uploadButton.disabled = true; previewWrapper.style.display = 'none'; resultElement.style.display = 'none'; filtersWrapper.style.display = 'none'; hideShareMenu(); statusElement.textContent = "Обработка..."; statusElement.className = 'status processing'; statusElement.style.display = 'block';
+            const formData = new FormData(); formData.append("receipt_image", file); formData.append("num_people", numPeople); formData.append("tea_money", tipAmount);
             try {
                 const response = await fetch('/upload_receipt', { method: "POST", body: formData });
-                statusElement.style.display = 'none'; // Hide status temporarily
-                statusElement.classList.remove('processing'); // Remove animation class
-
-                if (!response.ok) {
-                    let errorMsg = `Ошибка ${response.status}: ${response.statusText}`;
-                    try {
-                        // Try to parse more detailed error from JSON response
-                        const errorData = await response.json();
-                        errorMsg = errorData.detail || errorData.message || errorMsg;
-                    } catch (e) {
-                        // If response is not JSON or parsing fails, use the original message
-                    }
-                    throw new Error(errorMsg);
-                }
-
-                recommendations = await response.json();
-                console.log("Received recommendations:", recommendations); // For debugging
-
-                // Show success status briefly
-                statusElement.textContent = "Обработка завершена";
-                statusElement.className = 'status success';
-                statusElement.style.display = 'block';
-                setTimeout(() => { statusElement.style.display = 'none'; }, 2000); // Hide after 2 seconds
-
-                // Display results and filters
-                displayRecommendations('equally'); // Display default filter first
-                filtersWrapper.style.display = "flex"; // Show filter buttons
-
+                statusElement.style.display = 'none'; statusElement.classList.remove('processing');
+                if (!response.ok) { let eMsg=`Ошибка ${response.status}`; try {const eD=await response.json(); eMsg=eD.detail||eD.message||eMsg;} catch(e){} throw new Error(eMsg); }
+                recommendations = await response.json(); console.log("Рекомендации:", recommendations);
+                statusElement.textContent = "Обработка завершена"; statusElement.className = 'status success'; statusElement.style.display = 'block'; setTimeout(() => { statusElement.style.display = 'none'; }, 2000);
+                displayRecommendations('equally'); filtersWrapper.style.display = "flex";
             } catch (error) {
-                console.error("Ошибка загрузки:", error);
-                statusElement.textContent = `Ошибка: ${error.message || "Не удалось обработать изображение"}`;
-                statusElement.className = 'status error'; // Add error class
-                statusElement.style.display = 'block';
-                // Ensure results and filters are hidden on error
-                resultElement.innerHTML = "";
-                resultElement.style.display = "none";
-                filtersWrapper.style.display = "none";
-            } finally {
-                 // Re-enable button only if conditions are met (in case user changed input during processing)
-                 toggleUploadButton();
-            }
+                console.error("Ошибка загрузки:", error); statusElement.textContent = `Ошибка: ${error.message||"Сбой обработки"}`; statusElement.className = 'status error'; statusElement.style.display = 'block';
+                resultElement.innerHTML = ""; resultElement.style.display = "none"; filtersWrapper.style.display = "none"; hideShareMenu();
+            } finally { toggleUploadButton(); }
         }
 
-         // Initial setup on page load
-         window.onload = () => {
-             toggleUploadButton(); // Set initial button state
-              // Hide elements that shouldn't be visible initially
-              previewWrapper.style.display = 'none';
-              statusElement.style.display = 'none';
-              resultElement.style.display = 'none';
-              filtersWrapper.style.display = 'none';
+        // --- Initial Setup ---
+        window.onload = () => {
+             toggleUploadButton(); previewWrapper.style.display = 'none'; statusElement.style.display = 'none';
+             resultElement.style.display = 'none'; filtersWrapper.style.display = 'none'; hideShareMenu();
+             formatTipInput(tipAmountInput);
         };
     </script>
 
