@@ -249,7 +249,110 @@
             width: 22px;
             height: 22px;
         }
+        /* --- AMOLED Dark Theme --- */
+        @media (prefers-color-scheme: dark) {
 
+        /* Переопределение переменных для темной темы */
+        :root {
+            /* Основные цвета */
+            --primary-green-dark: #12c26a;       /* Более яркий зеленый для контраста */
+            --accent-green-yellow-dark: #c8ff4d; /* Более яркий акцент */
+            --text-light-dark-theme: #000000; /* Черный текст (если нужен на светлом фоне) */
+            --card-background-dark: #000000;    /* Черный фон виджетов */
+            --body-background-dark: #000000;     /* Черный фон страницы */
+            --input-background-dark: #1f1f1f;   /* Темно-серый фон инпутов */
+            --border-gradient: linear-gradient(135deg, var(--primary-green), var(--accent-green-yellow)); /* Gradient for the border */
+            --border-thickness: 3px; /* Control border thickness */
+            --shadow-color-dark: rgba(180, 180, 180, 0.1); /* Очень легкая светлая тень */
+            --disabled-button-bg-dark: #3a3a3a; /* Фон неактивных кнопок */
+            --disabled-button-text-dark: #888888; /* Текст неактивных кнопок */
+        }
+
+        body {
+            background-color: var(--body-background-dark);
+            color: var(--text-dark-theme);
+            /* Опционально: затемнить фоновое изображение */
+            /* background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png"); */
+        }
+
+        .header .logo,
+        .header div:not(.logo) {
+            color: var(--text-dark-theme);
+            text-shadow: none; /* Убираем светлую тень */
+        }
+
+        /* Внешний контейнер виджета */
+        .widget-bordered {
+            box-shadow: 0 5px 20px var(--shadow-color-dark);
+            padding: var(--border-thickness); /* ВЕРНУТЬ ЭТУ СТРОКУ */
+
+        }
+
+
+
+        /* Внутренний контейнер с контентом */
+        .widget-content {
+            background-color: var(--card-background-dark);
+            /* Скругление должно соответствовать внешнему контейнеру */
+            border-radius: calc(var(--widget-border-radius) - var(--border-thickness));
+            /* Внутренние отступы остаются прежними (через специфичные селекторы ниже) */
+        }
+        /* Убедимся, что паддинги применяются (они были в оригинале для .widget-content) */
+        .receipt-card .widget-content { padding: 25px; }
+        .share-section .widget-content { padding: 20px; }
+
+
+        /* Заголовки виджетов */
+        .receipt-title,
+        .share-title {
+            color: var(--primary-green-dark); /* Яркий зеленый */
+        }
+
+        /* Поле ввода суммы */
+        #receiptAmountInput {
+            background-color: var(--input-background-dark);
+            border: 2px solid var(--border-dark); /* Темная рамка */
+            box-shadow: none; /* Убираем внутреннюю тень */
+        }
+        #receiptAmountInput:focus {
+            border-color: var(--primary-green-dark);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.03), 0 0 5px var(--primary-green-dark); /* Легкая внешняя подсветка */
+        }
+
+
+        /* Кнопки "Поделиться" */
+        .share-button {
+            /* Можно оставить основной зеленый цвет кнопки, он контрастен */
+            background-color: var(--primary-green); /* Используем исходный зеленый */
+            color: var(--text-light); /* Белый текст остается */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); /* Темная тень */
+        }
+        .share-button:hover:not(:disabled) {
+            /* opacity: var(--button-hover-opacity); */ /* Оставляем */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5); /* Усиленная темная тень */
+        }
+        .share-button:active:not(:disabled) {
+            transform: translateY(0px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Неактивные кнопки */
+        .share-button:disabled {
+            background-color: var(--disabled-button-bg-dark);
+            color: var(--disabled-button-text-dark);
+            opacity: 0.7; /* Чуть менее прозрачные */
+            box-shadow: none;
+        }
+        .share-button:disabled:hover { /* Стили при наведении на неактивную */
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Иконки внутри кнопок уже имеют fill="white" в HTML, что отлично подходит */
+
+        } /* Конец @media (prefers-color-scheme: dark) */
     </style>
 </head>
 <body>

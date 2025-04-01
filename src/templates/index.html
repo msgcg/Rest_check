@@ -201,6 +201,160 @@
              #share-menu a { padding: 6px 12px; /* Further reduced padding */ font-size: 13px;}
              #share-menu a svg { width: 15px; height: 15px; margin-right: 7px;}
         }
+        /* Добавьте этот блок ВНУТРИ существующего тега <style> или в ваш CSS-файл */
+
+        @media (prefers-color-scheme: dark) {
+
+        /* --- Глобальные стили и Body --- */
+        body {
+            background-color: #000000; /* Чистый черный для AMOLED */
+            color: #e0e0e0;       /* Светло-серый текст по умолчанию */
+            /* Опционально: затемнить фоновое изображение для темной темы */
+            /* background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("{{ url_for('static', filename='images/splash.png') }}"); */
+        }
+
+        /* --- Основной контейнер --- */
+        .container {
+            background-color: #000000; /* Чистый черный */
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.1); /* Очень легкая тень для темного фона */
+            border: 4px solid transparent; background-clip: padding-box;
+            border-image: linear-gradient(45deg, #08a552, #9fe61f) 1;
+        }
+        h1 {
+            color: #12c26a; /* Немного более яркий зеленый для контраста */
+        }
+
+        /* --- Индикатор статуса --- */
+        #status {
+            color: #12c26a; /* Яркий зеленый */
+            background-color: rgba(25, 25, 25, 0.97); /* Очень темный полупрозрачный фон */
+            border-color: #12c26a;
+            box-shadow: 0 5px 20px rgba(200,200,200,0.1); /* Легкая тень */
+        }
+        #status.processing { border-color: #12c26a; color: #12c26a; }
+        #status.error {
+            color: #ff5555; /* Яркий красный */
+            border-color: #ff5555;
+        }
+        #status.success { color: #12c26a; border-color: #12c26a; }
+
+        /* --- Превью --- */
+        #preview {
+            border: 1px solid #444; /* Темно-серая рамка */
+        }
+
+        /* --- Область результата --- */
+        .result-container {
+            /* Стили контейнера не меняем, меняем #result внутри */
+        }
+        #result {
+            background-color: #1a1a1a; /* Очень темный серый, чтобы отличался от фона body */
+            color: #e0e0e0;       /* Светлый текст */
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Легкая внутренняя тень */
+            /* Убираем светлый градиент рамки */
+            border: 2px solid #444;
+            border-image: none;
+        }
+        #result b {
+            color: #12c26a; /* Яркий зеленый */
+        }
+
+        /* --- Обертка инпутов --- */
+        .input-wrapper {
+            /* Стили не меняем */
+        }
+
+        /* --- Инпуты --- */
+        .file-input-gradient-border {
+            /* Меняем градиент на более подходящий для темной темы или убираем */
+            background: linear-gradient(to right, #12c26a, #bfff30); /* Адаптированный градиент */
+        }
+        input[type="file"] {
+            color: #e0e0e0; /* Светлый текст */
+            background-color: #222; /* Темный фон инпута */
+        }
+        input[type="file"]::file-selector-button {
+            /* Основные цвета кнопки могут остаться, контраст должен быть ок */
+            /* background-color: #08a552; color: white; */
+        }
+        input[type="file"]::file-selector-button:hover {
+            /* background-color: #067d40; */
+        }
+        input[type="number"], input[type="text"].numeric-input {
+            background-color: #222; /* Темный фон */
+            color: #e0e0e0; /* Светлый текст */
+            border: 2px solid #555; /* Темно-серая рамка */
+        }
+        input::placeholder {
+            color: #777; /* Более темный серый плейсхолдер */
+        }
+
+        /* --- Кнопка загрузки --- */
+        button#upload-btn {
+            /* Основные цвета могут остаться */
+            /* background-color: #08a552; color: white; */
+        }
+        button#upload-btn:hover {
+            /* background-color: #067d40; */
+        }
+        button#upload-btn:disabled {
+            background-color: #444; /* Темно-серый фон для неактивной */
+            color: #888; /* Серый текст для неактивной */
+            border-image: none;
+        }
+
+        /* --- Фильтры --- */
+        .filters button {
+            background-color: #2a2a2a; /* Темный фон кнопок */
+            color: #12c26a; /* Светло-зеленый текст */
+            border: 1px solid #444; /* Темная рамка */
+        }
+        .filters button:hover {
+            background-color: #383838; /* Чуть светлее при наведении */
+            color: #30d070; /* Ярче зеленый при наведении */
+        }
+        .filters button:disabled {
+            background-color: #333; /* Темный фон неактивной */
+            color: #777; /* Серый текст неактивной */
+            border-color: #555; /* Темная рамка неактивной */
+        }
+
+        /* --- Кнопки результата / Меню --- */
+        .result-action-btn {
+            background-color: #1a1a1a; /* Фон как у #result */
+            color: #aaa; /* Светло-серый для иконок */
+            border: 2px solid #555; /* Темная рамка */
+            border-image: none;
+            box-shadow: 0 1px 3px rgba(255,255,255,0.08); /* Легкая тень */
+        }
+        .result-action-btn:hover {
+            color: #12c26a; /* Зеленый при наведении */
+            background-color: #333; /* Темнее фон при наведении */
+            box-shadow: 0 2px 5px rgba(255,255,255,0.12);
+        }
+        .result-action-btn:active {
+            color: #067d40;
+            background-color: #444;
+        }
+        /* SVG иконки наследуют цвет (currentColor) */
+
+        #share-menu {
+            background-color: #2a2a2a; /* Темный фон меню */
+            border: 1px solid #555; /* Темная рамка */
+            box-shadow: 0 -4px 12px rgba(255,255,255,0.1); /* Легкая тень */
+        }
+        #share-menu a {
+            color: #e0e0e0; /* Светлый текст ссылок */
+        }
+        #share-menu a:hover {
+            background-color: #383838; /* Темнее фон при наведении */
+            color: #12c26a; /* Зеленый текст при наведении */
+        }
+        /* SVG иконки в меню наследуют цвет */
+
+        } /* Конец @media (prefers-color-scheme: dark) */
+
+</style>
     </style>
 </head>
 <body>
