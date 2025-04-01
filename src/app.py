@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_from_directory
 import os
 from google import genai
 from ocr_module import process_image_with_gemini
@@ -6,6 +6,10 @@ from pydantic import BaseModel
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Set the upload folder from environment variable
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static', 'favicon.png', mimetype='image/png')
 
 @app.route('/')
 def index():
