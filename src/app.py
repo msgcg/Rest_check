@@ -90,7 +90,7 @@ def get_recommendations(extracted_text, num_people, tea_money):
     "is_restaurant": булевой индикатор, есть ли в данных чек. True если чек, False если нет.
 
     Если в текстовых данных не содержится чека из ресторана, скажи об этом.
-    В расчетах используются русские рубли.
+    В расчетах используются русские рубли, если не указано иное.
     """
 
     client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
