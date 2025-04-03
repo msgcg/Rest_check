@@ -345,7 +345,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 @media (max-width: 600px) {
      /* Стили Podeli/Index/Contacts */
      body { 
-        padding-top: env(safe-area-inset-top, 15px);
+        padding-top: env(safe-area-inset-top, 20px);
         padding-bottom: 10px;
     }
      body.share-page-body {
@@ -468,6 +468,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         background-color: var(--body-background-dark);
         color: var(--text-color-dark-theme);
         background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png");
+        padding-top: env(safe-area-inset-top, 20px);
     }
     
     /* Контейнер темной темы */
