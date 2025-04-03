@@ -74,7 +74,7 @@ body {
     margin: 0;
     box-sizing: border-box;
     position: relative;
-    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top, 20px);
 }
 /* --- Специфичные стили для Body на странице Share --- */
 body.share-page-body {
@@ -345,7 +345,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 @media (max-width: 600px) {
      /* Стили Podeli/Index/Contacts */
      body { 
-        padding-top: calc(15px + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top, 15px);
         padding-bottom: 10px;
     }
      body.share-page-body {
