@@ -4,400 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПоДЕЛИ! - Поделиться чеком</title>
-    <style>
-        /* Sber-inspired Palette */
-        :root {
-            --primary-green: #08a552; /* Main green */
-            --accent-green-yellow: #9fe61f; /* Bright green/yellow */
-            --accent-teal: #42e3b4; /* Lighter teal/green */
-            --text-dark: #1a1a1a; /* Darker than pure black for text */
-            --text-light: #ffffff;
-            --card-background: #ffffff; /* White background for the card */
-            --border-gradient: linear-gradient(135deg, var(--primary-green), var(--accent-green-yellow)); /* Gradient for the border */
-            --button-hover-opacity: 0.85;
-            --shadow-color: rgba(8, 165, 82, 0.15); /* Shadow based on primary green */
-            --border-thickness: 3px; /* Control border thickness */
-            --widget-border-radius: 18px; /* Consistent rounding */
-            --disabled-button-bg: #aabbcc; /* Grey for disabled buttons */
-        }
-
-        /* Make body a flex container to push content down */
-        body {
-            font-family: 'Arial', sans-serif;
-            padding: 25px 20px; /* Keep padding for spacing from screen edges */
-            color: var(--text-dark);
-            background-image: url("/static/images/splash.png"); /* Combined background style */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-
-            /* Flexbox for bottom alignment */
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Ensure body takes full viewport height */
-            justify-content: flex-end; /* Push flex items (header, cards) to the bottom */
-            box-sizing: border-box; /* Include padding in min-height calculation */
-            margin: 0; /* Reset default margin */
-        }
-
-        /* Apply max-width and centering to the main content blocks */
-        .header,
-        .widget-bordered { /* Target the main blocks */
-            max-width: 600px; /* Set the max width */
-            width: 100%; /* Ensure they take available width up to max-width */
-            margin-left: auto; /* Center the blocks */
-            margin-right: auto; /* Center the blocks */
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--text-dark);
-            margin-bottom: 5px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-        }
-        .header div:not(.logo) {
-            font-size: 16px;
-            color: var(--text-dark);
-            opacity: 0.9;
-        }
-
-        /* Outer container for border and shadow */
-        .widget-bordered {
-            border-radius: var(--widget-border-radius);
-            box-shadow: 0 5px 20px var(--shadow-color);
-            position: relative;
-            z-index: 1;
-            overflow: hidden;
-            padding: var(--border-thickness);
-        }
-
-        /* Adjust margins between the cards */
-        .receipt-card {
-             margin-bottom: 25px; /* Space between receipt and share card */
-        }
-        .share-section {
-             margin-bottom: 40px; /* Add some space at the very bottom */
-        }
-
-
-        /* Gradient Border using ::before */
-        .widget-bordered::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--border-gradient);
-            z-index: -1;
-            border-radius: inherit;
-        }
-
-        /* Inner container for white background and content padding */
-        .widget-content {
-            background-color: var(--card-background);
-             border-radius: calc(var(--widget-border-radius) - var(--border-thickness));
-             padding: 25px;
-             height: 100%;
-             box-sizing: border-box;
-        }
-
-
-        /* Specific styles for receipt card */
-        .receipt-card {
-             /* Inherits .widget-bordered styles */
-        }
-
-        /* Adjust padding for the inner content */
-         .receipt-card .widget-content {
-             padding: 25px;
-         }
-
-        .receipt-title {
-            font-size: 22px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: var(--primary-green);
-            font-weight: 600;
-        }
-
-        .amount-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px; /* Adjust gap if needed after removing button */
-            flex-wrap: wrap;
-            margin-top: 30px;
-            margin-bottom: 30px;
-        }
-
-        #receiptAmountInput {
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--primary-green);
-            border: 2px solid var(--primary-green);
-            border-radius: 10px;
-            padding: 8px 12px;
-            width: auto;
-            min-width: 120px;
-            max-width: 220px; /* Might want to adjust max-width */
-            text-align: right;
-            background-color: #fdfdfd;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            -webkit-appearance: none; /* Keep this for iOS */
-            margin: 0;
-            -moz-appearance: textfield; /* For Firefox */
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        #receiptAmountInput:focus {
-            outline: none;
-            border-color: var(--accent-green-yellow);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--accent-green-yellow);
-        }
-        /* Hide arrows for number input */
-        #receiptAmountInput::-webkit-outer-spin-button,
-        #receiptAmountInput::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .currency-symbol {
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--primary-green);
-            padding-left: 5px;
-        }
-
-        /* Specific styles for share section */
-        .share-section {
-            /* Inherits .widget-bordered styles */
-        }
-
-        /* Adjust padding for the inner content */
-         .share-section .widget-content {
-             padding: 20px; /* Slightly less padding */
-         }
-
-
-        .share-title {
-            margin-bottom: 20px;
-            font-size: 20px;
-            color: var(--primary-green);
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .share-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .share-button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            color: var(--text-light);
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s, background-color 0.3s;
-            background-color: var(--primary-green);
-            box-shadow: 0 3px 8px var(--shadow-color);
-            min-width: 150px;
-        }
-
-        .share-button:hover:not(:disabled) { /* Apply hover only if not disabled */
-            opacity: var(--button-hover-opacity);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px var(--shadow-color);
-        }
-         .share-button:active:not(:disabled) { /* Apply active only if not disabled */
-            transform: translateY(0px);
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        /* --- Styles for Disabled Share Buttons --- */
-        .share-button:disabled {
-            background-color: var(--disabled-button-bg); /* Greyed out background */
-            opacity: 0.6; /* Reduce opacity */
-            cursor: not-allowed; /* Indicate non-clickable */
-            box-shadow: none; /* Remove shadow */
-            transform: none; /* Prevent hover transform */
-        }
-
-        .share-button:disabled:hover { /* Keep disabled style on hover */
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
-        }
-        /* --- End Disabled Styles --- */
-
-        .icon {
-            width: 22px;
-            height: 22px;
-        }
-        /* --- AMOLED Dark Theme --- */
-        @media (prefers-color-scheme: dark) {
-
-        /* Переопределение переменных для темной темы */
-        :root {
-            /* Основные цвета */
-            --primary-green-dark: #12c26a;       /* Более яркий зеленый для контраста */
-            --accent-green-yellow-dark: #c8ff4d; /* Более яркий акцент */
-            --text-light-dark-theme: #000000; /* Черный текст (если нужен на светлом фоне) */
-            --card-background-dark: #000000;    /* Черный фон виджетов */
-            --body-background-dark: #000000;     /* Черный фон страницы */
-            --input-background-dark: #1f1f1f;   /* Темно-серый фон инпутов */
-            --border-gradient: linear-gradient(135deg, var(--primary-green), var(--accent-green-yellow)); /* Gradient for the border */
-            --border-thickness: 3px; /* Control border thickness */
-            --shadow-color-dark: rgba(180, 180, 180, 0.1); /* Очень легкая светлая тень */
-            --disabled-button-bg-dark: #3a3a3a; /* Фон неактивных кнопок */
-            --disabled-button-text-dark: #888888; /* Текст неактивных кнопок */
-        }
-
-        body {
-            background-color: var(--body-background-dark);
-            color: var(--text-dark-theme);
-            /* Опционально: затемнить фоновое изображение */
-            /* background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png"); */
-        }
-
-        .header .logo,
-        .header div:not(.logo) {
-            color: var(--text-dark-theme);
-            text-shadow: none; /* Убираем светлую тень */
-        }
-
-        /* Внешний контейнер виджета */
-        .widget-bordered {
-            box-shadow: 0 5px 20px var(--shadow-color-dark);
-            padding: var(--border-thickness); /* ВЕРНУТЬ ЭТУ СТРОКУ */
-
-        }
-
-
-
-        /* Внутренний контейнер с контентом */
-        .widget-content {
-            background-color: var(--card-background-dark);
-            /* Скругление должно соответствовать внешнему контейнеру */
-            border-radius: calc(var(--widget-border-radius) - var(--border-thickness));
-            /* Внутренние отступы остаются прежними (через специфичные селекторы ниже) */
-        }
-        /* Убедимся, что паддинги применяются (они были в оригинале для .widget-content) */
-        .receipt-card .widget-content { padding: 25px; }
-        .share-section .widget-content { padding: 20px; }
-
-
-        /* Заголовки виджетов */
-        .receipt-title,
-        .share-title {
-            color: var(--primary-green-dark); /* Яркий зеленый */
-        }
-
-        /* Поле ввода суммы */
-        #receiptAmountInput {
-            background-color: var(--input-background-dark);
-            border: 2px solid var(--border-dark); /* Темная рамка */
-            box-shadow: none; /* Убираем внутреннюю тень */
-        }
-        #receiptAmountInput:focus {
-            border-color: var(--primary-green-dark);
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.03), 0 0 5px var(--primary-green-dark); /* Легкая внешняя подсветка */
-        }
-
-
-        /* Кнопки "Поделиться" */
-        .share-button {
-            /* Можно оставить основной зеленый цвет кнопки, он контрастен */
-            background-color: var(--primary-green); /* Используем исходный зеленый */
-            color: var(--text-light); /* Белый текст остается */
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); /* Темная тень */
-        }
-        .share-button:hover:not(:disabled) {
-            /* opacity: var(--button-hover-opacity); */ /* Оставляем */
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5); /* Усиленная темная тень */
-        }
-        .share-button:active:not(:disabled) {
-            transform: translateY(0px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Неактивные кнопки */
-        .share-button:disabled {
-            background-color: var(--disabled-button-bg-dark);
-            color: var(--disabled-button-text-dark);
-            opacity: 0.7; /* Чуть менее прозрачные */
-            box-shadow: none;
-        }
-        .share-button:disabled:hover { /* Стили при наведении на неактивную */
-            opacity: 0.7;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Иконки внутри кнопок уже имеют fill="white" в HTML, что отлично подходит */
-
-        } /* Конец @media (prefers-color-scheme: dark) */
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="share-page-body">
+
     <div class="header">
         <div class="logo">ПоДЕЛИ!</div>
         <div>Поделитесь суммой из чека легко</div>
     </div>
 
-    <!-- Receipt Card with Gradient Border -->
-    <div class="receipt-card widget-bordered">
-        <div class="widget-content">
-            <div class="receipt-title">Введите сумму чека</div> <!-- Updated title -->
-            <div class="amount-container">
-                 <!-- Input type=text might offer more control over input behavior than type=number -->
-                 <!-- Use inputmode="decimal" for mobile keyboards -->
-                 <input type="text" inputmode="decimal" id="receiptAmountInput" value="0.00" placeholder="0.00">
-                 <span class="currency-symbol">₽</span>
-                 <!-- Paste button removed -->
+    <!-- <<< НОВАЯ ОБЕРТКА для карточек >>> -->
+    <div class="share-widgets-wrapper">
+
+        <!-- Первая карточка: Сумма чека -->
+        <div class="container receipt-container">
+            <div class="container-content receipt-content">
+                <div class="receipt-title">Введите сумму чека</div>
+                <div class="amount-container">
+                     <input type="text" inputmode="decimal" id="receiptAmountInput" value="0.00" placeholder="0.00">
+                     <span class="currency-symbol">₽</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Share Section with Gradient Border -->
-    <div class="share-section widget-bordered">
-        <div class="widget-content">
-            <div class="share-title">Поделиться суммой</div>
-            <div class="share-buttons">
-                <!-- VK Button - Initially might be disabled -->
-                <button class="share-button" id="shareVk">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                        <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/>
-                    </svg>
-                    ВКонтакте
-            </button>
+        <!-- Вторая карточка: Кнопки Поделиться -->
+        <div class="container share-container">
+            <div class="container-content share-content">
+                <div class="share-title">Поделиться суммой</div>
+                <div class="share-buttons">
+                    <!-- VK Button -->
+                    <button class="share-button" id="shareVk">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/>
+                        </svg>
+                        ВКонтакте
+                    </button>
+                    <!-- Telegram Button -->
+                    <button class="share-button" id="shareTelegram">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/>
+                        </svg>
+                        Telegram
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            <!-- Telegram Button - Initially might be disabled -->
-            <button class="share-button" id="shareTelegram">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                    <path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/>
-                </svg>
-                Telegram
-            </button>
-        </div>
-        </div>
-    </div>
+    </div> <!-- <<< КОНЕЦ НОВОЙ ОБЕРТКИ >>> -->
 
     <script>
         // Get references to elements

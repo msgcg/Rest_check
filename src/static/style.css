@@ -1,0 +1,581 @@
+/* --- Переменные (Объединенные с приоритетом существующих) --- */
+/* --- Определение кастомного шрифта --- */
+@font-face {
+    font-family: 'Blogger Sans'; /* Используем имя шрифта */
+    src: url('/static/fonts/Blogger_Sans-Medium.otf') format('opentype'); /* Путь к OTF файлу */
+    font-weight: 500; /* Medium обычно соответствует весу 500 */
+    font-style: normal;
+}
+:root {
+    /* Существующие из Podeli/Index/Contacts */
+    --primary-green: #08a552;
+    --accent-green-yellow: #9fe61f;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+    --card-background: #ffffff;
+    --disabled-button-bg: #bdbdbd; /* Приоритет существующему */
+    --placeholder-color: #aaa;
+    --light-grey-border: #ccc;
+    --input-border-color: #ddd;
+    --primary-color: var(--primary-green); /* Синоним */
+    --secondary-color: var(--accent-green-yellow); /* Синоним */
+    --dark-green: #1e8a52;
+    --light-green-bg: #f8fdfa;
+    --hover-green-bg: #effaf5;
+    --active-green-bg: #e8f5ef;
+    --border-green: #e0f0e8;
+    --text-color: var(--text-dark); /* Синоним */
+    --white-color: var(--text-light); /* Синоним */
+    --grey-color: #888;
+    --vk-color: #4a76a8;
+    --tg-color: #0088cc;
+    --delete-color: #dc3545;
+    --modal-overlay: rgba(0, 0, 0, 0.6);
+    --input-focus-border-color: var(--primary-color);
+    --input-bg-color: #fdfdfd;
+    --upload-btn-bg: var(--white-color);
+    --upload-btn-text: var(--primary-color);
+    --upload-btn-border: var(--primary-color);
+    --upload-btn-hover-bg: #f0f0f0;
+    --error-color: var(--delete-color);
+    --clear-history-btn-bg: var(--delete-color);
+    --clear-history-btn-hover-bg: #c82333;
+
+    /* Добавленные из Share (только недостающие) */
+    --accent-teal: #42e3b4;
+    --border-gradient: linear-gradient(45deg, var(--primary-green), var(--accent-green-yellow)); /* Используется для .widget-bordered::before, если он останется */
+    --button-hover-opacity: 0.85;
+    --shadow-color: rgba(8, 165, 82, 0.15);
+    --border-thickness: 3px; /* Может использоваться для .widget-bordered */
+    --widget-border-radius: 18px; /* Может использоваться для .widget-bordered */
+}
+
+/* --- Global Styles --- */
+html {
+    height: 100%;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("/static/images/splash.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+    display: flex;
+    /* <<< ИЗМЕНЕНИЕ: Вертикальное расположение, центрирование по горизонтали >>> */
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; - Убрано */
+    /* align-items: flex-end; - Убрано */
+    min-height: 100vh;
+    padding: 20px; /* Добавляем паддинг сверху/снизу для body */
+    margin: 0;
+    box-sizing: border-box;
+    position: relative;
+}
+/* --- Специфичные стили для Body на странице Share --- */
+body.share-page-body {
+    /* Переопределяем глобальные flex-свойства */
+    flex-direction: column;     /* Располагаем элементы вертикально */
+    align-items: center;        /* Центрируем по горизонтали */
+    padding: 25px 20px;         /* Оставляем паддинги для этой страницы */
+    /* Остальные свойства body (фон, шрифт и т.д.) наследуются */
+}
+/* --- Новая обертка для карточек на странице Share --- */
+.share-widgets-wrapper {
+    margin-top: auto; /* <<< Прижимаем всю группу карточек вниз >>> */
+    width: 100%; /* Занимаем всю ширину для центрирования контента */
+    display: flex; /* Используем flex для управления дочерними контейнерами */
+    flex-direction: column; /* Карточки друг под другом */
+    align-items: center; /* Центрируем карточки внутри обертки */
+}
+/* Убедимся, что header и контейнеры на share-странице центрируются */
+/* (Хотя align-items: center у body должен это делать, добавим для надежности) */
+/* Убедимся, что header тоже центрируется */
+body.share-page-body .header {
+    margin-left: auto;
+    margin-right: auto;
+    /* max-width и width уже заданы */
+}
+body.share-page-body .receipt-container,
+body.share-page-body .share-container {
+    margin-left: auto;
+    margin-right: auto;
+    /* max-width и width уже заданы в других правилах */
+}
+body.results-shown .index-header {
+    display: none;
+}
+/* --- Main Container (Podeli/Index/Contacts - Общий стиль) --- */
+/* Этот стиль будет применяться и к контейнерам на share.html */
+.container {
+    width: 90%;
+    max-width: 600px;
+    padding: 4px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* <<< ИЗМЕНЕНИЕ: Убираем margin: auto, добавляем margin-top: auto >>> */
+    /* margin: auto auto 20px auto; */
+    margin-top: auto; /* Прижимает контейнер вниз */
+    margin-bottom: 0; /* Убираем нижний отступ, т.к. есть padding у body */
+    margin-left: auto; /* Центрирование */
+    margin-right: auto; /* Центрирование */
+    display: flex;
+    position: relative;
+    z-index: 0;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    box-sizing: border-box;
+    /* Добавляем ограничение высоты, чтобы он не растягивался слишком сильно */
+    max-height: calc(100vh - 100px); /* Пример: высота окна минус место для хедера и отступов */
+}
+
+/* Inner container for content (Общий стиль) */
+.container-content {
+     width: 100%;
+     height: 100%;
+     background-color: var(--card-background);
+     border-radius: 10px; /* Внутренний радиус */
+     padding: 16px; /* Базовый отступ, будет переопределен для share */
+     box-sizing: border-box;
+     overflow-y: auto; /* Скролл */
+     display: flex;
+     flex-direction: column;
+     position: relative;
+     z-index: 1;
+     max-height: calc(100vh - 40px - 8px); /* Ограничение высоты */
+}
+
+/* --- Заголовки --- */
+h1 { color: var(--primary-color); text-align: center; margin-top: 0; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
+h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-bottom: 20px; font-weight: bold; }
+
+/* --- Компоненты Podeli/Index (Существующие) --- */
+/* Все стили #status, .image-preview-wrapper ... #share-menu остаются без изменений */
+#status { display: none; position: fixed; top: 65%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; padding: 25px 30px; background-color: rgba(255, 255, 255, 0.97); border-radius: 12px; z-index: 1000; border: 3px solid var(--primary-color); width: 80%; max-width: 400px; box-sizing: border-box; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+#status.processing { animation: pulsate 1.5s infinite ease-in-out; border-color: var(--primary-color); color: var(--primary-color); }
+#status.error { color: #cb0001; border-color: #cb0001; animation: none; }
+#status.success { color: var(--primary-color); border-color: var(--primary-color); animation: none; }
+@keyframes pulsate { 0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); } 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); } }
+.image-preview-wrapper { display: none; flex-direction: column; align-items: center; justify-content: center; margin-top: 15px; margin-bottom: 15px; width: 100%; align-self: center; max-width: 90%; min-height: 100px; }
+#preview { max-width: 100%; max-height: 250px; height: auto; border-radius: 10px; margin-top: 10px; border: 1px solid var(--input-border-color); }
+.result-container { display: none; position: relative; width: 100%; max-width: 550px; align-self: center; margin-top: 15px; margin-bottom: 15px; padding-bottom: 45px; box-sizing: border-box; }
+#result { padding: 15px; background-color: var(--light-green-bg); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); width: 100%; box-sizing: border-box; white-space: pre-wrap; line-height: 1.6; text-align: left; color: var(--text-dark); border: 1px solid var(--border-green); min-height: 100px; overflow-y: auto; max-height: 350px; }
+#result b { color: var(--primary-color); font-weight: bold; }
+.input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; align-self: center; margin-top: auto; padding-top: 20px; flex-shrink: 0; }
+input[type="file"] { border: 2px solid var(--light-grey-border); display: block; width: 100%; padding: 10px; box-sizing: border-box; font-size: 16px; color: var(--text-dark); background-color: var(--card-background); border-radius: 10px; overflow: hidden; margin: 10px 0 5px 0; }
+input[type="file"]::file-selector-button { padding: 10px 15px; margin-right: 10px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
+input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
+input[type="number"], input[type="text"].numeric-input { padding: 12px 15px; border: 2px solid var(--light-grey-border); border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 16px; background-color: var(--card-background); color: var(--text-dark); margin: 5px 0; }
+input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
+input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-input-placeholder { color: var(--placeholder-color); } input::-ms-input-placeholder { color: var(--placeholder-color); }
+.input-container { width: 100%; }
+.file-btn-wrapper { margin-top: 10px; width: 100%; }
+button#upload-btn { padding: 12px 15px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background-color 0.3s; box-sizing: border-box; }
+button#upload-btn:hover { background-color: var(--dark-green); }
+button#upload-btn:disabled { background-color: var(--disabled-button-bg); color: #757575; cursor: not-allowed; border-image: none; }
+.filters { display: none; flex-direction: column; align-items: stretch; width: 100%; max-width: 300px; margin-top: 15px; align-self: center; flex-shrink: 0; }
+.filters button { margin: 4px 0; padding: 10px 12px; background-color: #e8f5e9; color: var(--primary-color); border: 1px solid #a5d6a7; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.3s, color 0.3s; box-sizing: border-box; text-align: center; }
+.filters button:hover { background-color: #c8e6c9; color: var(--dark-green);}
+.filters button:disabled { background-color: #eeeeee; color: #9e9e9e; cursor: not-allowed; border-color: #e0e0e0;}
+.result-action-btn { position: absolute; bottom: 10px; z-index: 5; background-color: var(--card-background); color: #555; cursor: pointer; padding: 5px; line-height: 1; border-radius: 8px; border: 2px solid var(--light-grey-border); width: auto; height: auto; font-weight: normal; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
+.result-action-btn:hover { color: var(--primary-color); background-color: #f0f0f0; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+.result-action-btn:active { color: var(--dark-green); background-color: #e0e0e0;}
+.result-action-btn svg { width: 18px; height: 18px; fill: currentColor; }
+#copy-result-btn { right: 50px; }
+#share-result-btn { right: 10px; }
+#share-menu { display: none; position: absolute; bottom: 45px; right: 10px; background-color: var(--card-background); border: 1px solid var(--light-grey-border); border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); padding: 5px 0; z-index: 11; min-width: 150px; overflow: visible; }
+#share-menu a { display: flex; align-items: center; padding: 7px 15px; color: var(--text-dark); text-decoration: none; font-size: 14px; white-space: nowrap; transition: background-color 0.2s, color 0.2s; }
+#share-menu a:hover { background-color: #f0f0f0; color: var(--primary-color); }
+#share-menu a svg { width: 16px; height: 16px; margin-right: 8px; fill: currentColor; flex-shrink: 0; }
+#share-menu a span { line-height: 1.2; }
+
+/* --- Компоненты Contacts.html (Добавленные) --- */
+.contacts-page-container { max-width: 700px; }
+#contact-list { display: flex; flex-direction: column; gap: 18px; flex-grow: 1; overflow-y: auto; margin-bottom: 20px; padding: 5px; }
+#contact-list p { text-align: center; color: var(--grey-color); font-style: italic; margin-top: 20px; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+.contact-card { background-color: var(--light-green-bg); border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden; flex-shrink: 0; }
+.contact-card:hover { background-color: var(--hover-green-bg); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12); }
+.contact-card.active { background-color: var(--active-green-bg); }
+.contact-photo img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border-green); display: block; flex-shrink: 0; background-color: #eee; }
+.contact-details { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+.contact-name { font-size: 1.15em; font-weight: 600; color: var(--dark-green); margin-bottom: 4px; word-break: break-word; }
+.contact-phone-display { font-size: 0.9em; color: var(--grey-color); margin-bottom: 8px; min-height: 1.2em; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 8px; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease-out 0.1s, margin-top 0.4s ease-out; visibility: hidden; margin-top: 0; }
+.contact-card.active .contact-actions { max-height: 150px; opacity: 1; visibility: visible; margin-top: 10px; }
+.action-button { display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; font-size: 0.85em; font-weight: bold; text-decoration: none; text-align: center; transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); white-space: nowrap; }
+.action-button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.action-button i { margin-right: 5px; }
+.vk-request-btn { background-color: var(--vk-color); }
+.tg-request-btn { background-color: var(--tg-color); }
+.delete-button { background-color: var(--delete-color); }
+.no-links-placeholder { font-size: 0.85em; color: var(--grey-color); font-style: italic; padding: 8px 0; }
+.bottom-actions { margin-top: auto; padding-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; flex-shrink: 0; }
+.bottom-actions button { padding: 12px 25px; color: var(--white-color); border: none; border-radius: 10px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+.bottom-actions button:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
+#add-contact-btn { background-color: var(--primary-color); }
+#add-contact-btn:hover { background-color: var(--dark-green); }
+#history-btn { background-color: var(--tg-color); }
+#history-btn:hover { background-color: #0073b1; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+.modal-overlay.visible { display: flex; opacity: 1; }
+.modal-content { background-color: var(--white-color); padding: 25px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
+.modal-overlay.visible .modal-content { transform: scale(1); }
+.modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.8em; color: var(--grey-color); cursor: pointer; line-height: 1; padding: 5px; }
+.modal-close-btn:hover { color: var(--text-color); }
+.modal-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: var(--dark-green); }
+.modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { width: 100%; padding: 10px 12px; margin-bottom: 15px; border: 1px solid var(--input-border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; background-color: var(--input-bg-color); transition: border-color 0.3s ease; }
+.modal-form input:focus { border-color: var(--input-focus-border-color); outline: none; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+.modal-actions button { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, box-shadow 0.3s; }
+.modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); border: none; }
+.modal-actions .submit-btn:hover { background-color: var(--dark-green); }
+.modal-actions .cancel-btn { background-color: var(--grey-color); color: var(--white-color); border: none; }
+.modal-actions .cancel-btn:hover { background-color: #666; }
+#history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; }
+#history-list li { padding: 12px 0; border-bottom: 1px solid var(--border-green); font-size: 0.95em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; }
+#history-list li:last-child { border-bottom: none; }
+.history-details { flex-grow: 1; margin-right: 10px; }
+.history-amount { font-weight: bold; white-space: nowrap; color: var(--primary-color); }
+.history-type { font-weight: bold; }
+.history-type-vk { color: var(--vk-color); }
+.history-type-tg { color: var(--tg-color); }
+.history-timestamp { font-size: 0.8em; color: var(--grey-color); display: block; margin-top: 3px; }
+.no-history { text-align: center; color: var(--grey-color); margin-top: 20px; font-style: italic; border-bottom: none !important;}
+#clear-history-btn { display: block; margin: 25px auto 0; padding: 10px 20px; background-color: var(--clear-history-btn-bg); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: bold; transition: background-color 0.3s; }
+#clear-history-btn:hover { background-color: var(--clear-history-btn-hover-bg); }
+#clear-history-btn:disabled { background-color: var(--grey-color); cursor: not-allowed; opacity: 0.7; }
+.photo-upload-container { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+#contact-photo-preview { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border-green); background-color: var(--light-green-bg); display: block; flex-shrink: 0; }
+#contact-photo-input { display: none; }
+.file-upload-label { padding: 10px 15px; background-color: var(--upload-btn-bg); color: var(--upload-btn-text); border: 1px solid var(--upload-btn-border); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s, color 0.3s; text-align: center; display: inline-block; }
+.file-upload-label:hover { background-color: var(--upload-btn-hover-bg); }
+#photo-file-name { font-size: 0.8em; color: var(--grey-color); margin-top: 5px; display: block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#amount-request-modal .modal-content { max-width: 400px; }
+#amount-request-info { font-size: 0.95em; color: var(--text-color); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-green); line-height: 1.4; }
+#amount-request-info b { color: var(--dark-green); font-weight: 600; }
+.input-error-message { color: var(--error-color); font-size: 0.8em; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
+.modal-form input.invalid { border-color: var(--error-color); background-color: #fffafa; }
+label.required::after { content: '*'; color: var(--error-color); margin-left: 3px; font-weight: bold; vertical-align: super; font-size: 0.9em; }
+
+/* --- Компоненты Share.html (Добавленные/Адаптированные) --- */
+/* Центрирование для header */
+.header {
+    max-width: 600px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    margin-bottom: 20px; /* Уменьшаем отступ под хедером */
+    z-index: 1;
+    position: relative;
+    flex-shrink: 0; /* Предотвращаем сжатие хедера */
+}
+.logo {
+    /* ... */
+    font-size: 28px;
+    font-weight: bold; /* Оставляем bold, если нужно жирное начертание логотипа */
+    /* Если нужен именно Medium вес, как у файла, используйте font-weight: 500; */
+    color: var(--text-dark);
+    text-shadow:
+      -1px -1px 0 var(--text-light),
+       1px -1px 0 var(--text-light),
+      -1px  1px 0 var(--text-light),
+       1px  1px 0 var(--text-light); /* Белая обводка (4 тени) */;
+    margin-bottom: 5px;
+    /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт >>> */
+    font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
+}
+.header div:not(.logo) {
+    /* ... */
+    font-size: 16px;
+    color: var(--text-dark);
+    text-shadow:
+      -1px -1px 0 var(--text-light),
+       1px -1px 0 var(--text-light),
+      -1px  1px 0 var(--text-light),
+       1px  1px 0 var(--text-light); /* Белая обводка (4 тени) */;
+    opacity: 0.9;
+     /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт >>> */
+    font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
+    font-weight: 500; /* <<< Устанавливаем вес Medium для подписи >>> */
+}
+
+
+/* Стили для контейнеров на share.html (используют .container) */
+/* Управляем отступами между контейнерами */
+.receipt-container {
+    /* margin-top: auto; */ /* <<< УДАЛЕНО ОТСЮДА >>> */
+    margin-bottom: 25px;
+    max-width: 600px;
+    width: 100%;
+    /* margin-left/right: auto; - Больше не нужно, т.к. центрирует родитель */
+}
+.share-container {
+    margin-bottom: 40px;
+    max-width: 600px;
+    width: 100%;
+     /* margin-left/right: auto; - Больше не нужно, т.к. центрирует родитель */
+}
+
+/* Паддинги для контента внутри контейнеров на share.html */
+.receipt-container .container-content { padding: 25px; }
+.share-container .container-content { padding: 20px; }
+
+/* Содержимое карточек Share */
+.receipt-title { font-size: 22px; margin-bottom: 20px; text-align: center; color: var(--primary-green); font-weight: 600; }
+.amount-container { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 30px; margin-bottom: 30px; }
+#receiptAmountInput { font-size: 42px; font-weight: bold; color: var(--primary-green); border: 2px solid var(--primary-green); border-radius: 10px; padding: 8px 12px; width: auto; min-width: 120px; max-width: 220px; text-align: right; background-color: #fdfdfd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); -webkit-appearance: none; margin: 0; -moz-appearance: textfield; transition: border-color 0.3s, box-shadow 0.3s; }
+#receiptAmountInput:focus { outline: none; border-color: var(--accent-green-yellow); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--accent-green-yellow); }
+#receiptAmountInput::-webkit-outer-spin-button, #receiptAmountInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.currency-symbol { font-size: 42px; font-weight: bold; color: var(--primary-green); padding-left: 5px; }
+.share-title { margin-bottom: 20px; font-size: 20px; color: var(--primary-green); font-weight: 600; text-align: center; }
+.share-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.share-button { padding: 12px 25px; border: none; border-radius: 25px; color: var(--text-light); font-weight: bold; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s, background-color 0.3s; background-color: var(--primary-green); box-shadow: 0 3px 8px var(--shadow-color); min-width: 150px; }
+.share-button:hover:not(:disabled) { opacity: var(--button-hover-opacity); transform: translateY(-2px); box-shadow: 0 5px 12px var(--shadow-color); }
+.share-button:active:not(:disabled) { transform: translateY(0px); box-shadow: 0 2px 5px var(--shadow-color); }
+.share-button:disabled { background-color: var(--disabled-button-bg); opacity: 0.6; cursor: not-allowed; box-shadow: none; transform: none; }
+.share-button:disabled:hover { opacity: 0.6; transform: none; box-shadow: none; }
+.icon { width: 22px; height: 22px; }
+
+
+/* --- Mobile Styles (Объединенные) --- */
+@media (max-width: 600px) {
+     /* Стили Podeli/Index/Contacts */
+     body { padding-bottom: 10px; }
+     body.share-page-body {
+        padding: 15px 10px; /* Уменьшаем паддинги на мобильных */
+    }
+     .container { 
+        width: 95%; 
+        margin-bottom: 0; 
+        padding: 3px; 
+        border-radius: 13px;
+        max-height: calc(100vh - 80px); 
+    }
+     .container-content { padding: 12px; border-radius: 10px; max-height: calc(100vh - 30px - 6px); }
+     #status { font-size: 1.2em; width: 85%; padding: 20px; top: 75.9%; }
+     .input-wrapper { max-width: 90%; padding-top: 15px; }
+     .filters { max-width: 90%; }
+     .filters button { font-size: 13px; padding: 9px 10px;}
+     .result-container { padding-bottom: 40px; }
+     #result { max-width: 100%; padding: 10px; min-height: 80px; max-height: 300px; }
+     input[type="number"], input[type="text"].numeric-input { font-size: 15px; padding: 10px 12px; }
+     .result-action-btn { bottom: 8px; padding: 4px; border-radius: 6px; border: 1px solid #ccc; }
+     .result-action-btn svg { width: 16px; height: 16px; }
+     #copy-result-btn { right: 45px; }
+     #share-result-btn { right: 8px; }
+     #share-menu { bottom: 38px; right: 8px; min-width: 140px; box-shadow: 0 -3px 10px rgba(0,0,0,0.15); padding: 4px 0; }
+     #share-menu a { padding: 6px 12px; font-size: 13px;}
+     #share-menu a svg { width: 15px; height: 15px; margin-right: 7px;}
+     h1 { font-size: 1.4em; margin-bottom: 15px; }
+     h2 { font-size: 1.2em; margin-bottom: 15px; }
+     .contacts-page-container { max-width: none; width: 95%; }
+     #contact-list { gap: 12px; padding: 0px 2px; }
+     .contact-card { padding: 12px; gap: 12px; align-items: center; }
+     .contact-photo img { width: 55px; height: 55px; }
+     .contact-name { font-size: 1.05em; }
+     .contact-phone-display { font-size: 0.85em; }
+     .action-button { padding: 7px 12px; font-size: 0.8em; }
+     .bottom-actions { flex-direction: row; gap: 10px; padding-top: 10px; }
+     .bottom-actions button { flex-grow: 1; padding: 12px; font-size: 0.95em; }
+     .modal-content { padding: 20px 15px; max-width: 92%; }
+     .modal-close-btn { font-size: 1.7em; top: 8px; right: 10px; }
+     #history-list li { font-size: 0.9em; flex-direction: column; align-items: flex-start; text-align: left; }
+     .history-amount { margin-top: 5px; align-self: flex-end; }
+     .history-details { margin-right: 0; width: 100%; }
+     #clear-history-btn { font-size: 0.9em; padding: 10px 18px; }
+     .photo-upload-container { flex-direction: column; align-items: center; gap: 10px; }
+     #contact-photo-preview { margin-bottom: 10px; width: 80px; height: 80px; }
+     .file-upload-label { width: 100%; box-sizing: border-box; padding: 12px; }
+     #photo-file-name { max-width: none; text-align: center; }
+     .modal-actions { justify-content: space-around; }
+     #amount-request-modal .modal-content { max-width: 92%; }
+
+     /* Добавленные/Адаптированные стили Share для мобильных */
+     body { padding: 15px 10px; } /* Уменьшаем паддинги body */
+     .header { margin-bottom: 15px; }
+     .logo { font-size: 24px; }
+     .header div:not(.logo) { font-size: 14px; }
+     /* .widget-bordered - не используется */
+     /* .widget-content - не используется */
+     .receipt-container { margin-bottom: 20px; } /* Уменьшаем отступ */
+     .share-container { margin-bottom: 30px; } /* Уменьшаем отступ */
+     .receipt-container .container-content { padding: 20px; } /* Уменьшаем паддинг */
+     .share-container .container-content { padding: 15px; } /* Уменьшаем паддинг */
+     .receipt-title { font-size: 20px; margin-bottom: 15px; }
+     .amount-container { margin-top: 20px; margin-bottom: 20px; }
+     #receiptAmountInput { font-size: 36px; padding: 6px 10px; max-width: 180px; }
+     .currency-symbol { font-size: 36px; }
+     .share-title { font-size: 18px; margin-bottom: 15px; }
+     .share-buttons { gap: 15px; }
+     .share-button { padding: 10px 20px; font-size: 14px; min-width: 130px; gap: 8px; }
+     .icon { width: 20px; height: 20px; }
+}
+
+/* --- Dark Mode Styles (Объединенные) --- */
+@media (prefers-color-scheme: dark) {
+    /* Переменные темной темы (Объединенные) */
+    :root {
+        /* Существующие */
+        --primary-color-dark-theme: #12c26a;
+        --text-color-dark-theme: #e0e0e0;
+        --card-background-dark: #000000;
+        --body-background-dark: #000000;
+        --shadow-color-dark: rgba(180, 180, 180, 0.1);
+        --disabled-button-bg-dark: #3a3a3a; /* Приоритет Contacts */
+        --disabled-button-text-dark: #888888; /* Приоритет Contacts */
+        --placeholder-color-dark-theme: #777777;
+        --light-grey-border-dark-theme: #555555;
+        --input-border-color-dark-theme: var(--light-grey-border-dark-theme);
+        --input-bg-color-dark-theme: #252525; /* Приоритет Contacts */
+        --error-color-dark-theme: #ff5555; /* Приоритет Contacts */
+
+        /* Добавленные/Объединенные из Contacts */
+        --dark-green-dark-theme: #30d070;
+        --light-green-bg-dark-theme: #1a1a1a;
+        --hover-green-bg-dark-theme: #2a2a2a;
+        --active-green-bg-dark-theme: #333333;
+        --border-green-dark-theme: #444444;
+        --white-color-dark-theme: #000000;
+        --grey-color-dark-theme: #aaaaaa;
+        --delete-color-dark-theme: var(--error-color-dark-theme);
+        --modal-overlay-dark-theme: rgba(0, 0, 0, 0.75);
+        --input-focus-border-color-dark-theme: var(--primary-color-dark-theme);
+        --upload-btn-bg-dark-theme: #333333;
+        --upload-btn-text-dark-theme: var(--text-color-dark-theme);
+        --upload-btn-border-dark-theme: var(--light-grey-border-dark-theme);
+        --upload-btn-hover-bg-dark-theme: #444444;
+        --clear-history-btn-bg-dark-theme: var(--error-color-dark-theme);
+        --clear-history-btn-hover-bg-dark-theme: #ff7777;
+
+        /* Добавленные из Share */
+        --primary-green-dark: var(--primary-color-dark-theme); /* Синоним */
+        --accent-green-yellow-dark: #c8ff4d;
+        --text-light-dark-theme: var(--white-color-dark-theme); /* Синоним */
+        /* --input-background-dark: #1f1f1f; */ /* Игнорируется, приоритет Contacts */
+        /* --border-gradient - не меняется */
+        /* --border-thickness - не меняется */
+    }
+
+    /* Глобальные стили темной темы */
+    body {
+        background-color: var(--body-background-dark);
+        color: var(--text-color-dark-theme);
+        background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png");
+    }
+    
+    /* Контейнер темной темы */
+    .container {
+        /* <<< ИЗМЕНЕНИЕ ЗДЕСЬ >>> */
+        background: var(--border-gradient); /* Используем оригинальный градиент рамки */
+        box-shadow: var(--shadow-color-dark);
+        /* padding и border-radius наследуются */
+    }
+   .container-content {
+    background-color: var(--card-background-dark);
+    /* border-radius и padding наследуются */
+    }
+    h1 { color: var(--primary-color-dark-theme); }
+    h2 { color: var(--primary-color-dark-theme); }
+
+
+    /* Стили темной темы из Podeli/Index (адаптированы под переменные) */
+    #status { color: var(--primary-color-dark-theme); background-color: rgba(25, 25, 25, 0.97); border-color: var(--primary-color-dark-theme); box-shadow: var(--shadow-color-dark); }
+    #status.processing { border-color: var(--primary-color-dark-theme); color: var(--primary-color-dark-theme); }
+    #status.error { color: var(--error-color-dark-theme); border-color: var(--error-color-dark-theme); }
+    #status.success { color: var(--primary-color-dark-theme); border-color: var(--primary-color-dark-theme); }
+    #preview { border: 1px solid var(--border-green-dark-theme); }
+    #result { background-color: var(--light-green-bg-dark-theme); color: var(--text-color-dark-theme); box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); border: 2px solid var(--light-grey-border-dark-theme); }
+    #result b { color: var(--primary-color-dark-theme); }
+    input[type="file"] { color: var(--text-color-dark-theme); background-color: var(--input-bg-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); }
+    input[type="file"]::file-selector-button { background-color: var(--primary-color); color: var(--white-color); border-radius: 8px; border: none; }
+    input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
+    input[type="number"], input[type="text"].numeric-input { background-color: var(--input-bg-color-dark-theme); color: var(--text-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); }
+    input::placeholder { color: var(--placeholder-color-dark-theme); }
+    button#upload-btn:disabled { background-color: var(--disabled-button-bg-dark); color: var(--disabled-button-text-dark); }
+    .filters button { background-color: var(--hover-green-bg-dark-theme); color: var(--primary-color-dark-theme); border: 1px solid var(--border-green-dark-theme); }
+    .filters button:hover { background-color: var(--active-green-bg-dark-theme); color: var(--dark-green-dark-theme); }
+    .filters button:disabled { background-color: var(--active-green-bg-dark-theme); color: var(--grey-color-dark-theme); border-color: var(--light-grey-border-dark-theme); }
+    .result-action-btn { background-color: var(--light-green-bg-dark-theme); color: var(--grey-color-dark-theme); border: 2px solid var(--light-grey-border-dark-theme); box-shadow: 0 1px 3px rgba(255,255,255,0.08); }
+    .result-action-btn:hover { color: var(--primary-color-dark-theme); background-color: #333; }
+    .result-action-btn:active { color: var(--dark-green-dark-theme); background-color: var(--border-green-dark-theme); }
+    #share-menu { background-color: var(--hover-green-bg-dark-theme); border: 1px solid var(--light-grey-border-dark-theme); box-shadow: 0 -4px 12px rgba(255,255,255,0.1); }
+    #share-menu a { color: var(--text-color-dark-theme); }
+    #share-menu a:hover { background-color: var(--active-green-bg-dark-theme); color: var(--primary-color-dark-theme); }
+
+    /* Стили темной темы из Contacts (используют переменные) */
+    .contacts-page-container { /* Стили для контейнера наследуются */ }
+    #contact-list p { color: var(--grey-color-dark-theme); }
+    .contact-card { background-color: var(--light-green-bg-dark-theme); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+    .contact-card:hover { background-color: var(--hover-green-bg-dark-theme); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4); }
+    .contact-card.active { background-color: var(--active-green-bg-dark-theme); }
+    .contact-photo img { border: 3px solid var(--border-green-dark-theme); background-color: #333; }
+    .contact-name { color: var(--dark-green-dark-theme); }
+    .contact-phone-display { color: var(--grey-color-dark-theme); }
+    .action-button { color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .action-button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .delete-button { background-color: var(--delete-color-dark-theme); }
+    .no-links-placeholder { color: var(--grey-color-dark-theme); }
+    .bottom-actions button { color: var(--white-color); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+    .bottom-actions button:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+    #add-contact-btn { background-color: var(--primary-color); }
+    #add-contact-btn:hover { background-color: var(--dark-green); }
+    #history-btn { background-color: var(--tg-color); }
+    #history-btn:hover { background-color: #0073b1; }
+    .modal-overlay { background-color: var(--modal-overlay-dark-theme); }
+    .modal-content { background-color: #111111; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); color: var(--text-color-dark-theme); }
+    .modal-close-btn { color: var(--grey-color-dark-theme); }
+    .modal-close-btn:hover { color: var(--text-color-dark-theme); }
+    .modal-form label { color: var(--dark-green-dark-theme); }
+    .modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); color: var(--text-color-dark-theme); }
+    .modal-form input::placeholder { color: var(--placeholder-color-dark-theme); opacity: 1; }
+    .modal-form input:focus { border-color: var(--input-focus-border-color-dark-theme); }
+    .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); }
+    .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
+    .modal-actions .cancel-btn { background-color: #555; color: var(--white-color); }
+    .modal-actions .cancel-btn:hover { background-color: #666; }
+    #history-list li { border-bottom: 1px solid var(--border-green-dark-theme); }
+    .history-amount { color: var(--primary-color-dark-theme); }
+    .history-timestamp { color: var(--grey-color-dark-theme); }
+    .no-history { color: var(--grey-color-dark-theme); border-bottom: none !important; }
+    #clear-history-btn { background-color: var(--clear-history-btn-bg-dark-theme); color: var(--white-color); }
+    #clear-history-btn:hover { background-color: var(--clear-history-btn-hover-bg-dark-theme); }
+    #clear-history-btn:disabled { background-color: #555; opacity: 0.7; }
+    #contact-photo-preview { border: 3px solid var(--border-green-dark-theme); background-color: #333; }
+    .file-upload-label { background-color: var(--upload-btn-bg-dark-theme); color: var(--upload-btn-text-dark-theme); border: 1px solid var(--upload-btn-border-dark-theme); }
+    .file-upload-label:hover { background-color: var(--upload-btn-hover-bg-dark-theme); }
+    #photo-file-name { color: var(--grey-color-dark-theme); }
+    #amount-request-info { color: var(--text-color-dark-theme); border-bottom: 1px solid var(--border-green-dark-theme); }
+    #amount-request-info b { color: var(--dark-green-dark-theme); }
+    .input-error-message { color: var(--error-color-dark-theme); }
+    .modal-form input.invalid { border-color: var(--error-color-dark-theme) !important; background-color: #3f2525; }
+    label.required::after { color: var(--error-color-dark-theme); }
+
+    .header .logo, .header div:not(.logo) {
+        color: var(--text-dark);
+        text-shadow: none;
+        /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт и здесь >>> */
+        font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
+    }
+    /* Если нужно, установите font-weight и для темной темы */
+    .header div:not(.logo) {
+        font-weight: 500; /* Medium для подписи */
+    }
+    /* .widget-bordered - не используется */
+    /* .widget-content - не используется */
+    .receipt-container .container-content { padding: 25px; } /* Паддинги остаются */
+    .share-container .container-content { padding: 20px; }
+    .receipt-title, .share-title { color: var(--primary-color-dark-theme); }
+    #receiptAmountInput { background-color: var(--input-bg-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); box-shadow: none; color: var(--text-color-dark-theme); }
+    #receiptAmountInput:focus { border-color: var(--primary-color-dark-theme); box-shadow: inset 0 1px 2px rgba(255,255,255,0.03), 0 0 5px var(--primary-color-dark-theme); }
+    .currency-symbol { color: var(--primary-color-dark-theme); }
+    .share-button { background-color: var(--primary-color); color: var(--text-light); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); }
+    .share-button:hover:not(:disabled) { opacity: var(--button-hover-opacity); transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5); }
+    .share-button:active:not(:disabled) { transform: translateY(0px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); }
+    .share-button:disabled { background-color: var(--disabled-button-bg-dark); color: var(--disabled-button-text-dark); opacity: 0.7; box-shadow: none; }
+    .share-button:disabled:hover { opacity: 0.7; transform: none; box-shadow: none; }
+    /* .icon - цвет задан в SVG */
+
+} /* End @media (prefers-color-scheme: dark) */
