@@ -43,17 +43,25 @@
 
     /* Добавленные из Share (только недостающие) */
     --accent-teal: #42e3b4;
-    --border-gradient: linear-gradient(45deg, var(--primary-green), var(--accent-green-yellow)); /* Используется для .widget-bordered::before, если он останется */
+    --border-gradient: linear-gradient(45deg, var(--primary-green), var(--accent-green-yellow));
     --button-hover-opacity: 0.85;
     --shadow-color: rgba(8, 165, 82, 0.15);
-    --border-thickness: 3px; /* Может использоваться для .widget-bordered */
-    --widget-border-radius: 18px; /* Может использоваться для .widget-bordered */
+    --border-thickness: 3px;
+    --widget-border-radius: 18px;
 }
 
 /* --- Global Styles --- */
-html {
-    height: 100%;
+html, body {
+    /* <<< Запрещаем скролл основной страницы >>> */
+    height: 100vh; /* Фиксируем высоту по вьюпорту */
+    overflow: hidden; /* Скрываем любой скролл */
+    margin: 0; /* Убираем стандартные отступы */
 }
+
+html {
+     overflow-x: hidden; /* Дополнительно для html */
+}
+
 body {
     font-family: Arial, sans-serif;
     background-image: url("/static/images/splash.png");
@@ -64,87 +72,110 @@ body {
     background-color: #f0f0f0;
     color: var(--text-dark);
     display: flex;
-    /* <<< ИЗМЕНЕНИЕ: Вертикальное расположение, центрирование по горизонтали >>> */
     flex-direction: column;
     align-items: center;
-    /* justify-content: center; - Убрано */
-    /* align-items: flex-end; - Убрано */
-    min-height: 100vh;
-    padding: 20px; /* Добавляем паддинг сверху/снизу для body */
-    margin: 0;
+    /* height: 100vh; уже установлено выше */
     box-sizing: border-box;
     position: relative;
+
+    /* <<< ВОССТАНАВЛИВАЕМ ПАДДИНГИ >>> */
+    /* Базовые отступы (десктоп) */
+    padding-right: 20px;
+    padding-bottom: 20px; /* Оставляем место снизу */
+    padding-left: 20px;
+    padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп верхний */
+
+    overflow-x: hidden; /* Убеждаемся, что гориз. скролл отключен */
 }
+
 /* --- Специфичные стили для Body на странице Share --- */
 body.share-page-body {
-    /* Переопределяем глобальные flex-свойства */
-    flex-direction: column;     /* Располагаем элементы вертикально */
-    align-items: center;        /* Центрируем по горизонтали */
-    padding: 25px 20px;         /* Оставляем паддинги для этой страницы */
-    /* Остальные свойства body (фон, шрифт и т.д.) наследуются */
+    flex-direction: column;
+    align-items: center;
+
+    /* <<< ВОССТАНАВЛИВАЕМ ПАДДИНГИ для share-страницы >>> */
+    padding-right: 20px;
+    padding-bottom: 25px; /* Нижний отступ для Share */
+    padding-left: 20px;
+    padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп верхний */
 }
+
 /* --- Новая обертка для карточек на странице Share --- */
 .share-widgets-wrapper {
-    margin-top: auto; /* <<< Прижимаем всю группу карточек вниз >>> */
+    /* <<< ВОЗВРАЩАЕМ: Прижимаем всю группу карточек вниз на странице Share >>> */
+    margin-top: auto;
     width: 100%; /* Занимаем всю ширину для центрирования контента */
     display: flex; /* Используем flex для управления дочерними контейнерами */
     flex-direction: column; /* Карточки друг под другом */
     align-items: center; /* Центрируем карточки внутри обертки */
+    /* Убираем flex-grow и overflow, т.к. обертка не должна растягиваться */
+    /* flex-grow: 1; */
+    /* overflow-y: auto; */
+    /* padding-bottom: 20px; */ /* Убираем внутренний паддинг, т.к. отступ задан у body */
+    box-sizing: border-box;
+    /* <<< ДОБАВЛЕНО: Ограничиваем максимальную высоту обертки, чтобы она не вылезала за экран >>> */
+    /* Рассчитываем как (Высота окна - Отступ сверху у body - Отступ снизу у body) */
+    /* Нужно подобрать точнее, учитывая высоту хедера */
+    max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 25px); /* Пример для Share десктоп */
 }
+
 /* Убедимся, что header и контейнеры на share-странице центрируются */
-/* (Хотя align-items: center у body должен это делать, добавим для надежности) */
-/* Убедимся, что header тоже центрируется */
 body.share-page-body .header {
     margin-left: auto;
     margin-right: auto;
-    /* max-width и width уже заданы */
+    flex-shrink: 0; /* Важно: хедер не должен сжиматься */
 }
 body.share-page-body .receipt-container,
 body.share-page-body .share-container {
     margin-left: auto;
     margin-right: auto;
-    /* max-width и width уже заданы в других правилах */
+    flex-shrink: 0; /* Карточки не должны сжиматься */
+    width: 90%; /* Используем % для адаптивности */
+    max-width: 600px; /* Ограничиваем максимальную ширину */
 }
 body.results-shown .index-header {
     display: none;
 }
 /* --- Main Container (Podeli/Index/Contacts - Общий стиль) --- */
-/* Этот стиль будет применяться и к контейнерам на share.html */
 .container {
+    /* <<< ВОЗВРАЩАЕМ: Прижимаем контейнер вниз на страницах Index/Contacts >>> */
+    margin-top: auto;
     width: 90%;
     max-width: 600px;
     padding: 4px;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    /* <<< ИЗМЕНЕНИЕ: Убираем margin: auto, добавляем margin-top: auto >>> */
-    /* margin: auto auto 20px auto; */
-    margin-top: auto; /* Прижимает контейнер вниз */
-    margin-bottom: 0; /* Убираем нижний отступ, т.к. есть padding у body */
-    margin-left: auto; /* Центрирование */
-    margin-right: auto; /* Центрирование */
+    margin-bottom: 0; /* Нижний отступ контролируется padding'ом body */
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
     position: relative;
     z-index: 0;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     box-sizing: border-box;
-    /* Добавляем ограничение высоты, чтобы он не растягивался слишком сильно */
-    max-height: calc(100vh - 100px); /* Пример: высота окна минус место для хедера и отступов */
+    flex-shrink: 0; /* Не сжимаем контейнер */
+    /* <<< ВОЗВРАЩАЕМ/АДАПТИРУЕМ: Ограничиваем максимальную высоту контейнера >>> */
+    /* Рассчитываем как (Высота окна - Отступ сверху у body - Отступ снизу у body) */
+    /* Можно задать немного меньше для запаса */
+     max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 20px - 40px); /* Пример для Index/Contacts десктоп, 40px - запас */
 }
 
 /* Inner container for content (Общий стиль) */
 .container-content {
      width: 100%;
-     height: 100%;
+     /* height: 100%; - Высота будет ограничена max-height родителя и собственным overflow */
      background-color: var(--card-background);
-     border-radius: 10px; /* Внутренний радиус */
-     padding: 16px; /* Базовый отступ, будет переопределен для share */
+     border-radius: 10px;
+     padding: 16px;
      box-sizing: border-box;
-     overflow-y: auto; /* Скролл */
+     overflow-y: auto; /* << ОСНОВНОЙ СКРОЛЛ КОНТЕНТА ЗДЕСЬ */
      display: flex;
      flex-direction: column;
      position: relative;
      z-index: 1;
-     max-height: calc(100vh - 40px - 8px); /* Ограничение высоты */
+     /* <<< ВОЗВРАЩАЕМ/АДАПТИРУЕМ: Убедимся, что контент не вылезает за контейнер >>> */
+     /* Обычно overflow-y: auto родителя (.container) достаточно, но можно и здесь ограничить */
+      max-height: 100%; /* Занимает всю высоту родительского .container */
 }
 
 /* --- Заголовки --- */
@@ -152,7 +183,6 @@ h1 { color: var(--primary-color); text-align: center; margin-top: 0; margin-bott
 h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-bottom: 20px; font-weight: bold; }
 
 /* --- Компоненты Podeli/Index (Существующие) --- */
-/* Все стили #status, .image-preview-wrapper ... #share-menu остаются без изменений */
 #status { display: none; position: fixed; top: 65%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; padding: 25px 30px; background-color: rgba(255, 255, 255, 0.97); border-radius: 12px; z-index: 1000; border: 3px solid var(--primary-color); width: 80%; max-width: 400px; box-sizing: border-box; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
 #status.processing { animation: pulsate 1.5s infinite ease-in-out; border-color: var(--primary-color); color: var(--primary-color); }
 #status.error { color: #cb0001; border-color: #cb0001; animation: none; }
@@ -161,9 +191,9 @@ h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-b
 .image-preview-wrapper { display: none; flex-direction: column; align-items: center; justify-content: center; margin-top: 15px; margin-bottom: 15px; width: 100%; align-self: center; max-width: 90%; min-height: 100px; }
 #preview { max-width: 100%; max-height: 250px; height: auto; border-radius: 10px; margin-top: 10px; border: 1px solid var(--input-border-color); }
 .result-container { display: none; position: relative; width: 100%; max-width: 550px; align-self: center; margin-top: 15px; margin-bottom: 15px; padding-bottom: 45px; box-sizing: border-box; }
-#result { padding: 15px; background-color: var(--light-green-bg); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); width: 100%; box-sizing: border-box; white-space: pre-wrap; line-height: 1.6; text-align: left; color: var(--text-dark); border: 1px solid var(--border-green); min-height: 100px; overflow-y: auto; max-height: 350px; }
+#result { padding: 15px; background-color: var(--light-green-bg); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); width: 100%; box-sizing: border-box; white-space: pre-wrap; line-height: 1.6; text-align: left; color: var(--text-dark); border: 1px solid var(--border-green); min-height: 100px; overflow-y: auto; max-height: 350px; /* << СКРОЛЛ РЕЗУЛЬТАТА */ }
 #result b { color: var(--primary-color); font-weight: bold; }
-.input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; align-self: center; margin-top: auto; padding-top: 20px; flex-shrink: 0; }
+.input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; align-self: center; /* margin-top: auto; */ /* Прижимается кнопками снизу */ padding-top: 20px; flex-shrink: 0; margin-top: auto; /* << ПРИЖИМАЕТ ИНПУТЫ ВНИЗ КОНТЕЙНЕРА */ }
 input[type="file"] { border: 2px solid var(--light-grey-border); display: block; width: 100%; padding: 10px; box-sizing: border-box; font-size: 16px; color: var(--text-dark); background-color: var(--card-background); border-radius: 10px; overflow: hidden; margin: 10px 0 5px 0; }
 input[type="file"]::file-selector-button { padding: 10px 15px; margin-right: 10px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
 input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
@@ -192,8 +222,8 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 #share-menu a span { line-height: 1.2; }
 
 /* --- Компоненты Contacts.html (Добавленные) --- */
-.contacts-page-container { max-width: 700px; }
-#contact-list { display: flex; flex-direction: column; gap: 18px; flex-grow: 1; overflow-y: auto; margin-bottom: 20px; padding: 5px; }
+.contacts-page-container { max-width: 700px; /* Контейнер для контактов внутри основного .container */ }
+#contact-list { display: flex; flex-direction: column; gap: 18px; flex-grow: 1; overflow-y: auto; /* << СКРОЛЛ СПИСКА КОНТАКТОВ */ margin-bottom: 20px; padding: 5px; min-height: 100px; }
 #contact-list p { text-align: center; color: var(--grey-color); font-style: italic; margin-top: 20px; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
 .contact-card { background-color: var(--light-green-bg); border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden; flex-shrink: 0; }
 .contact-card:hover { background-color: var(--hover-green-bg); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12); }
@@ -211,7 +241,7 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 .tg-request-btn { background-color: var(--tg-color); }
 .delete-button { background-color: var(--delete-color); }
 .no-links-placeholder { font-size: 0.85em; color: var(--grey-color); font-style: italic; padding: 8px 0; }
-.bottom-actions { margin-top: auto; padding-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; flex-shrink: 0; }
+.bottom-actions { margin-top: auto; /* << ПРИЖИМАЕТ КНОПКИ ВНИЗ */ padding-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; flex-shrink: 0; }
 .bottom-actions button { padding: 12px 25px; color: var(--white-color); border: none; border-radius: 10px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
 .bottom-actions button:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
 #add-contact-btn { background-color: var(--primary-color); }
@@ -220,7 +250,7 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 #history-btn:hover { background-color: #0073b1; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
 .modal-overlay.visible { display: flex; opacity: 1; }
-.modal-content { background-color: var(--white-color); padding: 25px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
+.modal-content { background-color: var(--white-color); padding: 25px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; /* << СКРОЛЛ МОДАЛЬНОГО ОКНА */ position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
 .modal-overlay.visible .modal-content { transform: scale(1); }
 .modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.8em; color: var(--grey-color); cursor: pointer; line-height: 1; padding: 5px; }
 .modal-close-btn:hover { color: var(--text-color); }
@@ -232,8 +262,8 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); border: none; }
 .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
 .modal-actions .cancel-btn { background-color: var(--grey-color); color: var(--white-color); border: none; }
-.modal-actions .cancel-btn:hover { background-color: #666; }
-#history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; }
+.modal-actions .cancel-btn:hover { background-color: #3f3d3d; }
+#history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; /* Скролл внутри модального окна */ }
 #history-list li { padding: 12px 0; border-bottom: 1px solid var(--border-green); font-size: 0.95em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; }
 #history-list li:last-child { border-bottom: none; }
 .history-details { flex-grow: 1; margin-right: 10px; }
@@ -260,63 +290,56 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 label.required::after { content: '*'; color: var(--error-color); margin-left: 3px; font-weight: bold; vertical-align: super; font-size: 0.9em; }
 
 /* --- Компоненты Share.html (Добавленные/Адаптированные) --- */
-/* Центрирование для header */
 .header {
     max-width: 600px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    margin-bottom: 20px; /* Уменьшаем отступ под хедером */
+    margin-bottom: 20px;
     z-index: 1;
     position: relative;
-    flex-shrink: 0; /* Предотвращаем сжатие хедера */
+    flex-shrink: 0; /* Важно: хедер не должен сжиматься */
 }
 .logo {
-    /* ... */
     font-size: 28px;
-    font-weight: bold; /* Оставляем bold, если нужно жирное начертание логотипа */
-    /* Если нужен именно Medium вес, как у файла, используйте font-weight: 500; */
+    font-weight: bold;
     color: var(--text-dark);
     text-shadow:
       -1px -1px 0 var(--text-light),
        1px -1px 0 var(--text-light),
       -1px  1px 0 var(--text-light),
-       1px  1px 0 var(--text-light); /* Белая обводка (4 тени) */;
+       1px  1px 0 var(--text-light);
     margin-bottom: 5px;
-    /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт >>> */
-    font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
+    font-family: 'Blogger Sans', Arial, sans-serif;
 }
 .header div:not(.logo) {
-    /* ... */
     font-size: 16px;
     color: var(--text-dark);
     text-shadow:
       -1px -1px 0 var(--text-light),
        1px -1px 0 var(--text-light),
       -1px  1px 0 var(--text-light),
-       1px  1px 0 var(--text-light); /* Белая обводка (4 тени) */;
+       1px  1px 0 var(--text-light);
     opacity: 0.9;
-     /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт >>> */
-    font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
-    font-weight: 500; /* <<< Устанавливаем вес Medium для подписи >>> */
+    font-family: 'Blogger Sans', Arial, sans-serif;
+    font-weight: 500;
 }
 
 
 /* Стили для контейнеров на share.html (используют .container) */
-/* Управляем отступами между контейнерами */
 .receipt-container {
-    /* margin-top: auto; */ /* <<< УДАЛЕНО ОТСЮДА >>> */
-    margin-bottom: 25px;
-    max-width: 600px;
-    width: 100%;
-    /* margin-left/right: auto; - Больше не нужно, т.к. центрирует родитель */
+    margin-bottom: 25px; /* Отступ между карточками */
+    flex-shrink: 0; /* Не сжимаем карточку */
 }
 .share-container {
-    margin-bottom: 40px;
-    max-width: 600px;
-    width: 100%;
-     /* margin-left/right: auto; - Больше не нужно, т.к. центрирует родитель */
+    margin-bottom: 0; /* Отступ снизу управляется паддингом body */
+    flex-shrink: 0; /* Не сжимаем карточку */
+}
+/* Общие стили для обоих контейнеров на Share странице внутри обертки */
+.share-widgets-wrapper .container {
+    margin-top: 0; /* Убираем авто-отступ, т.к. они в потоке внутри обертки */
+    max-height: none; /* Убираем ограничение высоты, т.к. контент внутри скроллится */
 }
 
 /* Паддинги для контента внутри контейнеров на share.html */
@@ -343,18 +366,33 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 /* --- Mobile Styles (Объединенные) --- */
 @media (max-width: 600px) {
      /* Стили Podeli/Index/Contacts */
-     body { padding-bottom: 10px; }
+     body {
+        /* Мобильные отступы */
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+     }
      body.share-page-body {
-        padding: 15px 10px; /* Уменьшаем паддинги на мобильных */
-    }
-     .container { 
-        width: 95%; 
-        margin-bottom: 0; 
-        padding: 3px; 
+        /* Мобильные отступы для share */
+        padding-right: 10px;
+        padding-bottom: 15px;
+        padding-left: 10px;
+        padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+     }
+     /* Адаптируем max-height для мобильных */
+     .share-widgets-wrapper {
+        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px); /* Share мобайл */
+     }
+     .container {
+        width: 95%;
+        padding: 3px;
         border-radius: 13px;
-        max-height: calc(100vh - 80px); 
+        margin-bottom: 15px;
+        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - 30px); /* Index/Contacts мобайл, 30px - запас */
     }
-     .container-content { padding: 12px; border-radius: 10px; max-height: calc(100vh - 30px - 6px); }
+     /* Остальные мобильные стили */
+     .container-content { padding: 12px; border-radius: 10px; }
      #status { font-size: 1.2em; width: 85%; padding: 20px; top: 75.9%; }
      .input-wrapper { max-width: 90%; padding-top: 15px; }
      .filters { max-width: 90%; }
@@ -394,16 +432,13 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
      #amount-request-modal .modal-content { max-width: 92%; }
 
      /* Добавленные/Адаптированные стили Share для мобильных */
-     body { padding: 15px 10px; } /* Уменьшаем паддинги body */
      .header { margin-bottom: 15px; }
      .logo { font-size: 24px; }
      .header div:not(.logo) { font-size: 14px; }
-     /* .widget-bordered - не используется */
-     /* .widget-content - не используется */
-     .receipt-container { margin-bottom: 20px; } /* Уменьшаем отступ */
-     .share-container { margin-bottom: 30px; } /* Уменьшаем отступ */
-     .receipt-container .container-content { padding: 20px; } /* Уменьшаем паддинг */
-     .share-container .container-content { padding: 15px; } /* Уменьшаем паддинг */
+     .receipt-container { margin-bottom: 20px; }
+     /* .share-container - отступ снизу контролируется паддингом body */
+     .receipt-container .container-content { padding: 20px; }
+     .share-container .container-content { padding: 15px; }
      .receipt-title { font-size: 20px; margin-bottom: 15px; }
      .amount-container { margin-top: 20px; margin-bottom: 20px; }
      #receiptAmountInput { font-size: 36px; padding: 6px 10px; max-width: 180px; }
@@ -416,23 +451,21 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
 /* --- Dark Mode Styles (Объединенные) --- */
 @media (prefers-color-scheme: dark) {
-    /* Переменные темной темы (Объединенные) */
+    /* Переменные темной темы */
     :root {
-        /* Существующие */
+        /* ... (переменные темной темы без изменений) ... */
         --primary-color-dark-theme: #12c26a;
         --text-color-dark-theme: #e0e0e0;
         --card-background-dark: #000000;
         --body-background-dark: #000000;
         --shadow-color-dark: rgba(180, 180, 180, 0.1);
-        --disabled-button-bg-dark: #3a3a3a; /* Приоритет Contacts */
-        --disabled-button-text-dark: #888888; /* Приоритет Contacts */
+        --disabled-button-bg-dark: #3a3a3a;
+        --disabled-button-text-dark: #888888;
         --placeholder-color-dark-theme: #777777;
         --light-grey-border-dark-theme: #555555;
         --input-border-color-dark-theme: var(--light-grey-border-dark-theme);
-        --input-bg-color-dark-theme: #252525; /* Приоритет Contacts */
-        --error-color-dark-theme: #ff5555; /* Приоритет Contacts */
-
-        /* Добавленные/Объединенные из Contacts */
+        --input-bg-color-dark-theme: #252525;
+        --error-color-dark-theme: #ff5555;
         --dark-green-dark-theme: #30d070;
         --light-green-bg-dark-theme: #1a1a1a;
         --hover-green-bg-dark-theme: #2a2a2a;
@@ -449,14 +482,9 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         --upload-btn-hover-bg-dark-theme: #444444;
         --clear-history-btn-bg-dark-theme: var(--error-color-dark-theme);
         --clear-history-btn-hover-bg-dark-theme: #ff7777;
-
-        /* Добавленные из Share */
-        --primary-green-dark: var(--primary-color-dark-theme); /* Синоним */
+        --primary-green-dark: var(--primary-color-dark-theme);
         --accent-green-yellow-dark: #c8ff4d;
-        --text-light-dark-theme: var(--white-color-dark-theme); /* Синоним */
-        /* --input-background-dark: #1f1f1f; */ /* Игнорируется, приоритет Contacts */
-        /* --border-gradient - не меняется */
-        /* --border-thickness - не меняется */
+        --text-light-dark-theme: var(--white-color-dark-theme);
     }
 
     /* Глобальные стили темной темы */
@@ -464,24 +492,25 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         background-color: var(--body-background-dark);
         color: var(--text-color-dark-theme);
         background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png");
+        padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп */
     }
-    
+    body.share-page-body {
+        padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп Share */
+    }
+
     /* Контейнер темной темы */
     .container {
-        /* <<< ИЗМЕНЕНИЕ ЗДЕСЬ >>> */
-        background: var(--border-gradient); /* Используем оригинальный градиент рамки */
+        background: var(--border-gradient);
         box-shadow: var(--shadow-color-dark);
-        /* padding и border-radius наследуются */
     }
    .container-content {
     background-color: var(--card-background-dark);
-    /* border-radius и padding наследуются */
     }
     h1 { color: var(--primary-color-dark-theme); }
     h2 { color: var(--primary-color-dark-theme); }
 
 
-    /* Стили темной темы из Podeli/Index (адаптированы под переменные) */
+    /* Стили темной темы из Podeli/Index */
     #status { color: var(--primary-color-dark-theme); background-color: rgba(25, 25, 25, 0.97); border-color: var(--primary-color-dark-theme); box-shadow: var(--shadow-color-dark); }
     #status.processing { border-color: var(--primary-color-dark-theme); color: var(--primary-color-dark-theme); }
     #status.error { color: var(--error-color-dark-theme); border-color: var(--error-color-dark-theme); }
@@ -505,8 +534,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     #share-menu a { color: var(--text-color-dark-theme); }
     #share-menu a:hover { background-color: var(--active-green-bg-dark-theme); color: var(--primary-color-dark-theme); }
 
-    /* Стили темной темы из Contacts (используют переменные) */
-    .contacts-page-container { /* Стили для контейнера наследуются */ }
+    /* Стили темной темы из Contacts */
     #contact-list p { color: var(--grey-color-dark-theme); }
     .contact-card { background-color: var(--light-green-bg-dark-theme); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
     .contact-card:hover { background-color: var(--hover-green-bg-dark-theme); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4); }
@@ -535,7 +563,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); }
     .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
     .modal-actions .cancel-btn { background-color: #555; color: var(--white-color); }
-    .modal-actions .cancel-btn:hover { background-color: #666; }
+    .modal-actions .cancel-btn:hover { background-color: #3f3d3d; }
     #history-list li { border-bottom: 1px solid var(--border-green-dark-theme); }
     .history-amount { color: var(--primary-color-dark-theme); }
     .history-timestamp { color: var(--grey-color-dark-theme); }
@@ -553,19 +581,16 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .modal-form input.invalid { border-color: var(--error-color-dark-theme) !important; background-color: #3f2525; }
     label.required::after { color: var(--error-color-dark-theme); }
 
+    /* Стили темной темы из Share */
     .header .logo, .header div:not(.logo) {
         color: var(--text-dark);
         text-shadow: none;
-        /* <<< ИЗМЕНЕНИЕ: Применяем новый шрифт и здесь >>> */
-        font-family: 'Blogger Sans', Arial, sans-serif; /* Новый шрифт + запасные */
+        font-family: 'Blogger Sans', Arial, sans-serif;
     }
-    /* Если нужно, установите font-weight и для темной темы */
     .header div:not(.logo) {
-        font-weight: 500; /* Medium для подписи */
+        font-weight: 500;
     }
-    /* .widget-bordered - не используется */
-    /* .widget-content - не используется */
-    .receipt-container .container-content { padding: 25px; } /* Паддинги остаются */
+    .receipt-container .container-content { padding: 25px; }
     .share-container .container-content { padding: 20px; }
     .receipt-title, .share-title { color: var(--primary-color-dark-theme); }
     #receiptAmountInput { background-color: var(--input-bg-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); box-shadow: none; color: var(--text-color-dark-theme); }
@@ -576,6 +601,22 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .share-button:active:not(:disabled) { transform: translateY(0px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); }
     .share-button:disabled { background-color: var(--disabled-button-bg-dark); color: var(--disabled-button-text-dark); opacity: 0.7; box-shadow: none; }
     .share-button:disabled:hover { opacity: 0.7; transform: none; box-shadow: none; }
-    /* .icon - цвет задан в SVG */
+
+    /* Переопределяем верхний отступ для мобильной темной темы */
+    @media (max-width: 600px) {
+        body {
+             padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+        }
+        body.share-page-body {
+             padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+        }
+         /* Адаптируем max-height для темных мобильных */
+         .share-widgets-wrapper {
+            max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px);
+         }
+         .container {
+            max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - 30px);
+        }
+    }
 
 } /* End @media (prefers-color-scheme: dark) */
