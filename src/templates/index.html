@@ -5,8 +5,282 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПоДЕЛИ!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Дополнительные стили для новой секции */
+        #item-assignment-section {
+            display: none; /* Скрыто по умолчанию */
+            width: 100%;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--light-grey-border);
+        }
+         /* Стили для темной темы */
+        @media (prefers-color-scheme: dark) {
+            #item-assignment-section {
+                 border-top: 1px solid var(--light-grey-border-dark-theme);
+            }
+            .assignment-person-card {
+                 background-color: var(--hover-green-bg-dark-theme);
+                 border: 1px solid var(--border-green-dark-theme);
+            }
+            .assignment-item label {
+                 color: var(--text-color-dark-theme);
+            }
+            .assignment-item input[type="checkbox"]:checked + label {
+                 color: var(--primary-color-dark-theme);
+            }
+            .add-person-controls select, .add-person-controls button {
+                 background-color: var(--input-bg-color-dark-theme);
+                 color: var(--text-color-dark-theme);
+                 border: 1px solid var(--input-border-color-dark-theme);
+            }
+             .add-person-controls button:hover {
+                 background-color: var(--active-green-bg-dark-theme);
+             }
+             #calculate-split-btn {
+                 background-color: var(--primary-color); /* Цвет кнопки может остаться ярким */
+             }
+             #calculate-split-btn:hover {
+                 background-color: var(--dark-green);
+             }
+             #calculate-split-btn:disabled {
+                 background-color: var(--disabled-button-bg-dark);
+                 color: var(--disabled-button-text-dark);
+             }
+             .share-person-btn {
+                 background-color: var(--grey-color-dark-theme);
+                 color: var(--white-color-dark-theme);
+             }
+             .share-person-btn:hover {
+                 background-color: #555;
+             }
+        }
+
+
+        .assignment-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .add-person-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .add-person-controls select {
+            padding: 8px 10px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            flex-grow: 1;
+            max-width: 250px; /* Ограничим ширину селекта */
+        }
+
+        .add-person-controls button {
+            padding: 8px 15px;
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .add-person-controls button:hover {
+            background-color: var(--dark-green);
+        }
+
+        #assigned-people-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .assignment-person-card {
+            background-color: var(--light-green-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 10px;
+            padding: 15px;
+            position: relative; /* Для кнопки удаления */
+        }
+
+        .assignment-person-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remove-person-btn {
+             background: none;
+             border: none;
+             color: var(--delete-color);
+             font-size: 1.2em;
+             cursor: pointer;
+             padding: 0 5px;
+             line-height: 1;
+        }
+         .remove-person-btn:hover {
+             color: darkred;
+         }
+
+        .assignment-items-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Адаптивная сетка */
+            gap: 10px;
+        }
+
+        .assignment-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .assignment-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px; /* Увеличим размер чекбокса */
+            height: 18px;
+        }
+        .assignment-item input[type="checkbox"]:checked + label {
+             color: var(--primary-color);
+             font-weight: 500;
+        }
+
+        .assignment-item label {
+            font-size: 0.95em;
+            cursor: pointer;
+            /* Позволяет переносить длинные названия */
+            word-break: break-word;
+            line-height: 1.3;
+            display: inline-block; /* Чтобы label занимал место */
+        }
+        .item-price {
+            font-size: 0.8em;
+            color: var(--grey-color);
+            margin-left: 5px;
+            white-space: nowrap; /* Не переносить цену */
+        }
+
+        #calculate-split-btn-wrapper {
+            text-align: center;
+            margin-top: 25px;
+        }
+        #calculate-split-btn {
+             padding: 12px 25px;
+             background-color: var(--primary-color);
+             color: var(--white-color);
+             border: none;
+             border-radius: 10px;
+             cursor: pointer;
+             font-size: 1em;
+             font-weight: bold;
+             transition: background-color 0.3s;
+        }
+         #calculate-split-btn:hover {
+             background-color: var(--dark-green);
+         }
+         #calculate-split-btn:disabled {
+             background-color: var(--disabled-button-bg);
+             cursor: not-allowed;
+         }
+
+         /* Стили для результатов с долями людей */
+         .person-share-details {
+             margin-top: 15px;
+             padding-top: 15px;
+             border-top: 1px dashed var(--light-grey-border);
+         }
+         .person-share-details h3 {
+             margin-bottom: 10px;
+             font-size: 1.1em;
+             color: var(--dark-green);
+             text-align: center;
+         }
+         .person-share-item {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             padding: 8px 5px;
+             border-bottom: 1px solid var(--border-green);
+             flex-wrap: wrap; /* Перенос на моб */
+             gap: 5px;
+         }
+         .person-share-item:last-child {
+             border-bottom: none;
+         }
+         .person-share-name {
+             font-weight: bold;
+             flex-basis: 40%; /* Место под имя */
+             min-width: 100px;
+         }
+         .person-share-amounts {
+             display: flex;
+             gap: 10px;
+             align-items: center;
+             flex-grow: 1;
+             justify-content: flex-end; /* Кнопку и суммы вправо */
+             flex-wrap: wrap; /* Перенос сумм */
+         }
+         .person-share-amount {
+             font-size: 0.9em;
+             white-space: nowrap;
+             /* Можно добавить title с типом деления */
+         }
+         .share-person-btn {
+             padding: 4px 8px;
+             font-size: 0.8em;
+             background-color: var(--grey-color);
+             color: var(--white-color);
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             margin-left: 10px; /* Отступ от сумм */
+             white-space: nowrap;
+         }
+         .share-person-btn:hover {
+             opacity: 0.8;
+         }
+         .share-person-btn:disabled {
+             opacity: 0.5;
+             cursor: not-allowed;
+         }
+
+         /* Стили для темной темы для долей */
+         @media (prefers-color-scheme: dark) {
+             .person-share-details {
+                 border-top-color: var(--light-grey-border-dark-theme);
+             }
+             .person-share-details h3 {
+                 color: var(--dark-green-dark-theme);
+             }
+             .person-share-item {
+                 border-bottom-color: var(--border-green-dark-theme);
+             }
+             .person-share-amount {
+                 /* Можно сделать чуть светлее */
+             }
+             .share-person-btn {
+                 background-color: #555;
+                 color: var(--text-color-dark-theme);
+             }
+             .share-person-btn:hover {
+                 background-color: #666;
+             }
+             .share-person-btn:disabled {
+                 background-color: #444;
+             }
+         }
+
+    </style>
 </head>
-<body> <!-- Класс results-shown будет добавляться/удаляться сюда -->
+<body > <!-- Класс results-shown будет добавляться/удаляться сюда -->
     <!-- Status Indicator Moved Outside Container -->
     <div id="status" class="status"></div>
 
@@ -19,312 +293,930 @@
     <!-- Основной контейнер -->
     <div class="container">
         <div class="container-content">
-            <!-- Preview Area -->
-            <div class="image-preview-wrapper" id="preview-wrapper">
-                <img id="preview">
-            </div>
 
-            <!-- Result Area Wrapper -->
-            <div class="result-container" id="result-container">
-                 <div id="result" class="result"></div>
-                 <!-- Buttons/Menu inserted by JS -->
-            </div>
+            <!-- === Шаг 1: Загрузка и Предобработка === -->
+            <div id="initial-upload-section">
+                <!-- Preview Area -->
+                <div class="image-preview-wrapper" id="preview-wrapper">
+                    <img id="preview">
+                </div>
 
-            <!-- Input Wrapper -->
-            <div class="input-wrapper">
-                 <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
-                 <div class="input-container">
-                     <input type="number" id="num-people-input" placeholder="Количество людей" required min="1" oninput="toggleUploadButton()">
-                 </div>
-                 <div class="input-container">
-                     <input type="text" id="tip-amount-input" class="numeric-input" placeholder="Сумма чаевых" inputmode="decimal">
-                 </div>
-                 <div class="file-btn-wrapper">
-                     <button id="upload-btn" onclick="upload_receipt()" disabled>Обработать изображение</button>
-                 </div>
-            </div>
+                <!-- Input Wrapper -->
+                <div class="input-wrapper">
+                     <input type="file" id="image-input" accept="image/*" onchange="previewImage()">
+                     <div class="input-container">
+                         <input type="number" id="num-people-input" placeholder="Количество людей" required min="1" oninput="togglePreprocessButton()">
+                     </div>
+                     <div class="input-container">
+                         <input type="text" id="tip-amount-input" class="numeric-input" placeholder="Сумма чаевых (необязательно)" inputmode="decimal">
+                     </div>
+                     <div class="file-btn-wrapper">
+                         <!-- Кнопка изменена на preprocessReceipt() -->
+                         <button id="preprocess-btn" onclick="preprocessReceipt()" disabled>Извлечь позиции из чека</button>
+                     </div>
+                </div>
+            </div> <!-- Конец #initial-upload-section -->
 
-            <!-- Filters -->
-            <div class="filters" id="filters-wrapper">
-               <button onclick="filter_recommendations('equally')">Поровну</button>
-               <button onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
-               <button onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто больше заплатил</button>
-               <button onclick="filter_recommendations('proportional_division_by_the_cost_of_orders')">Пропорционально</button>
-            </div>
+            <!-- === Шаг 2: Распределение позиций === -->
+            <div id="item-assignment-section">
+                <div class="assignment-title">Распределите блюда по людям</div>
+                <div class="add-person-controls">
+                    <select id="contact-select">
+                        <option value="">-- Выберите контакт --</option>
+                        <!-- Контакты будут добавлены сюда из JS -->
+                    </select>
+                    <button onclick="addPersonForAssignment()">Добавить человека</button>
+                </div>
+                <div id="assigned-people-container">
+                    <!-- Карточки людей для распределения будут здесь -->
+                </div>
+                <div id="calculate-split-btn-wrapper">
+                    <button id="calculate-split-btn" onclick="calculateSplit()" disabled>Рассчитать деление</button>
+                </div>
+            </div> <!-- Конец #item-assignment-section -->
+
+
+            <!-- === Шаг 3: Отображение Результатов === -->
+            <div id="results-section" style="display: none;">
+                 <!-- Result Area Wrapper -->
+                <div class="result-container" id="result-container">
+                     <div id="result" class="result"></div>
+                     <!-- Кнопки Copy/Share будут добавлены сюда JS -->
+                     <!-- Сюда же добавим детализацию по людям -->
+                     <div id="person-share-details-container" class="person-share-details">
+                         <!-- Детализация по людям будет здесь -->
+                     </div>
+                </div>
+                 <!-- Filters -->
+                <div class="filters" id="filters-wrapper">
+                   <button onclick="filter_recommendations('equally')">Поровну</button>
+                   <button onclick="filter_recommendations('who_more_eat_then_more_pay')">Кто больше ел</button>
+                   <button onclick="filter_recommendations('who_more_cost_then_more_pay')">Кто дороже заказал</button>
+                   <button onclick="filter_recommendations('proportional_division_by_the_cost_of_orders')">Пропорционально</button>
+                </div>
+                 <!-- Кнопка Назад/Новый чек -->
+                 <div style="text-align: center; margin-top: 20px;">
+                     <button onclick="resetApp()" style="padding: 10px 20px; font-size: 0.9em;">Новый чек</button>
+                 </div>
+            </div> <!-- Конец #results-section -->
+
         </div> <!-- Конец .container-content -->
     </div> <!-- End .container -->
 
     <script>
-        let recommendations = {};
+        // --- Глобальные переменные состояния ---
+        let currentExtractedText = null;
+        let currentPositions = {}; // { "Блюдо": цена, ... }
+        let currentPeopleAssignments = {}; // { "Имя": ["Блюдо1", "Блюдо2"], ... }
+        let finalRecommendations = {}; // Хранит полный ответ от /calculate_split
+        let contacts = []; // Загруженные контакты
+        const CONTACTS_STORAGE_KEY = 'myContactsList_v4_local'; // Ключ как в contacts.html
+        const HISTORY_STORAGE_KEY = 'myContactsHistory_v4_req'; // Ключ как в contacts.html
 
-        // --- DOM Elements ---
+        // --- DOM Элементы ---
+        const initialUploadSection = document.getElementById('initial-upload-section');
+        const itemAssignmentSection = document.getElementById('item-assignment-section');
+        const resultsSection = document.getElementById('results-section');
+
         const previewWrapper = document.getElementById('preview-wrapper');
         const previewElement = document.getElementById('preview');
         const statusElement = document.getElementById('status');
         const resultContainer = document.getElementById('result-container');
         const resultElement = document.getElementById('result');
+        const personShareDetailsContainer = document.getElementById('person-share-details-container');
         const filtersWrapper = document.getElementById('filters-wrapper');
-        const uploadButton = document.getElementById('upload-btn');
+
+        const preprocessButton = document.getElementById('preprocess-btn');
+        const calculateSplitButton = document.getElementById('calculate-split-btn');
         const imageInput = document.getElementById('image-input');
         const numPeopleInput = document.getElementById('num-people-input');
         const tipAmountInput = document.getElementById('tip-amount-input');
+        const contactSelect = document.getElementById('contact-select');
+        const assignedPeopleContainer = document.getElementById('assigned-people-container');
+
         const containerElement = document.querySelector('.container');
-        // <<< ИСПРАВЛЕНО: Присваиваем результат переменной >>>
         const containerContentElement = document.querySelector('.container-content');
-        const headerElement = document.querySelector('.index-header'); // Получаем хедер
+        const headerElement = document.querySelector('.index-header');
 
-        // --- Tip Input Formatting ---
-        function formatTipInput(inputElement) { let v=inputElement.value, n=v.replace(/[^0-9.,]/g,'').replace('₽','').replace(',','.'); const p=n.split('.'); if(p.length>2) n=p[0]+'.'+p.slice(1).join(''); if(n.length>1&&n.startsWith('0')&&!n.startsWith('0.')) n=n.substring(1); if(n==='.'||n===''){inputElement.value=''; return '';} const num=parseFloat(n); if(isNaN(num)||num<0){inputElement.value=''; return '';} inputElement.value=n+'₽'; return n; }
-        function removeFormatting(inputElement) { inputElement.value = inputElement.value.replace('₽','').trim(); }
-        tipAmountInput.addEventListener('focus', () => { removeFormatting(tipAmountInput); setTimeout(() => { tipAmountInput.setSelectionRange(tipAmountInput.value.length, tipAmountInput.value.length); }, 0); });
-        tipAmountInput.addEventListener('blur', () => { formatTipInput(tipAmountInput); });
-        tipAmountInput.addEventListener('input', () => { let c=tipAmountInput.selectionStart, o=tipAmountInput.value, v=o.replace(/[^0-9.,]/g,'').replace(',','.'); const p=v.split('.'); if(p.length>2)v=p[0]+'.'+p.slice(1).join(''); if(v.length>1&&v.startsWith('0')&&!v.startsWith('0.')){v=v.substring(1); if(c>0)c--;} if(v!==o.replace('₽','').trim()){tipAmountInput.value=v; try{tipAmountInput.setSelectionRange(c,c);}catch(e){console.warn("Cursor err:",e);}} });
-
-        // --- Core App Functions ---
-        function previewImage() {
-            const file = imageInput.files[0];
-            hideShareMenu();
-            resultContainer.style.display = 'none';
-            resultElement.innerHTML = '';
-            filtersWrapper.style.display = 'none';
-            statusElement.style.display = 'none';
-            // <<< Управляем классом на body >>>
-            document.body.classList.remove('results-shown');
-
-            if (file) {
-                previewElement.src = URL.createObjectURL(file);
-                previewElement.style.display = 'block';
-                previewWrapper.style.display = 'flex';
-                containerElement.scrollTop = 0;
-            } else {
-                 previewElement.style.display = 'none';
-                 previewWrapper.style.display = 'none';
-            }
-            toggleUploadButton();
-        }
-
-        function toggleUploadButton() {
-            const numPeopleValid = numPeopleInput.value && parseInt(numPeopleInput.value, 10) > 0;
-            uploadButton.disabled = !(numPeopleValid && imageInput.files.length > 0);
-        }
-
-        function formatOutputText(text) {
-            if (!text) return "";
-            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-        }
-
-        function getResultTextForSharing() { /* ... без изменений ... */
-            const resultDiv = document.getElementById('result');
-            if (!resultDiv) return "";
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = resultDiv.innerHTML;
-            tempDiv.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
-            let text = tempDiv.innerText || tempDiv.textContent || "";
-            return text.trim();
-        }
-        async function copyResultText() { /* ... без изменений ... */
-            const copyButton = document.getElementById('copy-result-btn');
-            if (!copyButton) return;
-            const textToCopy = getResultTextForSharing();
-            if (!textToCopy) { console.warn("No text to copy."); return; }
-            try {
-                await navigator.clipboard.writeText(textToCopy);
-                const originalIcon = copyButton.innerHTML;
-                copyButton.innerHTML = '✅'; copyButton.title = 'Скопировано!'; copyButton.style.color = '#08a552';
-                setTimeout(() => { if(document.getElementById('copy-result-btn')) { document.getElementById('copy-result-btn').innerHTML = originalIcon; document.getElementById('copy-result-btn').title = 'Скопировать результат'; document.getElementById('copy-result-btn').style.color = ''; } }, 1500);
-            } catch (err) {
-                console.error('Ошибка копирования: ', err); alert('Не удалось скопировать текст.');
-                 const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '❌'; copyButton.title = 'Ошибка копирования'; copyButton.style.color = '#cb0001';
-                 setTimeout(() => { if(document.getElementById('copy-result-btn')) { document.getElementById('copy-result-btn').innerHTML = originalIcon; document.getElementById('copy-result-btn').title = 'Скопировать результат'; document.getElementById('copy-result-btn').style.color = ''; } }, 2000);
-            }
-             hideShareMenu();
-        }
-        function toggleShareMenu() { /* ... без изменений ... */
-             const menu = document.getElementById('share-menu');
-             if (menu) { menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
-         }
-        function hideShareMenu() { /* ... без изменений ... */
-             const menu = document.getElementById('share-menu'); if (menu) { menu.style.display = 'none'; }
-         }
-        function shareViaVK() { /* ... без изменений ... */
-            const description = getResultTextForSharing();
-            const title = "ПоДЕЛИ! - Результат деления";
-            console.log("Sharing to VK - Title:", title);
-            console.log("Sharing to VK - Description/Comment:", description);
-            if (!description) { console.warn("No result text available for VK sharing description."); }
-            const shareUrl = `https://vk.com/share.php?title=${encodeURIComponent(title)}&comment=${encodeURIComponent(description)}`;
-            console.log("VK Share URL:", shareUrl);
-            window.open(shareUrl, '_blank', 'noopener,noreferrer');
-            hideShareMenu();
-        }
-        function shareViaTelegram() { /* ... без изменений ... */
-            const textToShare = getResultTextForSharing();
-            console.log("Sharing to Telegram - Text:", textToShare);
-             if (!textToShare) { console.warn("No text available for Telegram sharing."); return; }
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('Привет! ')}&text=${encodeURIComponent('Обратите внимание, текст обрезан для лимитов браузера: ') + encodeURIComponent(textToShare.substring(0, 700))}`;
-            console.log("Telegram Share URL:", shareUrl);
-            window.open(shareUrl, '_blank', 'noopener,noreferrer');
-            hideShareMenu();
-        }
-        function shareViaSMS() { /* ... без изменений ... */
-            const text = getResultTextForSharing();
-            console.log("Sharing via SMS - Text:", text);
-             if (!text) { console.warn("No text available for SMS sharing."); return; }
-            const body = text;
-            console.log("SMS Body (encoded):", body);
-            window.location.href = `sms:?body=${body}`;
-        }
-        document.addEventListener('click', function(event) { /* ... без изменений ... */
-            const menu = document.getElementById('share-menu');
-            const shareButton = document.getElementById('share-result-btn');
-            if (menu && menu.style.display === 'block' && !menu.contains(event.target) && shareButton && !shareButton.contains(event.target)) {
-                hideShareMenu();
-            }
-        });
-
+        // --- Константы для иконок (как были) ---
         const svgIconCopy = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
         const svgIconShare = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>`;
         const svgIconVK = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93V15.07C2 20.67 3.33 22 8.93 22H15.07C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2M18.15 16.27H16.69C16.14 16.27 15.97 15.82 15 14.83C14.12 13.94 13.74 13.71 13.53 13.71C13.24 13.71 13.15 13.83 13.15 14.38V15.69C13.15 16.04 13.04 16.26 12.11 16.26C10.57 16.26 8.86 15.32 7.66 13.59C5.85 11.05 5.36 9.13 5.36 8.75C5.36 8.54 5.43 8.34 5.85 8.34H7.32C7.69 8.34 7.83 8.5 7.97 8.9C8.69 11 9.89 12.8 10.38 12.8C10.57 12.8 10.65 12.71 10.65 12.25V10.1C10.6 9.12 10.07 9.03 10.07 8.68C10.07 8.5 10.21 8.34 10.44 8.34H12.73C13.04 8.34 13.15 8.5 13.15 8.88V11.77C13.15 12.08 13.28 12.19 13.38 12.19C13.56 12.19 13.72 12.08 14.05 11.74C15.1 10.57 15.85 8.76 15.85 8.76C15.95 8.55 16.11 8.35 16.5 8.35H17.93C18.37 8.35 18.47 8.58 18.37 8.89C18.19 9.74 16.41 12.25 16.43 12.25C16.27 12.5 16.21 12.61 16.43 12.9C16.58 13.11 17.09 13.55 17.43 13.94C18.05 14.65 18.53 15.24 18.66 15.65C18.77 16.06 18.57 16.27 18.15 16.27Z"/></svg>`;
         const svgIconTelegram = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/></svg>`;
         const svgIconSMS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>`;
 
-        function displayRecommendations(filterType = 'equally') { /* ... без изменений ... */
-             let textToShow = "";
-             switch (filterType) {
-                 case 'equally': textToShow = recommendations.equally; break;
-                 case 'who_more_eat_then_more_pay': textToShow = recommendations.who_more_eat_then_more_pay; break;
-                 case 'who_more_cost_then_more_pay': textToShow = recommendations.who_more_cost_then_more_pay; break;
-                 case 'proportional_division_by_the_cost_of_orders': textToShow = recommendations.proportional_division_by_the_cost_of_orders; break;
-                 default: textToShow = recommendations.equally;
+        // --- Функции Форматирования и Вспомогательные ---
+        function formatTipInput(inputElement) { let v=inputElement.value, n=v.replace(/[^0-9.,]/g,'').replace('₽','').replace(',','.'); const p=n.split('.'); if(p.length>2) n=p[0]+'.'+p.slice(1).join(''); if(n.length>1&&n.startsWith('0')&&!n.startsWith('0.')) n=n.substring(1); if(n==='.'||n===''){inputElement.value=''; return '';} const num=parseFloat(n); if(isNaN(num)||num<0){inputElement.value=''; return '';} /*inputElement.value=n+'₽';*/ inputElement.value = n; return n; } // Убрал добавление ₽ для простоты
+        function removeFormatting(inputElement) { inputElement.value = inputElement.value.replace('₽','').trim(); }
+        tipAmountInput.addEventListener('focus', () => { removeFormatting(tipAmountInput); setTimeout(() => { tipAmountInput.setSelectionRange(tipAmountInput.value.length, tipAmountInput.value.length); }, 0); });
+        tipAmountInput.addEventListener('blur', () => { formatTipInput(tipAmountInput); });
+        tipAmountInput.addEventListener('input', () => { let c=tipAmountInput.selectionStart, o=tipAmountInput.value, v=o.replace(/[^0-9.,]/g,'').replace(',','.'); const p=v.split('.'); if(p.length>2)v=p[0]+'.'+p.slice(1).join(''); if(v.length>1&&v.startsWith('0')&&!v.startsWith('0.')){v=v.substring(1); if(c>0)c--;} if(v!==o.replace('₽','').trim()){tipAmountInput.value=v; try{tipAmountInput.setSelectionRange(c,c);}catch(e){console.warn("Cursor err:",e);}} });
+
+        function formatOutputText(text) {
+            if (!text) return "";
+            // Заменяем **текст** на <b>текст</b> и \n на <br>
+            // Добавим обработку *текст* как <i>текст</i> (курсив)
+            // Добавим обработку ```код``` как <pre><code>код</code></pre> (моноширинный блок)
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                // .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>') // Пока отключим pre/code для простоты
+                .replace(/\n/g, '<br>');
+        }
+
+        function showStatus(message, type = 'processing', duration = null) {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`; // processing, success, error
+            statusElement.style.display = 'block';
+            if (duration) {
+                setTimeout(() => {
+                    if (statusElement.textContent === message) { // Скрываем, только если сообщение не изменилось
+                        statusElement.style.display = 'none';
+                    }
+                }, duration);
+            }
+        }
+        function hideStatus() {
+            statusElement.style.display = 'none';
+        }
+
+        function loadContacts() {
+            const storedData = localStorage.getItem(CONTACTS_STORAGE_KEY);
+            if (storedData) {
+                try {
+                    contacts = JSON.parse(storedData);
+                    populateContactSelect();
+                } catch (e) {
+                    console.error("Ошибка загрузки контактов из localStorage:", e);
+                    contacts = [];
+                }
+            } else {
+                contacts = []; // Нет сохраненных контактов
+            }
+             // Добавляем опцию "Другой человек", если контактов нет или они есть
+             const otherOption = document.createElement('option');
+             otherOption.value = "__other__";
+             otherOption.textContent = "Другой человек...";
+             contactSelect.appendChild(otherOption);
+        }
+
+        function populateContactSelect() {
+            contactSelect.innerHTML = '<option value="">-- Выберите контакт --</option>'; // Очищаем и добавляем дефолт
+            // Сортируем контакты по имени
+            const sortedContacts = [...contacts].sort((a, b) =>
+                (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase())
+            );
+            sortedContacts.forEach(contact => {
+                // Не добавляем людей, которые уже есть в currentPeopleAssignments
+                if (!currentPeopleAssignments[contact.name]) {
+                    const option = document.createElement('option');
+                    option.value = contact.name; // Используем имя как value
+                    option.textContent = contact.name;
+                    option.dataset.contactId = contact.id; // Сохраняем ID для возможного использования
+                    contactSelect.appendChild(option);
+                }
+            });
+             // Добавляем опцию "Другой человек" в конец
+             const otherOption = document.createElement('option');
+             otherOption.value = "__other__";
+             otherOption.textContent = "Другой человек...";
+             contactSelect.appendChild(otherOption);
+        }
+
+        function resetApp() {
+            // Сброс состояния
+            currentExtractedText = null;
+            currentPositions = {};
+            currentPeopleAssignments = {};
+            finalRecommendations = {};
+            imageInput.value = ''; // Сброс инпута файла
+            numPeopleInput.value = '';
+            tipAmountInput.value = '';
+            previewElement.src = '';
+            previewWrapper.style.display = 'none';
+            assignedPeopleContainer.innerHTML = ''; // Очистка контейнера людей
+
+            // Скрытие/отображение секций
+            initialUploadSection.style.display = 'block';
+            itemAssignmentSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+
+            // Скрытие статуса и результатов
+            hideStatus();
+            resultContainer.style.display = 'none';
+            resultElement.innerHTML = '';
+            personShareDetailsContainer.innerHTML = '';
+            filtersWrapper.style.display = 'none';
+            document.body.classList.remove('results-shown'); // Убрать класс с body
+            headerElement.style.display = 'block'; // Показать хедер
+
+            // Обновление кнопок
+            togglePreprocessButton();
+            calculateSplitButton.disabled = true;
+
+            // Перезагрузка контактов (на случай, если они изменились на другой вкладке)
+            loadContacts();
+        }
+
+
+        // --- Шаг 1: Функции Предобработки ---
+
+        function previewImage() {
+            const file = imageInput.files[0];
+            // Сбрасываем предыдущие результаты, если выбрали новый файл
+            resultsSection.style.display = 'none';
+            itemAssignmentSection.style.display = 'none';
+            initialUploadSection.style.display = 'block'; // Убедимся, что секция видна
+            hideStatus();
+            document.body.classList.remove('results-shown');
+            headerElement.style.display = 'block';
+
+            if (file) {
+                previewElement.src = URL.createObjectURL(file);
+                previewElement.style.display = 'block';
+                previewWrapper.style.display = 'flex';
+                // containerElement.scrollTop = 0; // Прокрутка вверх
+            } else {
+                 previewElement.style.display = 'none';
+                 previewWrapper.style.display = 'none';
+            }
+            togglePreprocessButton();
+        }
+
+        function togglePreprocessButton() {
+            const numPeopleValid = numPeopleInput.value && parseInt(numPeopleInput.value, 10) > 0;
+            preprocessButton.disabled = !(numPeopleValid && imageInput.files.length > 0);
+        }
+
+        async function preprocessReceipt() {
+            const file = imageInput.files[0];
+            const numPeople = numPeopleInput.value;
+
+            if (!file || !numPeople || parseInt(numPeople, 10) <= 0) {
+                showStatus("Выберите изображение и укажите кол-во людей (> 0).", 'error', 3000);
+                return;
+            }
+
+            preprocessButton.disabled = true;
+            showStatus("Загрузка и обработка изображения...", 'processing');
+
+            const formData = new FormData();
+            formData.append("receipt_image", file);
+
+            try {
+                const response = await fetch('/preprocess_receipt', { method: "POST", body: formData });
+
+                // ... (обработка ошибок ответа) ...
+                 if (!response.ok) {
+                    let errorMsg = `Ошибка ${response.status}`;
+                    try { const errorData = await response.json(); errorMsg = errorData.error || errorMsg; } catch (e) { /* ignore */ }
+                    showStatus(`Ошибка предобработки: ${errorMsg}`, 'error');
+                    preprocessButton.disabled = false; // Разблокировать кнопку
+                    togglePreprocessButton(); // Проверить состояние снова
+                    return;
+                }
+
+
+                const data = await response.json();
+
+                if (data.error) {
+                     showStatus(`Ошибка: ${data.error}`, 'error');
+                     preprocessButton.disabled = false;
+                     togglePreprocessButton();
+                     return;
+                }
+
+                // --- ИЗМЕНЕННАЯ ПРОВЕРКА ---
+                // Теперь data.is_restaurant будет true или false (бэкенд обработал None)
+                if (data.is_restaurant === false) {
+                    showStatus("Ошибка: Изображение не похоже на чек из ресторана.", 'error', 5000);
+                    preprocessButton.disabled = false;
+                    togglePreprocessButton();
+                    return; // Выходим, если не ресторан
+                }
+                // --- КОНЕЦ ИЗМЕНЕННОЙ ПРОВЕРКИ ---
+
+                // Успех предобработки (is_restaurant === true)
+                hideStatus();
+                currentExtractedText = data.extracted_text;
+                // Преобразуем список обратно в словарь
+                currentPositions = {};
+                if (data.positions_list && Array.isArray(data.positions_list)) {
+                    data.positions_list.forEach(item => {
+                        if (item.name && typeof item.price === 'number') {
+                            let uniqueName = item.name;
+                            let counter = 1;
+                            while (currentPositions.hasOwnProperty(uniqueName)) {
+                                counter++;
+                                uniqueName = `${item.name}_${counter}`;
+                            }
+                            currentPositions[uniqueName] = item.price;
+                        }
+                    });
+                }
+                console.log("Позиции получены и преобразованы в словарь:", currentPositions);
+
+                // Переход ко второму шагу
+                initialUploadSection.style.display = 'none';
+                resultsSection.style.display = 'none';
+                itemAssignmentSection.style.display = 'block';
+                headerElement.style.display = 'none';
+
+                populateItemAssignmentUI();
+                populateContactSelect();
+                toggleCalculateSplitButton();
+
+            } catch (error) {
+                console.error("Ошибка сети или JS при предобработке:", error);
+                showStatus(`Ошибка сети: ${error.message}`, 'error');
+                preprocessButton.disabled = false;
+                togglePreprocessButton();
+            }
+        }
+
+        // --- Шаг 2: Функции Распределения Позиций ---
+
+        function populateItemAssignmentUI() {
+            assignedPeopleContainer.innerHTML = ''; // Очищаем предыдущих
+            currentPeopleAssignments = {}; // Сбрасываем распределение
+
+            // Добавляем людей, указанных в numPeopleInput, если их еще нет
+            const numPeople = parseInt(numPeopleInput.value, 10) || 0;
+            if (numPeople > 0 && Object.keys(currentPeopleAssignments).length === 0) {
+                 for (let i = 1; i <= numPeople; i++) {
+                     const defaultName = `Человек ${i}`;
+                     // Проверяем, нет ли уже такого имени (маловероятно при старте)
+                     if (!currentPeopleAssignments[defaultName]) {
+                         addPersonCard(defaultName);
+                     }
+                 }
+            } else {
+                 // Если люди уже были добавлены (например, при возврате назад), отрисовываем их
+                 Object.keys(currentPeopleAssignments).forEach(name => {
+                     addPersonCard(name, currentPeopleAssignments[name]);
+                 });
+            }
+            // Обновляем селект контактов
+            populateContactSelect();
+            toggleCalculateSplitButton(); // Проверяем кнопку расчета
+        }
+
+        function addPersonForAssignment() {
+            const selectedValue = contactSelect.value;
+            let personName = '';
+
+            if (selectedValue === "__other__") {
+                personName = prompt("Введите имя человека:");
+                if (personName) personName = personName.trim();
+                 if (!personName) return; // Отмена или пустое имя
+            } else if (selectedValue) {
+                personName = selectedValue;
+            } else {
+                showStatus("Выберите контакт или опцию 'Другой человек'", "error", 2000);
+                return; // Ничего не выбрано
+            }
+
+
+            if (currentPeopleAssignments[personName]) {
+                showStatus(`Человек "${personName}" уже добавлен.`, "error", 2000);
+                return;
+            }
+
+            addPersonCard(personName);
+            // Обновляем селект, чтобы убрать добавленного человека
+            populateContactSelect();
+            toggleCalculateSplitButton(); // Проверяем кнопку расчета
+        }
+
+        function addPersonCard(name, assignedItems = []) {
+             currentPeopleAssignments[name] = [...assignedItems];
+
+             const card = document.createElement('div');
+             card.classList.add('assignment-person-card');
+             card.dataset.personName = name;
+
+             let itemsHtml = '<div class="assignment-items-list">';
+             if (Object.keys(currentPositions).length > 0) {
+                 // Используем Object.entries, так как currentPositions снова словарь
+                 const sortedItems = Object.entries(currentPositions).sort((a, b) => a[0].localeCompare(b[0]));
+
+                 sortedItems.forEach(([itemName, itemPrice]) => { // Итерация по словарю
+                     const itemId = `item-${name}-${itemName.replace(/[^a-zA-Z0-9]/g, '')}`;
+                     const isChecked = assignedItems.includes(itemName) ? 'checked' : '';
+                     // Убедимся, что itemPrice это число перед форматированием
+                     const priceValue = typeof itemPrice === 'number' ? itemPrice : 0;
+                     const priceFormatted = priceValue.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
+                     itemsHtml += `
+                         <div class="assignment-item">
+                             <input type="checkbox" id="${itemId}" value="${itemName}" ${isChecked} onchange="updateAssignment('${name}', '${itemName}', this.checked)">
+                             <label for="${itemId}">
+                                 ${itemName}
+                                 <span class="item-price">(${priceFormatted})</span>
+                             </label>
+                         </div>
+                     `;
+                 });
+             } else {
+                 itemsHtml += '<span>Нет доступных позиций для распределения.</span>';
              }
-             resultElement.innerHTML = '';
-             resultContainer.style.display = "block";
+             itemsHtml += '</div>';
+
+             card.innerHTML = `
+                 <div class="assignment-person-name">
+                     <span>${name}</span>
+                     <button class="remove-person-btn" title="Удалить человека" onclick="removePerson('${name}')">×</button>
+                 </div>
+                 ${itemsHtml}
+             `;
+             assignedPeopleContainer.appendChild(card);
+        }
+
+        function removePerson(name) {
+            if (confirm(`Удалить "${name}" из списка распределения?`)) {
+                delete currentPeopleAssignments[name]; // Удаляем из объекта
+                const cardToRemove = assignedPeopleContainer.querySelector(`.assignment-person-card[data-person-name="${name}"]`);
+                if (cardToRemove) {
+                    cardToRemove.remove();
+                }
+                // Обновляем селект контактов (человек снова станет доступен)
+                populateContactSelect();
+                toggleCalculateSplitButton(); // Проверяем кнопку расчета
+            }
+        }
+
+        function updateAssignment(personName, itemName, isChecked) {
+            if (!currentPeopleAssignments[personName]) return; // На всякий случай
+
+            if (isChecked) {
+                if (!currentPeopleAssignments[personName].includes(itemName)) {
+                    currentPeopleAssignments[personName].push(itemName);
+                }
+            } else {
+                currentPeopleAssignments[personName] = currentPeopleAssignments[personName].filter(item => item !== itemName);
+            }
+            console.log("Обновленное распределение:", currentPeopleAssignments);
+            // Кнопка расчета не зависит от выбора блюд, только от наличия людей
+        }
+
+        function toggleCalculateSplitButton() {
+             // Кнопка активна, если добавлен хотя бы один человек для распределения
+             calculateSplitButton.disabled = Object.keys(currentPeopleAssignments).length === 0;
+        }
+
+
+        // --- Шаг 3: Функции Расчета и Отображения Результатов ---
+
+        async function calculateSplit() {
+            const numPeople = parseInt(numPeopleInput.value, 10); // Берем изначальное значение
+            let tipString = tipAmountInput.value.replace('₽','').trim().replace(',','.');
+            const tipAmount = parseFloat(tipString) || 0;
+
+            // Проверка, что количество людей совпадает с количеством добавленных карточек
+            if (Object.keys(currentPeopleAssignments).length !== numPeople) {
+                 if (!confirm(`Введено ${numPeople} чел., а распределено на ${Object.keys(currentPeopleAssignments).length} чел. Продолжить расчет для ${Object.keys(currentPeopleAssignments).length} человек?`)) {
+                     return;
+                 }
+                 // Если пользователь согласен, используем количество людей из распределения
+                 // numPeople = Object.keys(currentPeopleAssignments).length;
+                 // Или можно просто передать numPeople как есть, а модель разберется?
+                 // Лучше передать актуальное количество людей, на которых идет распределение
+                 numPeopleInput.value = Object.keys(currentPeopleAssignments).length; // Обновим инпут для консистентности
+            }
+
+
+            if (!currentExtractedText || numPeople <= 0 || Object.keys(currentPeopleAssignments).length === 0) {
+                showStatus("Ошибка: Недостаточно данных для расчета.", 'error', 3000);
+                return;
+            }
+            if (tipAmount < 0) {
+                 showStatus("Чаевые не могут быть отрицательными.", 'error', 3000);
+                 return;
+            }
+
+
+            calculateSplitButton.disabled = true;
+            showStatus("Расчет рекомендаций...", 'processing');
+
+            const payload = {
+                extracted_text: currentExtractedText,
+                num_people: Object.keys(currentPeopleAssignments).length, // Используем кол-во из распределения
+                tea_money: tipAmount,
+                item_assignments: currentPeopleAssignments
+            };
+
+            try {
+                const response = await fetch('/calculate_split', {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errorMsg = `Ошибка ${response.status}`;
+                    try { const errorData = await response.json(); errorMsg = errorData.error || errorMsg; } catch (e) { /* ignore */ }
+                    showStatus(`Ошибка расчета: ${errorMsg}`, 'error');
+                    calculateSplitButton.disabled = false; // Разблокировать кнопку
+                    toggleCalculateSplitButton();
+                    return;
+                }
+
+                finalRecommendations = await response.json();
+                console.log("Получены рекомендации:", finalRecommendations);
+
+                if (finalRecommendations.error) {
+                     showStatus(`Ошибка: ${finalRecommendations.error}`, 'error');
+                     calculateSplitButton.disabled = false;
+                     toggleCalculateSplitButton();
+                     return;
+                }
+
+                // Успешный расчет
+                hideStatus();
+                itemAssignmentSection.style.display = 'none';
+                resultsSection.style.display = 'block';
+                document.body.classList.add('results-shown'); // Добавить класс к body
+                headerElement.style.display = 'none'; // Скрыть хедер
+
+                displayRecommendations('equally'); // Показать результаты (по умолчанию "поровну")
+                filtersWrapper.style.display = "flex"; // Показать фильтры
+
+                // Прокрутка к результатам
+                setTimeout(() => {
+                     // containerElement.scrollTo({ top: containerElement.scrollHeight, behavior: 'smooth' });
+                     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 }, 100);
+
+
+            } catch (error) {
+                console.error("Ошибка сети или JS при расчете:", error);
+                showStatus(`Ошибка сети: ${error.message}`, 'error');
+                calculateSplitButton.disabled = false;
+                toggleCalculateSplitButton();
+            }
+        }
+
+        function displayRecommendations(filterType = 'equally') {
+             // Проверяем только peoples_list и final_total_calculated
+             if (!finalRecommendations || !finalRecommendations.peoples_list || typeof finalRecommendations.final_total_calculated !== 'number') {
+                 resultElement.innerHTML = "Нет данных для отображения."; // Можно оставить сообщение об ошибке здесь
+                 personShareDetailsContainer.innerHTML = '';
+                 // Скрыть кнопки и фильтры, если нет данных
+                 const oldButtons = resultContainer.querySelectorAll('.result-action-btn, #share-menu');
+                 oldButtons.forEach(btn => btn.remove());
+                 filtersWrapper.style.display = 'none';
+                 return;
+             }
+
+             // --- УДАЛЕНО: Установка текста в resultElement ---
+             // let textToShow = "";
+             // switch (filterType) { ... }
+             // resultElement.innerHTML = formatOutputText(textToShow || "Рекомендации не найдены.");
+             resultElement.innerHTML = ''; // Очищаем основной блок или добавляем заголовок
+             resultElement.style.display = 'none'; // Можно скрыть основной блок, если он не нужен
+             // --- КОНЕЦ УДАЛЕНИЯ ---
+
+             resultContainer.style.display = "block"; // Контейнер результатов все еще нужен
+
+             // Удаляем старые кнопки и меню
              const oldButtons = resultContainer.querySelectorAll('.result-action-btn, #share-menu');
              oldButtons.forEach(btn => btn.remove());
+
+             // Добавляем кнопки Copy/Share (теперь они будут работать с данными из peoples_list)
              const buttonsAndMenuHTML = `
                  <button id="copy-result-btn" class="result-action-btn" title="Скопировать результат" onclick="copyResultText()">${svgIconCopy}</button>
-                 <button id="share-result-btn" class="result-action-btn" title="Поделиться" onclick="toggleShareMenu()">${svgIconShare}</button>
-                 <div id="share-menu">
+                 <button id="share-result-btn" class="result-action-btn" title="Поделиться результатом" onclick="toggleShareMenu()">${svgIconShare}</button>
+                 <div id="share-menu" style="display: none;">
                      <a href="#" onclick="shareViaVK(); return false;">${svgIconVK}<span>ВКонтакте</span></a>
                      <a href="#" onclick="shareViaTelegram(); return false;">${svgIconTelegram}<span>Telegram</span></a>
                      <a href="#" onclick="shareViaSMS(); return false;">${svgIconSMS}<span>SMS</span></a>
                  </div>`;
-             resultElement.insertAdjacentHTML('afterend', buttonsAndMenuHTML);
-             resultElement.innerHTML = formatOutputText(textToShow || "Рекомендации не найдены.");
+             // Вставляем кнопки ПОСЛЕ personShareDetailsContainer, чтобы они были внизу
+             personShareDetailsContainer.insertAdjacentHTML('afterend', buttonsAndMenuHTML);
+
+
+             // Отображаем детализацию по людям (эта функция остается)
+             displayPersonShareDetails(filterType);
+
+             // Показываем фильтры
+             filtersWrapper.style.display = "flex";
+
              hideShareMenu();
         }
 
-        function filter_recommendations(filterType) { /* ... без изменений ... */
-             if (!recommendations || Object.keys(recommendations).length === 0) { return; }
-            displayRecommendations(filterType);
-            resultElement.scrollTop = 0;
+        function displayPersonShareDetails(filterType) {
+            personShareDetailsContainer.innerHTML = ''; // Очищаем
+
+            // --- ИЗМЕНЕНИЕ: Проверяем peoples_list ---
+            if (!finalRecommendations || !finalRecommendations.peoples_list || finalRecommendations.peoples_list.length === 0) {
+                return; // Нет данных по людям
+            }
+            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+            let detailsHtml = '<h3>Детализация по людям:</h3>';
+            // --- ИЗМЕНЕНИЕ: Используем peoples_list ---
+            const peopleDataList = finalRecommendations.peoples_list;
+
+            // Сортируем список людей по имени для консистентного отображения
+            const sortedPeopleList = [...peopleDataList].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            sortedPeopleList.forEach(personItem => {
+                const name = personItem.name;
+                const shares = personItem.shares; // Объект с долями
+                // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+                if (!name || !shares) return; // Пропускаем некорректные записи
+
+                let amountToShow = 0;
+                let shareTypeDescription = "";
+
+                // Выбираем нужную сумму в зависимости от фильтра (логика та же)
+                switch (filterType) {
+                    case 'equally': amountToShow = shares.equally; shareTypeDescription = "Поровну"; break;
+                    case 'who_more_eat_then_more_pay': amountToShow = shares.who_more_eat_then_more_pay; shareTypeDescription = "Кто больше ел"; break;
+                    case 'who_more_cost_then_more_pay': amountToShow = shares.who_more_cost_then_more_pay; shareTypeDescription = "Кто дороже заказал"; break;
+                    case 'proportional_division_by_the_cost_of_orders': amountToShow = shares.proportional_division_by_the_cost_of_orders; shareTypeDescription = "Пропорционально"; break;
+                    default: amountToShow = shares.equally; shareTypeDescription = "Поровну";
+                }
+
+                // Проверка типа и форматирование суммы
+                const numericAmount = typeof amountToShow === 'number' ? amountToShow : 0;
+                const amountFormatted = numericAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
+
+
+                // Проверяем наличие контактов для кнопки "Поделиться" (логика та же)
+                const contactInfo = contacts.find(c => c.name === name);
+                const canShare = contactInfo && (contactInfo.vk || contactInfo.tg || contactInfo.phone);
+                const shareButtonDisabled = !canShare ? 'disabled' : '';
+                const shareButtonTitle = canShare ? `Поделиться суммой ${amountFormatted} с ${name}` : `У ${name} не указаны VK/TG/Телефон для отправки`;
+
+                detailsHtml += `
+                    <div class="person-share-item">
+                        <span class="person-share-name">${name}</span>
+                        <div class="person-share-amounts">
+                             <span class="person-share-amount" title="${shareTypeDescription}">${amountFormatted}</span>
+                             <button class="share-person-btn" onclick="shareWithPerson('${name}', ${numericAmount})" ${shareButtonDisabled} title="${shareButtonTitle}">
+                                 Поделиться
+                             </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            personShareDetailsContainer.innerHTML = detailsHtml;
         }
 
-        async function upload_receipt() {
-            const file = imageInput.files[0];
-            const numPeople = numPeopleInput.value;
-            let tipString = tipAmountInput.value.replace('₽','').trim().replace(',','.');
-            const tipAmount = parseFloat(tipString) || 0;
 
-            if (!file || !numPeople || parseInt(numPeople, 10) <= 0) { alert("Пожалуйста, выберите изображение чека и укажите корректное количество людей (> 0)."); return; }
-            if (tipAmount < 0) { alert("Сумма чаевых не может быть отрицательной."); tipAmountInput.value = ''; tipAmountInput.focus(); return; }
+        function filter_recommendations(filterType) {
+             if (!finalRecommendations || Object.keys(finalRecommendations).length === 0) { return; }
+            displayRecommendations(filterType); // Перерисовываем и текст, и детализацию
+            // resultElement.scrollTop = 0; // Прокрутка основного текста вверх
+        }
 
-            uploadButton.disabled = true;
-            previewWrapper.style.display = 'none';
-            resultContainer.style.display = 'none';
-            resultElement.innerHTML = '';
-            filtersWrapper.style.display = 'none';
-            hideShareMenu();
-            // <<< Управляем классом на body >>>
-            document.body.classList.remove('results-shown');
+        // --- Функции Копирования и Шаринга (Общие и Персональные) ---
 
-            statusElement.textContent = "Обработка...";
-            statusElement.className = 'status processing';
-            statusElement.style.display = 'block';
+        function getResultTextForSharing(personName = null, amount = null) {
+            if (personName && amount !== null) {
+                 // Формируем персональное сообщение
+                 const amountFormatted = amount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
+                 return `Привет! Твоя доля за недавние посиделки: ${amountFormatted}. Спасибо! 😊`;
+            } else {
+                 // Формируем общий текст из текущего отображения
+                 const resultDiv = document.getElementById('result');
+                 if (!resultDiv) return "";
+                 // Копируем как текст, заменяя <br> на \n
+                 const tempDiv = document.createElement('div');
+                 tempDiv.innerHTML = resultDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+                 let text = tempDiv.innerText || tempDiv.textContent || "";
 
-            const formData = new FormData();
-            formData.append("receipt_image", file);
-            formData.append("num_people", numPeople);
-            formData.append("tea_money", tipAmount);
-
-            let statusTimer = null;
-
-            try {
-                const response = await fetch('/upload_receipt', { method: "POST", body: formData });
-                clearTimeout(statusTimer);
-
-                if (!response.ok) {
-                    let errorMsg = `Ошибка ${response.status}`;
-                    try { const errorData = await response.json(); errorMsg = errorData.detail || errorData.message || errorMsg; } catch (e) { errorMsg = `Ошибка ${response.status}: ${response.statusText}`; }
-                    statusElement.textContent = errorMsg;
-                    statusElement.className = 'status error';
-                    statusElement.style.display = 'block';
-                    // <<< Управляем классом на body >>>
-                    document.body.classList.remove('results-shown');
-                    throw new Error(errorMsg);
-                }
-
-                const responseData = await response.json();
-                console.log("Получены данные:", responseData);
-
-                if (responseData.is_restaurant === true) {
-                    recommendations = responseData;
-                    statusElement.textContent = "Обработка завершена!";
-                    statusElement.className = 'status success';
-                    statusElement.style.display = 'block';
-                    statusTimer = setTimeout(() => { statusElement.style.display = 'none'; }, 1800);
-                    // <<< Управляем классом на body >>>
-                    document.body.classList.add('results-shown');
-
-                    displayRecommendations('equally');
-                    filtersWrapper.style.display = "flex";
-
-                    setTimeout(() => {
-                         containerElement.scrollTo({ top: containerElement.scrollHeight, behavior: 'smooth' });
-                     }, 100);
-
-                } else {
-                    const errorText = "Ошибка: Загруженное изображение не похоже на чек из ресторана.";
-                    statusElement.textContent = errorText;
-                    statusElement.className = 'status error';
-                    statusElement.style.display = 'block';
-                    recommendations = {};
-                    resultContainer.style.display = "none";
-                    filtersWrapper.style.display = "none"; hideShareMenu();
-                    // <<< Управляем классом на body >>>
-                    document.body.classList.remove('results-shown');
-                }
-
-            } catch (error) {
-                console.error("Ошибка при обработке чека:", error);
-                clearTimeout(statusTimer);
-                 if (statusElement.style.display === 'none' || !statusElement.classList.contains('error')) {
-                    statusElement.textContent = `Ошибка: ${error.message || "Не удалось обработать чек"}`;
-                    statusElement.className = 'status error';
-                    statusElement.style.display = 'block';
+                 // Добавляем детализацию по людям, если она есть
+                 const detailsContainer = document.getElementById('person-share-details-container');
+                 if (detailsContainer && detailsContainer.offsetParent !== null) { // Проверяем видимость
+                     text += "\n\n--- Детализация ---\n";
+                     detailsContainer.querySelectorAll('.person-share-item').forEach(item => {
+                         const name = item.querySelector('.person-share-name')?.innerText || '';
+                         const amountText = item.querySelector('.person-share-amount')?.innerText || '';
+                         if (name && amountText) {
+                             text += `${name}: ${amountText}\n`;
+                         }
+                     });
                  }
-                recommendations = {};
-                resultContainer.style.display = "none";
-                filtersWrapper.style.display = "none"; hideShareMenu();
-                // <<< Управляем классом на body >>>
-                document.body.classList.remove('results-shown');
-            } finally {
-                toggleUploadButton();
+                 return text.trim();
             }
         }
 
-        window.onload = () => { /* ... без изменений ... */
-             toggleUploadButton();
+        async function copyResultText(personName = null, amount = null) {
+            const textToCopy = getResultTextForSharing(personName, amount);
+            const buttonId = personName ? null : 'copy-result-btn'; // ID только для общей кнопки
+            const buttonElement = buttonId ? document.getElementById(buttonId) : event.target; // Используем event.target для персональных кнопок
+
+            if (!textToCopy) { console.warn("Нет текста для копирования."); return; }
+            if (!buttonElement) { console.warn("Не найден элемент кнопки для обратной связи."); return; }
+
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                const originalContent = buttonElement.innerHTML;
+                const originalTitle = buttonElement.title;
+                buttonElement.innerHTML = '✅';
+                buttonElement.title = 'Скопировано!';
+                if (buttonId) buttonElement.style.color = '#08a552'; // Стиль для общей кнопки
+                else buttonElement.style.backgroundColor = '#08a552'; // Стиль для персональной
+
+                setTimeout(() => {
+                    // Проверяем, существует ли еще кнопка
+                    const currentButton = buttonId ? document.getElementById(buttonId) : buttonElement;
+                    if (currentButton) {
+                         currentButton.innerHTML = originalContent;
+                         currentButton.title = originalTitle;
+                         if (buttonId) currentButton.style.color = '';
+                         else currentButton.style.backgroundColor = '';
+                    }
+                }, 1500);
+            } catch (err) {
+                console.error('Ошибка копирования: ', err);
+                alert('Не удалось скопировать текст.');
+                 const originalContent = buttonElement.innerHTML;
+                 const originalTitle = buttonElement.title;
+                 buttonElement.innerHTML = '❌';
+                 buttonElement.title = 'Ошибка копирования';
+                 if (buttonId) buttonElement.style.color = '#cb0001';
+                 else buttonElement.style.backgroundColor = '#cb0001';
+
+                 setTimeout(() => {
+                     const currentButton = buttonId ? document.getElementById(buttonId) : buttonElement;
+                     if (currentButton) {
+                         currentButton.innerHTML = originalContent;
+                         currentButton.title = originalTitle;
+                         if (buttonId) currentButton.style.color = '';
+                         else currentButton.style.backgroundColor = '';
+                     }
+                 }, 2000);
+            }
+             hideShareMenu(); // Скрываем общее меню шаринга
+        }
+
+        function toggleShareMenu() {
+             const menu = document.getElementById('share-menu');
+             if (menu) { menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
+         }
+        function hideShareMenu() {
+             const menu = document.getElementById('share-menu'); if (menu) { menu.style.display = 'none'; }
+         }
+
+        // Функции для шаринга ОБЩЕГО результата (VK, TG, SMS)
+        function shareViaVK() {
+            const description = getResultTextForSharing(); // Общий текст
+            const title = "ПоДЕЛИ! - Результат деления";
+            if (!description) { console.warn("Нет текста для VK."); return; }
+            const shareUrl = `https://vk.com/share.php?title=${encodeURIComponent(title)}&comment=${encodeURIComponent(description.substring(0, 1000))}`; // Ограничим длину
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
+            hideShareMenu();
+        }
+        function shareViaTelegram() {
+            const textToShare = getResultTextForSharing(); // Общий текст
+             if (!textToShare) { console.warn("Нет текста для TG."); return; }
+            // Ограничим длину текста для URL
+            const shortText = textToShare.length > 3500 ? textToShare.substring(0, 3500) + "..." : textToShare;
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(' ') }&text=${encodeURIComponent(shortText)}`;
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
+            hideShareMenu();
+        }
+        function shareViaSMS() {
+            const text = getResultTextForSharing(); // Общий текст
+             if (!text) { console.warn("Нет текста для SMS."); return; }
+            // SMS имеет строгие ограничения по длине, особенно в URL
+            const body = text.substring(0, 160); // Примерное ограничение
+            window.location.href = `sms:?body=${encodeURIComponent(body)}`;
+            hideShareMenu();
+        }
+
+        // Функция для шаринга ПЕРСОНАЛЬНОЙ суммы
+        function shareWithPerson(personName, amount) {
+            const contact = contacts.find(c => c.name === personName);
+            if (!contact) {
+                showStatus(`Контакт "${personName}" не найден.`, 'error', 3000);
+                return;
+            }
+            
+            const message = getResultTextForSharing(personName, amount); // Персональное сообщение
+            const encodedMessage = encodeURIComponent(message);
+            let shareUrl = null;
+            let historyType = null;
+
+            // Приоритет: TG -> VK -> SMS (если есть номер)
+            if (contact.tg) {
+                shareUrl = generateTgLink(contact.tg, encodedMessage);
+                historyType = 'request_tg';
+            } else if (contact.vk) {
+                shareUrl = generateVkLink(contact.vk, encodedMessage);
+                historyType = 'request_vk';
+            } else if (contact.phone) {
+                // Для SMS используем другой формат
+                const smsBody = message.substring(0, 160); // Ограничение для SMS
+                shareUrl = `sms:${contact.phone}?body=${encodeURIComponent(smsBody)}`;
+                historyType = 'request_sms'; // Добавим тип для истории
+            }
+
+            if (shareUrl) {
+                console.log(`Sharing with ${personName} via ${historyType}: ${shareUrl}`);
+                // Открываем ссылку
+                 try {
+                     // Пытаемся открыть в новой вкладке (для VK/TG)
+                     if (historyType !== 'request_sms') {
+                         window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                     } else {
+                         // Для SMS просто переходим по ссылке
+                         window.location.href = shareUrl;
+                     }
+                     // Добавляем в историю
+                     addHistoryEntry(historyType, contact, amount);
+                 } catch (e) {
+                     console.error("Ошибка при открытии ссылки:", e);
+                     showStatus("Не удалось открыть ссылку для отправки.", "error", 3000);
+                 }
+            } else {
+                showStatus(`У ${personName} нет VK/TG/Телефона для отправки.`, 'error', 4000);
+            }
+        }
+
+        // Вспомогательные функции генерации ссылок (как в contacts.html)
+        function generateVkLink(vkInput, encodedMessage) {
+            const vkLink = vkInput.trim();
+            if (vkLink.includes('vk.com/id')) {
+                const userId = vkLink.split('id')[1]?.match(/\d+/)?.[0];
+                if (userId) return `https://vk.com/im?sel=${userId}&msg=${encodedMessage}`;
+            } else if (vkLink.includes('vk.com/')) {
+                const username = vkLink.split('vk.com/')[1]?.split('/')[0]?.split('?')[0];
+                if (username && !username.includes('id') && username !== "im") {
+                     return `https://vk.me/${username}?message=${encodedMessage}`;
+                }
+            } else if (vkLink.startsWith('vk.me/')) {
+                 const username = vkLink.split('vk.me/')[1]?.split('/')[0]?.split('?')[0];
+                 if (username) return `https://vk.me/${username}?message=${encodedMessage}`;
+            }
+            return `${vkLink}${vkLink.includes('?') ? '&' : '?'}msg=${encodedMessage}`;
+        }
+
+        function generateTgLink(tgInput, encodedMessage) {
+            const tgLink = tgInput.trim();
+            const usernameOrLink = tgLink.replace(/^@/, '').replace(/^(https?:\/\/)?(www\.)?t\.me\//, '').split('?')[0];
+            return `https://t.me/${usernameOrLink}?text=${encodedMessage}`;
+        }
+
+        // --- Добавление в историю (как в contacts.html) ---
+        function addHistoryEntry(type, contact, amount = null) {
+            let transferHistory = [];
+            const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+             if (storedHistory) {
+                 try { transferHistory = JSON.parse(storedHistory); } catch(e) { console.error("History parse error"); }
+             }
+
+            const numericAmount = (typeof amount === 'number' && !isNaN(amount) && amount > 0) ? amount : null;
+            const newEntry = {
+                type: type, // 'request_vk', 'request_tg', 'request_sms'
+                contactName: contact.name || 'Без имени',
+                amount: numericAmount,
+                timestamp: Date.now()
+            };
+            transferHistory.push(newEntry);
+            try {
+                 localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(transferHistory));
+            } catch (e) {
+                 console.error("Ошибка сохранения истории:", e);
+            }
+        }
+
+
+        // --- Инициализация при загрузке ---
+        window.onload = () => {
+             resetApp(); // Начинаем с чистого состояния
+             loadContacts(); // Загружаем контакты для селекта
+             // Скрываем меню шаринга по умолчанию
              hideShareMenu();
+             // Форматируем поле чаевых, если там что-то есть (например, из автозаполнения)
              if (tipAmountInput.value) { formatTipInput(tipAmountInput); }
+
+             // Глобальный обработчик кликов для скрытия статуса и меню шаринга
              document.body.addEventListener('click', (event) => {
+                 // Скрытие статуса
                  if (statusElement.style.display !== 'none' && !statusElement.contains(event.target)) {
                     const isProcessing = statusElement.classList.contains('processing');
-                    const clickedUpload = uploadButton.contains(event.target);
-                     if (!(isProcessing && clickedUpload)) { statusElement.style.display = 'none'; }
+                    // Не скрывать processing при клике на кнопки действий
+                    const clickedPreprocess = preprocessButton.contains(event.target);
+                    const clickedCalculate = calculateSplitButton.contains(event.target);
+                     if (!(isProcessing && (clickedPreprocess || clickedCalculate))) {
+                         hideStatus();
+                     }
                  }
-             }, true);
+                 // Скрытие меню шаринга
+                 const menu = document.getElementById('share-menu');
+                 const shareButton = document.getElementById('share-result-btn');
+                 if (menu && menu.style.display === 'block' && !menu.contains(event.target) && shareButton && !shareButton.contains(event.target)) {
+                     hideShareMenu();
+                 }
+             }, true); // Используем capture фазу
         };
+
     </script>
 
 </body>
