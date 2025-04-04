@@ -581,12 +581,29 @@
                 currentPeopleAssignments[personName] = currentPeopleAssignments[personName].filter(item => item !== itemName);
             }
             console.log("Обновленное распределение:", currentPeopleAssignments);
-            // Кнопка расчета не зависит от выбора блюд, только от наличия людей
+            toggleCalculateSplitButton();
+            // Кнопка расчета зависит от выбора блюд, от наличия людей
         }
 
         function toggleCalculateSplitButton() {
-             // Кнопка активна, если добавлен хотя бы один человек для распределения
-             calculateSplitButton.disabled = Object.keys(currentPeopleAssignments).length === 0;
+             const peopleExist = Object.keys(currentPeopleAssignments).length > 0;
+             let itemsAssigned = false; // Флаг, что хотя бы один предмет назначен
+
+             if (peopleExist) {
+                 // Проверяем, есть ли хоть у кого-то назначенные блюда
+                 for (const personName in currentPeopleAssignments) {
+                     // Если у текущего человека есть хотя бы одно блюдо в массиве
+                     if (currentPeopleAssignments[personName].length > 0) {
+                         itemsAssigned = true; // Ставим флаг
+                         break; // Дальше можно не проверять, одного достаточно
+                     }
+                 }
+             }
+
+             // Кнопка НЕАКТИВНА (!disabled), если:
+             // - Нет людей ИЛИ
+             // - Люди есть, НО ни одного блюда не назначено
+             calculateSplitButton.disabled = !peopleExist || !itemsAssigned;
         }
 
 
