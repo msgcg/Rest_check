@@ -323,7 +323,7 @@
             assignedPeopleContainer.innerHTML = ''; // Очистка контейнера людей
 
             // Скрытие/отображение секций
-            initialUploadSection.style.display = 'block';
+            initialUploadSection.style.display = 'flex'; // <<< ИЗМЕНЕНО НА FLEX
             itemAssignmentSection.style.display = 'none';
             resultsSection.style.display = 'none';
 
@@ -352,7 +352,7 @@
             // Сбрасываем предыдущие результаты, если выбрали новый файл
             resultsSection.style.display = 'none';
             itemAssignmentSection.style.display = 'none';
-            initialUploadSection.style.display = 'block'; // Убедимся, что секция видна
+            initialUploadSection.style.display = 'flex'; // <<< ИЗМЕНЕНО НА FLEX // Убедимся, что секция видна
             hideStatus();
             document.body.classList.remove('results-shown');
             headerElement.style.display = 'block';

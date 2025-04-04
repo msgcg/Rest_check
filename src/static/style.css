@@ -83,7 +83,14 @@ body {
     padding-top: calc(300px + env(safe-area-inset-top));
     overflow-x: hidden;
 }
-
+#initial-upload-section {
+    display: flex;           /* Для первоначальной отрисовки и как базовый стиль */
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    /* Убери align-self: center у .input-wrapper, если добавлял его */
+}
 /* --- Специфичные стили для Body на странице Share --- */
 body.share-page-body {
     flex-direction: column;
