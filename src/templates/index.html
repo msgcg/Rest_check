@@ -6,278 +6,99 @@
     <title>ПоДЕЛИ!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Дополнительные стили для новой секции */
-        #item-assignment-section {
-            display: none; /* Скрыто по умолчанию */
-            width: 100%;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid var(--light-grey-border);
+        /* =============================================== */
+        /* Стили для всплывающего окна выбора шаринга     */
+        /* С АВТОМАТИЧЕСКОЙ сменой темы (prefers-color-scheme) */
+        /* =============================================== */
+
+        /* --- Переменные для тем --- */
+        :root {
+            /* Светлая тема (по умолчанию) */
+            --popup-bg: white;
+            --popup-border: #ccc;
+            --popup-text: #333;
+            --popup-shadow: rgba(0, 0, 0, 0.15);
+            --popup-btn-bg: #f0f0f0;
+            --popup-btn-text: #333;
+            --popup-btn-hover-bg: #e0e0e0;
+            --popup-btn-disabled-bg: #e9e9e9;
+            --popup-btn-disabled-text: #999;
         }
-         /* Стили для темной темы */
+
         @media (prefers-color-scheme: dark) {
-            #item-assignment-section {
-                 border-top: 1px solid var(--light-grey-border-dark-theme);
+            :root {
+                /* Темная/AMOLED тема (переопределяем переменные) */
+                --popup-bg: #0a0a0a; /* Очень темно-серый, почти черный */
+                --popup-border: #333; /* Темная граница */
+                --popup-text: #e0e0e0; /* Светло-серый текст */
+                --popup-shadow: rgba(0, 0, 0, 0.5); /* Более темная тень */
+                --popup-btn-bg: #282828; /* Темно-серый фон кнопок */
+                --popup-btn-text: #e0e0e0; /* Светло-серый текст кнопок */
+                --popup-btn-hover-bg: #1f1f1f; /* Еще темнее при наведении */
+                --popup-btn-disabled-bg: #1a1a1a; /* Почти как фон попапа для неактивных */
+                --popup-btn-disabled-text: #555; /* Очень темный серый текст для неактивных */
             }
-            .assignment-person-card {
-                 background-color: var(--hover-green-bg-dark-theme);
-                 border: 1px solid var(--border-green-dark-theme);
-            }
-            .assignment-item label {
-                 color: var(--text-color-dark-theme);
-            }
-            .assignment-item input[type="checkbox"]:checked + label {
-                 color: var(--primary-color-dark-theme);
-            }
-            .add-person-controls select, .add-person-controls button {
-                 background-color: var(--input-bg-color-dark-theme);
-                 color: var(--text-color-dark-theme);
-                 border: 1px solid var(--input-border-color-dark-theme);
-            }
-             .add-person-controls button:hover {
-                 background-color: var(--active-green-bg-dark-theme);
-             }
-             #calculate-split-btn {
-                 background-color: var(--primary-color); /* Цвет кнопки может остаться ярким */
-             }
-             #calculate-split-btn:hover {
-                 background-color: var(--dark-green);
-             }
-             #calculate-split-btn:disabled {
-                 background-color: var(--disabled-button-bg-dark);
-                 color: var(--disabled-button-text-dark);
-             }
-             .share-person-btn {
-                 background-color: var(--grey-color-dark-theme);
-                 color: var(--white-color-dark-theme);
-             }
-             .share-person-btn:hover {
-                 background-color: #555;
-             }
         }
 
-
-        .assignment-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .add-person-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .add-person-controls select {
-            padding: 8px 10px;
-            border: 1px solid var(--input-border-color);
+        /* --- Основные стили попапа (используют переменные) --- */
+        .share-options-popup {
+            display: none; /* Скрыто по умолчанию */
+            position: absolute; /* Абсолютное позиционирование */
+            background-color: var(--popup-bg); /* Используем переменную */
+            border: 1px solid var(--popup-border); /* Используем переменную */
             border-radius: 8px;
-            flex-grow: 1;
-            max-width: 250px; /* Ограничим ширину селекта */
-        }
-
-        .add-person-controls button {
-            padding: 8px 15px;
-            background-color: var(--primary-color);
-            color: var(--white-color);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            box-shadow: 0 5px 15px var(--popup-shadow); /* Используем переменную */
+            padding: 10px;
+            z-index: 1001; /* Выше других элементов */
+            min-width: 150px; /* Можно немного увеличить мин. ширину */
             font-size: 0.9em;
-            transition: background-color 0.3s;
-        }
-        .add-person-controls button:hover {
-            background-color: var(--dark-green);
+            color: var(--popup-text); /* Используем переменную */
         }
 
-        #assigned-people-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .assignment-person-card {
-            background-color: var(--light-green-bg);
-            border: 1px solid var(--border-green);
-            border-radius: 10px;
-            padding: 15px;
-            position: relative; /* Для кнопки удаления */
-        }
-
-        .assignment-person-name {
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .remove-person-btn {
-             background: none;
-             border: none;
-             color: var(--delete-color);
-             font-size: 1.2em;
-             cursor: pointer;
-             padding: 0 5px;
-             line-height: 1;
-        }
-         .remove-person-btn:hover {
-             color: darkred;
-         }
-
-        .assignment-items-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Адаптивная сетка */
-            gap: 10px;
-        }
-
-        .assignment-item {
+        /* --- Стили кнопок внутри попапа (используют переменные) --- */
+        .share-options-popup button {
             display: flex;
             align-items: center;
-        }
-
-        .assignment-item input[type="checkbox"] {
-            margin-right: 8px;
+            width: 100%;
+            padding: 9px 12px; /* Чуть больше паддинг */
+            margin-bottom: 6px;
+            border: none;
+            background-color: var(--popup-btn-bg); /* Используем переменную */
+            color: var(--popup-btn-text); /* Используем переменную */
+            border-radius: 5px;
             cursor: pointer;
-            width: 18px; /* Увеличим размер чекбокса */
+            text-align: left;
+            transition: background-color 0.2s ease, color 0.2s ease; /* Добавим color в transition */
+        }
+
+        .share-options-popup button:last-child {
+            margin-bottom: 0;
+        }
+
+        .share-options-popup button:hover {
+            background-color: var(--popup-btn-hover-bg); /* Используем переменную */
+        }
+
+        .share-options-popup button:disabled {
+            background-color: var(--popup-btn-disabled-bg); /* Используем переменную */
+            color: var(--popup-btn-disabled-text); /* Используем переменную */
+            cursor: not-allowed;
+        }
+
+        /* --- Стили иконок внутри кнопок --- */
+        .share-options-popup button svg {
+            width: 18px;
             height: 18px;
-        }
-        .assignment-item input[type="checkbox"]:checked + label {
-             color: var(--primary-color);
-             font-weight: 500;
-        }
-
-        .assignment-item label {
-            font-size: 0.95em;
-            cursor: pointer;
-            /* Позволяет переносить длинные названия */
-            word-break: break-word;
-            line-height: 1.3;
-            display: inline-block; /* Чтобы label занимал место */
-        }
-        .item-price {
-            font-size: 0.8em;
-            color: var(--grey-color);
-            margin-left: 5px;
-            white-space: nowrap; /* Не переносить цену */
+            margin-right: 10px; /* Немного увеличить отступ */
+            fill: currentColor; /* Иконка наследует цвет текста кнопки */
+            vertical-align: middle;
+            flex-shrink: 0; /* Предотвратить сжатие иконки */
         }
 
-        #calculate-split-btn-wrapper {
-            text-align: center;
-            margin-top: 25px;
+        /* --- Убедимся, что кнопка "Поделиться" имеет position: relative --- */
+        .person-share-amounts .share-person-btn {
+            position: relative; /* Это важно для позиционирования popup */
         }
-        #calculate-split-btn {
-             padding: 12px 25px;
-             background-color: var(--primary-color);
-             color: var(--white-color);
-             border: none;
-             border-radius: 10px;
-             cursor: pointer;
-             font-size: 1em;
-             font-weight: bold;
-             transition: background-color 0.3s;
-        }
-         #calculate-split-btn:hover {
-             background-color: var(--dark-green);
-         }
-         #calculate-split-btn:disabled {
-             background-color: var(--disabled-button-bg);
-             cursor: not-allowed;
-         }
-
-         /* Стили для результатов с долями людей */
-         .person-share-details {
-             margin-top: 15px;
-             padding-top: 15px;
-             border-top: 1px dashed var(--light-grey-border);
-         }
-         .person-share-details h3 {
-             margin-bottom: 10px;
-             font-size: 1.1em;
-             color: var(--dark-green);
-             text-align: center;
-         }
-         .person-share-item {
-             display: flex;
-             justify-content: space-between;
-             align-items: center;
-             padding: 8px 5px;
-             border-bottom: 1px solid var(--border-green);
-             flex-wrap: wrap; /* Перенос на моб */
-             gap: 5px;
-         }
-         .person-share-item:last-child {
-             border-bottom: none;
-         }
-         .person-share-name {
-             font-weight: bold;
-             flex-basis: 40%; /* Место под имя */
-             min-width: 100px;
-         }
-         .person-share-amounts {
-             display: flex;
-             gap: 10px;
-             align-items: center;
-             flex-grow: 1;
-             justify-content: flex-end; /* Кнопку и суммы вправо */
-             flex-wrap: wrap; /* Перенос сумм */
-         }
-         .person-share-amount {
-             font-size: 0.9em;
-             white-space: nowrap;
-             /* Можно добавить title с типом деления */
-         }
-         .share-person-btn {
-             padding: 4px 8px;
-             font-size: 0.8em;
-             background-color: var(--grey-color);
-             color: var(--white-color);
-             border: none;
-             border-radius: 5px;
-             cursor: pointer;
-             margin-left: 10px; /* Отступ от сумм */
-             white-space: nowrap;
-         }
-         .share-person-btn:hover {
-             opacity: 0.8;
-         }
-         .share-person-btn:disabled {
-             opacity: 0.5;
-             cursor: not-allowed;
-         }
-
-         /* Стили для темной темы для долей */
-         @media (prefers-color-scheme: dark) {
-             .person-share-details {
-                 border-top-color: var(--light-grey-border-dark-theme);
-             }
-             .person-share-details h3 {
-                 color: var(--dark-green-dark-theme);
-             }
-             .person-share-item {
-                 border-bottom-color: var(--border-green-dark-theme);
-             }
-             .person-share-amount {
-                 /* Можно сделать чуть светлее */
-             }
-             .share-person-btn {
-                 background-color: #555;
-                 color: var(--text-color-dark-theme);
-             }
-             .share-person-btn:hover {
-                 background-color: #666;
-             }
-             .share-person-btn:disabled {
-                 background-color: #444;
-             }
-         }
-
     </style>
 </head>
 <body > <!-- Класс results-shown будет добавляться/удаляться сюда -->
@@ -356,13 +177,17 @@
                 </div>
                  <!-- Кнопка Назад/Новый чек -->
                  <div style="text-align: center; margin-top: 20px;">
-                     <button onclick="resetApp()" style="padding: 10px 20px; font-size: 0.9em;">Новый чек</button>
+                    <!-- <<< ДОБАВЛЕН ID >>> -->
+                    <button id="reset-app-btn" onclick="resetApp()" style="padding: 10px 20px; font-size: 0.9em;">Новый чек</button>
                  </div>
             </div> <!-- Конец #results-section -->
 
         </div> <!-- Конец .container-content -->
     </div> <!-- End .container -->
-
+    <!-- Всплывающее окно для выбора способа шаринга с персоной -->
+    <div id="person-share-options-popup" class="share-options-popup">
+        <!-- Кнопки будут добавлены сюда динамически JS -->
+    </div>
     <script>
         // --- Глобальные переменные состояния ---
         let currentExtractedText = null;
@@ -374,6 +199,7 @@
         const HISTORY_STORAGE_KEY = 'myContactsHistory_v4_req'; // Ключ как в contacts.html
 
         // --- DOM Элементы ---
+        const personShareOptionsPopup = document.getElementById('person-share-options-popup'); // Добавлено
         const initialUploadSection = document.getElementById('initial-upload-section');
         const itemAssignmentSection = document.getElementById('item-assignment-section');
         const resultsSection = document.getElementById('results-section');
@@ -953,10 +779,10 @@
                     <div class="person-share-item">
                         <span class="person-share-name">${name}</span>
                         <div class="person-share-amounts">
-                             <span class="person-share-amount" title="${shareTypeDescription}">${amountFormatted}</span>
-                             <button class="share-person-btn" onclick="shareWithPerson('${name}', ${numericAmount})" ${shareButtonDisabled} title="${shareButtonTitle}">
-                                 Поделиться
-                             </button>
+                            <span class="person-share-amount" title="${shareTypeDescription}">${amountFormatted}</span>
+                            <button class="share-person-btn" onclick="shareWithPerson(event, '${name}', ${numericAmount})" ${shareButtonDisabled} title="${shareButtonTitle}">
+                                Поделиться
+                            </button>
                         </div>
                     </div>
                 `;
@@ -1091,54 +917,31 @@
         }
 
         // Функция для шаринга ПЕРСОНАЛЬНОЙ суммы
-        function shareWithPerson(personName, amount) {
+        // Функция для ПОКАЗА ВЫБОРА шаринга ПЕРСОНАЛЬНОЙ суммы
+        function shareWithPerson(event, personName, amount) {
+            event.stopPropagation(); // Остановить всплытие, чтобы не закрыть сразу
+            hideShareMenu(); // Скрыть общее меню шаринга, если оно открыто
+
             const contact = contacts.find(c => c.name === personName);
             if (!contact) {
                 showStatus(`Контакт "${personName}" не найден.`, 'error', 3000);
                 return;
             }
-            
-            const message = getResultTextForSharing(personName, amount); // Персональное сообщение
-            const encodedMessage = encodeURIComponent(message);
-            let shareUrl = null;
-            let historyType = null;
 
-            // Приоритет: TG -> VK -> SMS (если есть номер)
-            if (contact.tg) {
-                shareUrl = generateTgLink(contact.tg, encodedMessage);
-                historyType = 'request_tg';
-            } else if (contact.vk) {
-                shareUrl = generateVkLink(contact.vk, encodedMessage);
-                historyType = 'request_vk';
-            } else if (contact.phone) {
-                // Для SMS используем другой формат
-                const smsBody = message.substring(0, 160); // Ограничение для SMS
-                shareUrl = `sms:${contact.phone}?body=${encodeURIComponent(smsBody)}`;
-                historyType = 'request_sms'; // Добавим тип для истории
-            }
+            const availableMethods = [];
+            if (contact.tg) availableMethods.push('tg');
+            if (contact.vk) availableMethods.push('vk');
+            if (contact.phone) availableMethods.push('sms');
 
-            if (shareUrl) {
-                console.log(`Sharing with ${personName} via ${historyType}: ${shareUrl}`);
-                // Открываем ссылку
-                 try {
-                     // Пытаемся открыть в новой вкладке (для VK/TG)
-                     if (historyType !== 'request_sms') {
-                         window.open(shareUrl, '_blank', 'noopener,noreferrer');
-                     } else {
-                         // Для SMS просто переходим по ссылке
-                         window.location.href = shareUrl;
-                     }
-                     // Добавляем в историю
-                     addHistoryEntry(historyType, contact, amount);
-                 } catch (e) {
-                     console.error("Ошибка при открытии ссылки:", e);
-                     showStatus("Не удалось открыть ссылку для отправки.", "error", 3000);
-                 }
-            } else {
+            if (availableMethods.length === 0) {
                 showStatus(`У ${personName} нет VK/TG/Телефона для отправки.`, 'error', 4000);
+                hideShareOptionsPopup(); // Скрыть, если вдруг был открыт
+                return;
             }
-        }
 
+            // Показываем попап с опциями
+            showShareOptionsPopup(contact, amount, event.target, availableMethods);
+        }
         // Вспомогательные функции генерации ссылок (как в contacts.html)
         function generateVkLink(vkInput, encodedMessage) {
             const vkLink = vkInput.trim();
@@ -1185,7 +988,167 @@
                  console.error("Ошибка сохранения истории:", e);
             }
         }
+        // --- Новые функции для попапа выбора шаринга ---
 
+        function showShareOptionsPopup(contact, amount, buttonElement, methods) {
+            personShareOptionsPopup.innerHTML = ''; // Очистить предыдущие кнопки
+
+            methods.forEach(method => {
+                let buttonText = '';
+                let iconSvg = '';
+                switch (method) {
+                    case 'tg':
+                        buttonText = 'Telegram';
+                        iconSvg = svgIconTelegram; // Используем существующие SVG
+                        break;
+                    case 'vk':
+                        buttonText = 'ВКонтакте';
+                        iconSvg = svgIconVK;
+                        break;
+                    case 'sms':
+                        buttonText = 'SMS';
+                        iconSvg = svgIconSMS;
+                        break;
+                }
+
+                if (buttonText) {
+                    const btn = document.createElement('button');
+                    // Используем JSON.stringify для безопасной передачи объекта контакта
+                    // и Number() для явного приведения amount к числу
+                    btn.onclick = () => executeShareAction(JSON.parse(JSON.stringify(contact)), Number(amount), method);
+                    btn.innerHTML = `${iconSvg}<span>${buttonText}</span>`;
+                    personShareOptionsPopup.appendChild(btn);
+                }
+            });
+
+            // Позиционирование попапа
+            // --- ОБНОВЛЕННОЕ ПОЗИЦИОНИРОВАНИЕ ---
+            const rect = buttonElement.getBoundingClientRect();
+            // Рассчитываем размеры ПОСЛЕ добавления контента, но ПЕРЕД показом
+            personShareOptionsPopup.style.display = 'block'; // Временно показать для расчета размеров
+            personShareOptionsPopup.style.visibility = 'hidden'; // Но сделать невидимым
+            const popupWidth = personShareOptionsPopup.offsetWidth;
+            const popupHeight = personShareOptionsPopup.offsetHeight;
+            personShareOptionsPopup.style.display = 'none'; // Снова скрыть
+            personShareOptionsPopup.style.visibility = 'visible'; // Вернуть видимость
+
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            const windowPadding = 10; // Отступ от краев окна
+
+            let top, left;
+
+            // Позиция по горизонтали: Стараемся центрировать, но учитываем края экрана
+            let initialLeft = rect.left + window.scrollX + (buttonElement.offsetWidth / 2) - (popupWidth / 2);
+
+            // Коррекция левого края
+            left = Math.max(window.scrollX + windowPadding, initialLeft);
+
+            // Коррекция правого края
+            if (left + popupWidth > window.innerWidth + window.scrollX - windowPadding) {
+                left = window.innerWidth + window.scrollX - popupWidth - windowPadding;
+            }
+            // Убедимся, что после коррекции правого края не ушли за левый
+            left = Math.max(window.scrollX + windowPadding, left);
+
+
+            // Позиция по вертикали (предпочтительно снизу, если есть место, иначе сверху)
+            if (spaceBelow >= popupHeight + 5 || spaceBelow >= spaceAbove) {
+                top = rect.bottom + window.scrollY + 5; // Немного ниже кнопки
+            } else {
+                top = rect.top + window.scrollY - popupHeight - 5; // Немного выше кнопки
+            }
+            // Корректировка, если уходит за верхний край
+            top = Math.max(window.scrollY + windowPadding, top);
+            // Корректировка, если уходит за нижний край (менее вероятно, но возможно)
+            if (top + popupHeight > window.innerHeight + window.scrollY - windowPadding) {
+                top = window.innerHeight + window.scrollY - popupHeight - windowPadding;
+            }
+
+
+            personShareOptionsPopup.style.top = `${top}px`;
+            personShareOptionsPopup.style.left = `${left}px`;
+            personShareOptionsPopup.style.display = 'block'; // Теперь показываем окончательно
+
+            // Добавляем слушатель для закрытия по клику вне попапа
+            // Используем setTimeout, чтобы клик, открывший попап, его сразу не закрыл
+            setTimeout(() => {
+                document.addEventListener('click', handleClickOutsideSharePopup, true);
+            }, 0);
+        }
+
+        function hideShareOptionsPopup() {
+            if (personShareOptionsPopup.style.display === 'block') {
+                personShareOptionsPopup.style.display = 'none';
+                document.removeEventListener('click', handleClickOutsideSharePopup, true);
+            }
+        }
+
+        function handleClickOutsideSharePopup(event) {
+            // Закрываем, если клик был НЕ внутри попапа и НЕ по кнопке, которая его открыла
+            const clickedButton = event.target.closest('.share-person-btn');
+            if (!personShareOptionsPopup.contains(event.target) && !clickedButton) {
+                hideShareOptionsPopup();
+            } else if (clickedButton && personShareOptionsPopup.style.display === 'block'){
+                // Если кликнули снова по той же кнопке, когда попап открыт - закрыть его
+                const isSameButton = personShareOptionsPopup.dataset.openerId === clickedButton.dataset.openerId; // Нужен ID или другой способ идентификации
+                // Простая проверка: если попап видимый и кликнули на любую кнопку "Поделиться" - скрыть
+                hideShareOptionsPopup();
+            }
+        }
+
+
+        // Функция для НЕПОСРЕДСТВЕННОГО выполнения шаринга после выбора метода
+        function executeShareAction(contact, amount, method) {
+            hideShareOptionsPopup(); // Сразу скрыть попап
+
+            const message = getResultTextForSharing(contact.name, amount); // Персональное сообщение
+            const encodedMessage = encodeURIComponent(message);
+            let shareUrl = null;
+            let historyType = null;
+
+            switch (method) {
+                case 'tg':
+                    if (contact.tg) {
+                        shareUrl = generateTgLink(contact.tg, encodedMessage);
+                        historyType = 'request_tg';
+                    }
+                    break;
+                case 'vk':
+                    if (contact.vk) {
+                        shareUrl = generateVkLink(contact.vk, encodedMessage);
+                        historyType = 'request_vk';
+                    }
+                    break;
+                case 'sms':
+                    if (contact.phone) {
+                        const smsBody = message.substring(0, 160); // Ограничение для SMS
+                        shareUrl = `sms:${contact.phone}?body=${encodeURIComponent(smsBody)}`;
+                        historyType = 'request_sms';
+                    }
+                    break;
+            }
+
+            if (shareUrl && historyType) {
+                console.log(`Executing share with ${contact.name} via ${historyType}: ${shareUrl}`);
+                try {
+                    if (historyType !== 'request_sms') {
+                        window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.location.href = shareUrl;
+                    }
+                    addHistoryEntry(historyType, contact, amount); // Добавляем в историю
+                } catch (e) {
+                    console.error("Ошибка при открытии ссылки:", e);
+                    showStatus("Не удалось открыть ссылку для отправки.", "error", 3000);
+                }
+            } else {
+                // Эта ошибка не должна возникать, т.к. кнопка бы не появилась, но на всякий случай
+                showStatus(`Не удалось создать ссылку для ${method.toUpperCase()} для ${contact.name}.`, 'error', 4000);
+            }
+        }
+
+        // --- Конец новых функций ---
 
         // --- Инициализация при загрузке ---
         window.onload = () => {
@@ -1197,27 +1160,35 @@
              if (tipAmountInput.value) { formatTipInput(tipAmountInput); }
 
              // Глобальный обработчик кликов для скрытия статуса и меню шаринга
-             document.body.addEventListener('click', (event) => {
-                 // Скрытие статуса
-                 if (statusElement.style.display !== 'none' && !statusElement.contains(event.target)) {
+              // Внутри window.onload
+            document.body.addEventListener('click', (event) => {
+                // --- Существующая логика скрытия статуса ---
+                if (statusElement.style.display !== 'none' && !statusElement.contains(event.target) && !personShareOptionsPopup.contains(event.target)) { // <-- Добавлена проверка на попап
                     const isProcessing = statusElement.classList.contains('processing');
-                    // Не скрывать processing при клике на кнопки действий
                     const clickedPreprocess = preprocessButton.contains(event.target);
                     const clickedCalculate = calculateSplitButton.contains(event.target);
-                     if (!(isProcessing && (clickedPreprocess || clickedCalculate))) {
-                         hideStatus();
-                     }
-                 }
-                 // Скрытие меню шаринга
-                 const menu = document.getElementById('share-menu');
-                 const shareButton = document.getElementById('share-result-btn');
-                 if (menu && menu.style.display === 'block' && !menu.contains(event.target) && shareButton && !shareButton.contains(event.target)) {
-                     hideShareMenu();
-                 }
-             }, true); // Используем capture фазу
+                    if (!(isProcessing && (clickedPreprocess || clickedCalculate))) {
+                        // Проверим, не кликнули ли мы на кнопку открытия попапа выбора шаринга
+                        const clickedSharePersonBtn = event.target.closest('.share-person-btn');
+                        if (!clickedSharePersonBtn) { // Не скрывать статус при клике на кнопку "Поделиться" с человеком
+                            hideStatus();
+                        }
+                    }
+                }
+                // --- Существующая логика скрытия общего меню шаринга ---
+                const menu = document.getElementById('share-menu');
+                const shareButton = document.getElementById('share-result-btn');
+                // Не скрывать, если клик был внутри нашего нового попапа
+                if (menu && menu.style.display === 'block' && !menu.contains(event.target) && shareButton && !shareButton.contains(event.target) && !personShareOptionsPopup.contains(event.target)) {
+                    hideShareMenu();
+                }
+
+                // --- Логика скрытия нашего нового попапа обрабатывается в handleClickOutsideSharePopup ---
+
+            }, true); // Используем capture фазу
         };
 
     </script>
-
+    
 </body>
 </html>

@@ -1,3 +1,5 @@
+/* --- style.css --- */
+
 /* --- Переменные (Объединенные с приоритетом существующих) --- */
 /* --- Определение кастомного шрифта --- */
 @font-face {
@@ -52,14 +54,13 @@
 
 /* --- Global Styles --- */
 html, body {
-    /* <<< Запрещаем скролл основной страницы >>> */
-    height: 100vh; /* Фиксируем высоту по вьюпорту */
-    overflow: hidden; /* Скрываем любой скролл */
-    margin: 0; /* Убираем стандартные отступы */
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
 }
 
 html {
-     overflow-x: hidden; /* Дополнительно для html */
+     overflow-x: hidden;
 }
 
 body {
@@ -74,78 +75,65 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* height: 100vh; уже установлено выше */
     box-sizing: border-box;
     position: relative;
-
-    /* <<< ВОССТАНАВЛИВАЕМ ПАДДИНГИ >>> */
-    /* Базовые отступы (десктоп) */
     padding-right: 20px;
-    padding-bottom: 20px; /* Оставляем место снизу */
+    padding-bottom: 20px;
     padding-left: 20px;
-    padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп верхний */
-
-    overflow-x: hidden; /* Убеждаемся, что гориз. скролл отключен */
+    padding-top: calc(300px + env(safe-area-inset-top));
+    overflow-x: hidden;
 }
 
 /* --- Специфичные стили для Body на странице Share --- */
 body.share-page-body {
     flex-direction: column;
     align-items: center;
-
-    /* <<< ВОССТАНАВЛИВАЕМ ПАДДИНГИ для share-страницы >>> */
     padding-right: 20px;
-    padding-bottom: 25px; /* Нижний отступ для Share */
+    padding-bottom: 25px;
     padding-left: 20px;
-    padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп верхний */
+    padding-top: calc(300px + env(safe-area-inset-top));
 }
 
 /* --- Новая обертка для карточек на странице Share --- */
 .share-widgets-wrapper {
-    /* <<< ВОЗВРАЩАЕМ: Прижимаем всю группу карточек вниз на странице Share >>> */
     margin-top: auto;
-    width: 100%; /* Занимаем всю ширину для центрирования контента */
-    display: flex; /* Используем flex для управления дочерними контейнерами */
-    flex-direction: column; /* Карточки друг под другом */
-    align-items: center; /* Центрируем карточки внутри обертки */
-    /* Убираем flex-grow и overflow, т.к. обертка не должна растягиваться */
-    /* flex-grow: 1; */
-    /* overflow-y: auto; */
-    /* padding-bottom: 20px; */ /* Убираем внутренний паддинг, т.к. отступ задан у body */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     box-sizing: border-box;
-    /* <<< ДОБАВЛЕНО: Ограничиваем максимальную высоту обертки, чтобы она не вылезала за экран >>> */
-    /* Рассчитываем как (Высота окна - Отступ сверху у body - Отступ снизу у body) */
-    /* Нужно подобрать точнее, учитывая высоту хедера */
-    max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 25px); /* Пример для Share десктоп */
+    max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 25px);
 }
 
-/* Убедимся, что header и контейнеры на share-странице центрируются */
+/* Центрирование на share-странице */
 body.share-page-body .header {
     margin-left: auto;
     margin-right: auto;
-    flex-shrink: 0; /* Важно: хедер не должен сжиматься */
+    flex-shrink: 0;
 }
 body.share-page-body .receipt-container,
 body.share-page-body .share-container {
     margin-left: auto;
     margin-right: auto;
-    flex-shrink: 0; /* Карточки не должны сжиматься */
-    width: 90%; /* Используем % для адаптивности */
-    max-width: 600px; /* Ограничиваем максимальную ширину */
+    flex-shrink: 0;
+    width: 90%;
+    max-width: 600px;
 }
+
+/* Скрытие хедера на странице результатов */
 body.results-shown .index-header {
     display: none;
 }
+
 /* --- Main Container (Podeli/Index/Contacts - Общий стиль) --- */
 .container {
-    /* <<< ВОЗВРАЩАЕМ: Прижимаем контейнер вниз на страницах Index/Contacts >>> */
     margin-top: auto;
     width: 90%;
     max-width: 600px;
     padding: 4px;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    margin-bottom: 0; /* Нижний отступ контролируется padding'ом body */
+    margin-bottom: 0;
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -153,31 +141,25 @@ body.results-shown .index-header {
     z-index: 0;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     box-sizing: border-box;
-    flex-shrink: 0; /* Не сжимаем контейнер */
-    /* <<< ВОЗВРАЩАЕМ/АДАПТИРУЕМ: Ограничиваем максимальную высоту контейнера >>> */
-    /* Рассчитываем как (Высота окна - Отступ сверху у body - Отступ снизу у body) */
-    /* Можно задать немного меньше для запаса */
-     max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 20px - 40px); /* Пример для Index/Contacts десктоп, 40px - запас */
+    flex-shrink: 0;
+    max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 20px - 40px);
 }
 
 /* Inner container for content (Общий стиль) */
 .container-content {
-     width: 100%;
-     /* height: 100%; - Высота будет ограничена max-height родителя и собственным overflow */
-     background-color: var(--card-background);
-     border-radius: 10px;
-     padding: 16px;
-     box-sizing: border-box;
-     overflow-y: auto; /* << ОСНОВНОЙ СКРОЛЛ КОНТЕНТА ЗДЕСЬ */
-     display: flex;
-     flex-direction: column;
-     position: relative;
-     z-index: 1;
-     /* <<< ВОЗВРАЩАЕМ/АДАПТИРУЕМ: Убедимся, что контент не вылезает за контейнер >>> */
-     /* Обычно overflow-y: auto родителя (.container) достаточно, но можно и здесь ограничить */
-      max-height: 100%; /* Занимает всю высоту родительского .container */
+    width: 100%;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-y: auto; /* << ОСНОВНОЙ СКРОЛЛ КОНТЕНТА ЗДЕСЬ */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* <<< ДОБАВЛЕНО ДЛЯ ГОРИЗОНТАЛЬНОГО ЦЕНТРИРОВАНИЯ */
+    position: relative;
+    z-index: 1;
+    max-height: 100%;
 }
-
 /* --- Заголовки --- */
 h1 { color: var(--primary-color); text-align: center; margin-top: 0; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
 h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-bottom: 20px; font-weight: bold; }
@@ -193,7 +175,7 @@ h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-b
 .result-container { display: none; position: relative; width: 100%; max-width: 550px; align-self: center; margin-top: 15px; margin-bottom: 15px; padding-bottom: 45px; box-sizing: border-box; }
 #result { padding: 15px; background-color: var(--light-green-bg); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); width: 100%; box-sizing: border-box; white-space: pre-wrap; line-height: 1.6; text-align: left; color: var(--text-dark); border: 1px solid var(--border-green); min-height: 100px; overflow-y: auto; max-height: 350px; /* << СКРОЛЛ РЕЗУЛЬТАТА */ }
 #result b { color: var(--primary-color); font-weight: bold; }
-.input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; align-self: center; /* margin-top: auto; */ /* Прижимается кнопками снизу */ padding-top: 20px; flex-shrink: 0; margin-top: auto; /* << ПРИЖИМАЕТ ИНПУТЫ ВНИЗ КОНТЕЙНЕРА */ }
+.input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; align-self: center; padding-top: 20px; flex-shrink: 0; margin-top: auto; /* << ПРИЖИМАЕТ ИНПУТЫ ВНИЗ КОНТЕЙНЕРА */ }
 input[type="file"] { border: 2px solid var(--light-grey-border); display: block; width: 100%; padding: 10px; box-sizing: border-box; font-size: 16px; color: var(--text-dark); background-color: var(--card-background); border-radius: 10px; overflow: hidden; margin: 10px 0 5px 0; }
 input[type="file"]::file-selector-button { padding: 10px 15px; margin-right: 10px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
 input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
@@ -202,13 +184,7 @@ input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
 input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-input-placeholder { color: var(--placeholder-color); } input::-ms-input-placeholder { color: var(--placeholder-color); }
 .input-container { width: 100%; }
 .file-btn-wrapper { margin-top: 10px; width: 100%; }
-button#upload-btn { padding: 12px 15px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background-color 0.3s; box-sizing: border-box; }
-button#upload-btn:hover { background-color: var(--dark-green); }
-button#upload-btn:disabled { background-color: var(--disabled-button-bg); color: #757575; cursor: not-allowed; border-image: none; }
-.filters { display: none; flex-direction: column; align-items: stretch; width: 100%; max-width: 300px; margin-top: 15px; align-self: center; flex-shrink: 0; }
-.filters button { margin: 4px 0; padding: 10px 12px; background-color: #e8f5e9; color: var(--primary-color); border: 1px solid #a5d6a7; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.3s, color 0.3s; box-sizing: border-box; text-align: center; }
-.filters button:hover { background-color: #c8e6c9; color: var(--dark-green);}
-.filters button:disabled { background-color: #eeeeee; color: #9e9e9e; cursor: not-allowed; border-color: #e0e0e0;}
+/* Убрали #upload-btn, стили теперь общие для кнопок ниже */
 .result-action-btn { position: absolute; bottom: 10px; z-index: 5; background-color: var(--card-background); color: #555; cursor: pointer; padding: 5px; line-height: 1; border-radius: 8px; border: 2px solid var(--light-grey-border); width: auto; height: auto; font-weight: normal; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
 .result-action-btn:hover { color: var(--primary-color); background-color: #f0f0f0; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
 .result-action-btn:active { color: var(--dark-green); background-color: #e0e0e0;}
@@ -222,8 +198,8 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 #share-menu a span { line-height: 1.2; }
 
 /* --- Компоненты Contacts.html (Добавленные) --- */
-.contacts-page-container { max-width: 700px; /* Контейнер для контактов внутри основного .container */ }
-#contact-list { display: flex; flex-direction: column; gap: 18px; flex-grow: 1; overflow-y: auto; /* << СКРОЛЛ СПИСКА КОНТАКТОВ */ margin-bottom: 20px; padding: 5px; min-height: 100px; }
+.contacts-page-container { max-width: 700px; }
+#contact-list { display: flex; flex-direction: column; gap: 18px; flex-grow: 1; overflow-y: auto; margin-bottom: 20px; padding: 5px; min-height: 100px; }
 #contact-list p { text-align: center; color: var(--grey-color); font-style: italic; margin-top: 20px; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
 .contact-card { background-color: var(--light-green-bg); border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden; flex-shrink: 0; }
 .contact-card:hover { background-color: var(--hover-green-bg); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12); }
@@ -241,7 +217,7 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 .tg-request-btn { background-color: var(--tg-color); }
 .delete-button { background-color: var(--delete-color); }
 .no-links-placeholder { font-size: 0.85em; color: var(--grey-color); font-style: italic; padding: 8px 0; }
-.bottom-actions { margin-top: auto; /* << ПРИЖИМАЕТ КНОПКИ ВНИЗ */ padding-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; flex-shrink: 0; }
+.bottom-actions { margin-top: auto; padding-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; flex-shrink: 0; }
 .bottom-actions button { padding: 12px 25px; color: var(--white-color); border: none; border-radius: 10px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
 .bottom-actions button:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
 #add-contact-btn { background-color: var(--primary-color); }
@@ -250,7 +226,7 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 #history-btn:hover { background-color: #0073b1; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
 .modal-overlay.visible { display: flex; opacity: 1; }
-.modal-content { background-color: var(--white-color); padding: 25px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; /* << СКРОЛЛ МОДАЛЬНОГО ОКНА */ position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
+.modal-content { background-color: var(--white-color); padding: 25px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
 .modal-overlay.visible .modal-content { transform: scale(1); }
 .modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.8em; color: var(--grey-color); cursor: pointer; line-height: 1; padding: 5px; }
 .modal-close-btn:hover { color: var(--text-color); }
@@ -263,7 +239,7 @@ button#upload-btn:disabled { background-color: var(--disabled-button-bg); color:
 .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
 .modal-actions .cancel-btn { background-color: var(--grey-color); color: var(--white-color); border: none; }
 .modal-actions .cancel-btn:hover { background-color: #3f3d3d; }
-#history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; /* Скролл внутри модального окна */ }
+#history-list { list-style: none; padding: 0; margin-top: 15px; margin-bottom: 20px; }
 #history-list li { padding: 12px 0; border-bottom: 1px solid var(--border-green); font-size: 0.95em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; }
 #history-list li:last-child { border-bottom: none; }
 .history-details { flex-grow: 1; margin-right: 10px; }
@@ -299,7 +275,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     margin-bottom: 20px;
     z-index: 1;
     position: relative;
-    flex-shrink: 0; /* Важно: хедер не должен сжиматься */
+    flex-shrink: 0;
 }
 .logo {
     font-size: 28px;
@@ -326,23 +302,19 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     font-weight: 500;
 }
 
-
-/* Стили для контейнеров на share.html (используют .container) */
+/* Стили для контейнеров на share.html */
 .receipt-container {
-    margin-bottom: 25px; /* Отступ между карточками */
-    flex-shrink: 0; /* Не сжимаем карточку */
+    margin-bottom: 25px;
+    flex-shrink: 0;
 }
 .share-container {
-    margin-bottom: 0; /* Отступ снизу управляется паддингом body */
-    flex-shrink: 0; /* Не сжимаем карточку */
+    margin-bottom: 0;
+    flex-shrink: 0;
 }
-/* Общие стили для обоих контейнеров на Share странице внутри обертки */
 .share-widgets-wrapper .container {
-    margin-top: 0; /* Убираем авто-отступ, т.к. они в потоке внутри обертки */
-    max-height: none; /* Убираем ограничение высоты, т.к. контент внутри скроллится */
+    margin-top: 0;
+    max-height: none;
 }
-
-/* Паддинги для контента внутри контейнеров на share.html */
 .receipt-container .container-content { padding: 25px; }
 .share-container .container-content { padding: 20px; }
 
@@ -362,36 +334,302 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 .share-button:disabled:hover { opacity: 0.6; transform: none; box-shadow: none; }
 .icon { width: 22px; height: 22px; }
 
+/* --- Стили секции распределения блюд (Перенесены из index.html) --- */
+#item-assignment-section {
+    display: none; /* Скрыто по умолчанию */
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--light-grey-border);
+}
+.assignment-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+.add-person-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.add-person-controls select {
+    padding: 8px 10px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    flex-grow: 1;
+    max-width: 250px;
+}
+.add-person-controls button { /* Кнопка "Добавить человека" */
+    padding: 8px 15px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+.add-person-controls button:hover {
+    background-color: var(--dark-green);
+}
+#assigned-people-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.assignment-person-card {
+    background-color: var(--light-green-bg);
+    border: 1px solid var(--border-green);
+    border-radius: 10px;
+    padding: 15px;
+    position: relative;
+}
+.assignment-person-name {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.remove-person-btn {
+     background: none;
+     border: none;
+     color: var(--delete-color);
+     font-size: 1.2em;
+     cursor: pointer;
+     padding: 0 5px;
+     line-height: 1;
+}
+ .remove-person-btn:hover {
+     color: darkred;
+ }
+.assignment-items-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+.assignment-item {
+    display: flex;
+    align-items: center;
+}
+/* Размер и выравнивание чекбокса */
+.assignment-item input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+    width: 18px; /* <<< ЗАДАЕМ РАЗМЕР >>> */
+    height: 18px; /* <<< ЗАДАЕМ РАЗМЕР >>> */
+    vertical-align: middle; /* Выравниваем по центру строки */
+    flex-shrink: 0; /* Не сжимаем чекбокс */
+    border-radius: 3px; /* Небольшое скругление */
+}
+.assignment-item input[type="checkbox"]:checked + label {
+     color: var(--primary-color);
+     font-weight: 500; /* Оставляем небольшое выделение */
+}
+.assignment-item label {
+    font-size: 0.95em;
+    cursor: pointer;
+    word-break: break-word;
+    line-height: 1.3;
+    display: inline-block;
+    vertical-align: middle; /* Выравниваем текст */
+}
+.item-price {
+    font-size: 0.8em;
+    color: var(--grey-color);
+    margin-left: 5px;
+    white-space: nowrap;
+}
+#calculate-split-btn-wrapper {
+    text-align: center;
+    margin-top: 25px;
+}
+
+/* --- Стили для результатов с долями людей (Перенесены из index.html) --- */
+.person-share-details {
+     margin-top: 15px;
+     padding-top: 15px;
+     border-top: 1px dashed var(--light-grey-border);
+ }
+ .person-share-details h3 {
+     margin-bottom: 10px;
+     font-size: 1.1em;
+     color: var(--dark-green);
+     text-align: center;
+ }
+ .person-share-item {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 8px 5px;
+     border-bottom: 1px solid var(--border-green);
+     flex-wrap: wrap;
+     gap: 5px;
+ }
+ .person-share-item:last-child {
+     border-bottom: none;
+ }
+ .person-share-name {
+     font-weight: bold;
+     flex-basis: 40%;
+     min-width: 100px;
+ }
+ .person-share-amounts {
+     display: flex;
+     gap: 10px;
+     align-items: center;
+     flex-grow: 1;
+     justify-content: flex-end;
+     flex-wrap: wrap;
+ }
+ .person-share-amount {
+     font-size: 0.9em;
+     white-space: nowrap;
+ }
+ .share-person-btn { /* Маленькая кнопка "Поделиться" */
+     padding: 4px 8px;
+     font-size: 0.8em;
+     background-color: var(--grey-color);
+     color: var(--white-color);
+     border: none;
+     border-radius: 5px;
+     cursor: pointer;
+     margin-left: 10px;
+     white-space: nowrap;
+ }
+ .share-person-btn:hover {
+     opacity: 0.8;
+ }
+ .share-person-btn:disabled {
+     opacity: 0.5;
+     cursor: not-allowed;
+ }
+
+/* === Стили для основных кнопок действий (Общие) === */
+/* Применяем к кнопкам Извлечь, Рассчитать, Новый чек */
+#preprocess-btn,
+#calculate-split-btn,
+#reset-app-btn {
+    padding: 12px 25px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#preprocess-btn:hover,
+#calculate-split-btn:hover,
+#reset-app-btn:hover {
+    background-color: var(--dark-green);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Стили НЕАКТИВНЫХ кнопок для СВЕТЛОЙ темы */
+#preprocess-btn:disabled,
+#calculate-split-btn:disabled {
+    background-color: var(--disabled-button-bg); /* #bdbdbd */
+    color: #757575;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+/* Кнопка "Новый чек" не бывает disabled в текущей логике, но стиль можно добавить */
+#reset-app-btn:disabled {
+    background-color: var(--disabled-button-bg);
+    color: #757575;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+
+/* Обертка для кнопки "Новый чек" */
+#results-section > div:last-of-type {
+     width: 100%;
+     max-width: 300px;
+     margin-left: auto;
+     margin-right: auto;
+     margin-top: 20px;
+     text-align: center; /* Центрирует кнопку внутри */
+}
+
+/* === Исправление центрирования фильтров === */
+.filters {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 15px;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+    flex-shrink: 0;
+}
+.filters button {
+    margin: 4px 0;
+    padding: 10px 12px;
+    background-color: #e8f5e9;
+    color: var(--primary-color);
+    border: 1px solid #a5d6a7;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+.filters button:hover {
+    background-color: #c8e6c9;
+    color: var(--dark-green);
+}
+.filters button:disabled {
+    background-color: #eeeeee;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
 
 /* --- Mobile Styles (Объединенные) --- */
 @media (max-width: 600px) {
      /* Стили Podeli/Index/Contacts */
      body {
-        /* Мобильные отступы */
         padding-right: 10px;
         padding-bottom: 10px;
         padding-left: 10px;
-        padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+        padding-top: calc(100px + env(safe-area-inset-top));
      }
      body.share-page-body {
-        /* Мобильные отступы для share */
         padding-right: 10px;
         padding-bottom: 15px;
         padding-left: 10px;
-        padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+        padding-top: calc(100px + env(safe-area-inset-top));
      }
-     /* Адаптируем max-height для мобильных */
      .share-widgets-wrapper {
-        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px); /* Share мобайл */
+        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px);
      }
      .container {
         width: 95%;
         padding: 3px;
         border-radius: 13px;
         margin-bottom: 15px;
-        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - 30px); /* Index/Contacts мобайл, 30px - запас */
+        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - 30px);
     }
-     /* Остальные мобильные стили */
      .container-content { padding: 12px; border-radius: 10px; }
      #status { font-size: 1.2em; width: 85%; padding: 20px; top: 75.9%; }
      .input-wrapper { max-width: 90%; padding-top: 15px; }
@@ -436,7 +674,6 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
      .logo { font-size: 24px; }
      .header div:not(.logo) { font-size: 14px; }
      .receipt-container { margin-bottom: 20px; }
-     /* .share-container - отступ снизу контролируется паддингом body */
      .receipt-container .container-content { padding: 20px; }
      .share-container .container-content { padding: 15px; }
      .receipt-title { font-size: 20px; margin-bottom: 15px; }
@@ -449,29 +686,28 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
      .icon { width: 20px; height: 20px; }
 }
 
-/* --- Dark Mode Styles (Объединенные) --- */
+/* --- Dark Mode Styles (ЕДИНЫЙ БЛОК) --- */
 @media (prefers-color-scheme: dark) {
     /* Переменные темной темы */
     :root {
-        /* ... (переменные темной темы без изменений) ... */
         --primary-color-dark-theme: #12c26a;
         --text-color-dark-theme: #e0e0e0;
-        --card-background-dark: #000000;
+        --card-background-dark: #121212;
         --body-background-dark: #000000;
         --shadow-color-dark: rgba(180, 180, 180, 0.1);
-        --disabled-button-bg-dark: #3a3a3a;
-        --disabled-button-text-dark: #888888;
+        --disabled-button-bg-dark: #2a2a2a; /* Темно-серый фон */
+        --disabled-button-text-dark: #383838; /* Темно-серый текст */
         --placeholder-color-dark-theme: #777777;
-        --light-grey-border-dark-theme: #555555;
+        --light-grey-border-dark-theme: #444444;
         --input-border-color-dark-theme: var(--light-grey-border-dark-theme);
-        --input-bg-color-dark-theme: #252525;
+        --input-bg-color-dark-theme: #1e1e1e;
         --error-color-dark-theme: #ff5555;
         --dark-green-dark-theme: #30d070;
         --light-green-bg-dark-theme: #1a1a1a;
         --hover-green-bg-dark-theme: #2a2a2a;
         --active-green-bg-dark-theme: #333333;
-        --border-green-dark-theme: #444444;
-        --white-color-dark-theme: #000000;
+        --border-green-dark-theme: #383838;
+        --white-color-dark-theme: #111111;
         --grey-color-dark-theme: #aaaaaa;
         --delete-color-dark-theme: var(--error-color-dark-theme);
         --modal-overlay-dark-theme: rgba(0, 0, 0, 0.75);
@@ -500,34 +736,32 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
     /* Контейнер темной темы */
     .container {
-        background: var(--border-gradient);
-        box-shadow: var(--shadow-color-dark);
+        background: var(--border-gradient); /* Оставляем градиентную рамку */
+        box-shadow: 0 4px 15px var(--shadow-color-dark);
     }
    .container-content {
-    background-color: var(--card-background-dark);
+        background-color: var(--card-background-dark); /* #121212 */
     }
     h1 { color: var(--primary-color-dark-theme); }
     h2 { color: var(--primary-color-dark-theme); }
 
-
     /* Стили темной темы из Podeli/Index */
-    #status { color: var(--primary-color-dark-theme); background-color: rgba(25, 25, 25, 0.97); border-color: var(--primary-color-dark-theme); box-shadow: var(--shadow-color-dark); }
+    #status { color: var(--primary-color-dark-theme); background-color: rgba(25, 25, 25, 0.97); border-color: var(--primary-color-dark-theme); box-shadow: 0 5px 20px var(--shadow-color-dark); }
     #status.processing { border-color: var(--primary-color-dark-theme); color: var(--primary-color-dark-theme); }
     #status.error { color: var(--error-color-dark-theme); border-color: var(--error-color-dark-theme); }
     #status.success { color: var(--primary-color-dark-theme); border-color: var(--primary-color-dark-theme); }
     #preview { border: 1px solid var(--border-green-dark-theme); }
-    #result { background-color: var(--light-green-bg-dark-theme); color: var(--text-color-dark-theme); box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); border: 2px solid var(--light-grey-border-dark-theme); }
+    #result { background-color: var(--light-green-bg-dark-theme); color: var(--text-color-dark-theme); box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); border: 1px solid var(--light-grey-border-dark-theme); } /* Уменьшил толщину рамки */
     #result b { color: var(--primary-color-dark-theme); }
-    input[type="file"] { color: var(--text-color-dark-theme); background-color: var(--input-bg-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); }
-    input[type="file"]::file-selector-button { background-color: var(--primary-color); color: var(--white-color); border-radius: 8px; border: none; }
+    input[type="file"] { color: var(--text-color-dark-theme); background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); } /* Уменьшил толщину рамки */
+    input[type="file"]::file-selector-button { background-color: var(--primary-color); color: var(--white-color-dark-theme); border-radius: 8px; border: none; }
     input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
-    input[type="number"], input[type="text"].numeric-input { background-color: var(--input-bg-color-dark-theme); color: var(--text-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); }
+    input[type="number"], input[type="text"].numeric-input { background-color: var(--input-bg-color-dark-theme); color: var(--text-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); } /* Уменьшил толщину рамки */
     input::placeholder { color: var(--placeholder-color-dark-theme); }
-    button#upload-btn:disabled { background-color: var(--disabled-button-bg-dark); color: var(--disabled-button-text-dark); }
     .filters button { background-color: var(--hover-green-bg-dark-theme); color: var(--primary-color-dark-theme); border: 1px solid var(--border-green-dark-theme); }
     .filters button:hover { background-color: var(--active-green-bg-dark-theme); color: var(--dark-green-dark-theme); }
     .filters button:disabled { background-color: var(--active-green-bg-dark-theme); color: var(--grey-color-dark-theme); border-color: var(--light-grey-border-dark-theme); }
-    .result-action-btn { background-color: var(--light-green-bg-dark-theme); color: var(--grey-color-dark-theme); border: 2px solid var(--light-grey-border-dark-theme); box-shadow: 0 1px 3px rgba(255,255,255,0.08); }
+    .result-action-btn { background-color: var(--light-green-bg-dark-theme); color: var(--grey-color-dark-theme); border: 1px solid var(--light-grey-border-dark-theme); box-shadow: 0 1px 3px rgba(255,255,255,0.08); } /* Уменьшил толщину рамки */
     .result-action-btn:hover { color: var(--primary-color-dark-theme); background-color: #333; }
     .result-action-btn:active { color: var(--dark-green-dark-theme); background-color: var(--border-green-dark-theme); }
     #share-menu { background-color: var(--hover-green-bg-dark-theme); border: 1px solid var(--light-grey-border-dark-theme); box-shadow: 0 -4px 12px rgba(255,255,255,0.1); }
@@ -546,7 +780,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .action-button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .delete-button { background-color: var(--delete-color-dark-theme); }
     .no-links-placeholder { color: var(--grey-color-dark-theme); }
-    .bottom-actions button { color: var(--white-color); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+    .bottom-actions button { color: var(--white-color-dark-theme); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
     .bottom-actions button:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
     #add-contact-btn { background-color: var(--primary-color); }
     #add-contact-btn:hover { background-color: var(--dark-green); }
@@ -560,15 +794,15 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); color: var(--text-color-dark-theme); }
     .modal-form input::placeholder { color: var(--placeholder-color-dark-theme); opacity: 1; }
     .modal-form input:focus { border-color: var(--input-focus-border-color-dark-theme); }
-    .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); }
+    .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color-dark-theme); }
     .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
-    .modal-actions .cancel-btn { background-color: #555; color: var(--white-color); }
+    .modal-actions .cancel-btn { background-color: #555; color: var(--white-color-dark-theme); }
     .modal-actions .cancel-btn:hover { background-color: #3f3d3d; }
     #history-list li { border-bottom: 1px solid var(--border-green-dark-theme); }
     .history-amount { color: var(--primary-color-dark-theme); }
     .history-timestamp { color: var(--grey-color-dark-theme); }
     .no-history { color: var(--grey-color-dark-theme); border-bottom: none !important; }
-    #clear-history-btn { background-color: var(--clear-history-btn-bg-dark-theme); color: var(--white-color); }
+    #clear-history-btn { background-color: var(--clear-history-btn-bg-dark-theme); color: var(--white-color-dark-theme); }
     #clear-history-btn:hover { background-color: var(--clear-history-btn-hover-bg-dark-theme); }
     #clear-history-btn:disabled { background-color: #555; opacity: 0.7; }
     #contact-photo-preview { border: 3px solid var(--border-green-dark-theme); background-color: #333; }
@@ -583,7 +817,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
     /* Стили темной темы из Share */
     .header .logo, .header div:not(.logo) {
-        color: var(--text-dark);
+        color: #000000; /* Делаем текст хедера светлым в темной теме */
         text-shadow: none;
         font-family: 'Blogger Sans', Arial, sans-serif;
     }
@@ -593,24 +827,107 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .receipt-container .container-content { padding: 25px; }
     .share-container .container-content { padding: 20px; }
     .receipt-title, .share-title { color: var(--primary-color-dark-theme); }
-    #receiptAmountInput { background-color: var(--input-bg-color-dark-theme); border: 2px solid var(--input-border-color-dark-theme); box-shadow: none; color: var(--text-color-dark-theme); }
+    #receiptAmountInput { background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); box-shadow: none; color: var(--text-color-dark-theme); } /* Уменьшил толщину рамки */
     #receiptAmountInput:focus { border-color: var(--primary-color-dark-theme); box-shadow: inset 0 1px 2px rgba(255,255,255,0.03), 0 0 5px var(--primary-color-dark-theme); }
     .currency-symbol { color: var(--primary-color-dark-theme); }
-    .share-button { background-color: var(--primary-color); color: var(--text-light); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); }
+    .share-button { background-color: var(--primary-color); color: var(--white-color-dark-theme); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); }
     .share-button:hover:not(:disabled) { opacity: var(--button-hover-opacity); transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5); }
     .share-button:active:not(:disabled) { transform: translateY(0px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); }
     .share-button:disabled { background-color: var(--disabled-button-bg-dark); color: var(--disabled-button-text-dark); opacity: 0.7; box-shadow: none; }
     .share-button:disabled:hover { opacity: 0.7; transform: none; box-shadow: none; }
 
+    /* === Стили НЕАКТИВНЫХ кнопок для ТЕМНОЙ темы === */
+    #preprocess-btn:disabled,
+    #calculate-split-btn:disabled,
+    #reset-app-btn:disabled { /* Добавил reset кнопку на всякий случай */
+        background-color: var(--disabled-button-bg-dark); /* #2a2a2a */
+        color: var(--disabled-button-text-dark);      
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    /* === Стили для секции распределения (Темная тема) === */
+    #item-assignment-section {
+         border-top: 1px solid var(--light-grey-border-dark-theme);
+    }
+    .assignment-person-card {
+         background-color: var(--hover-green-bg-dark-theme); /* #2a2a2a */
+         border: 1px solid var(--border-green-dark-theme); /* #383838 */
+    }
+    .assignment-person-name span {
+        color: var(--dark-green-dark-theme);
+    }
+    .remove-person-btn {
+         color: var(--error-color-dark-theme);
+    }
+     .remove-person-btn:hover {
+         color: #ff8888;
+     }
+    .assignment-item label {
+         color: var(--text-color-dark-theme);
+    }
+    .item-price {
+        color: var(--grey-color-dark-theme);
+    }
+    /* Чекбоксы */
+    .assignment-item input[type="checkbox"] {
+        accent-color: var(--grey-color-dark-theme); /* Серый цвет галочки */
+        background-color: var(--input-bg-color-dark-theme); /* #1e1e1e */
+        border: 1px solid var(--input-border-color-dark-theme); /* #444444 */
+        opacity: 0.8;
+        border-radius: 3px;
+    }
+    /* Выбранный лейбл */
+     .assignment-item input[type="checkbox"]:checked + label {
+         color: var(--primary-color-dark-theme); /* Зеленый текст */
+         font-weight: normal; /* Без жирности */
+    }
+    /* Контролы добавления человека */
+    .add-person-controls select {
+         background-color: var(--input-bg-color-dark-theme);
+         color: var(--text-color-dark-theme);
+         border: 1px solid var(--input-border-color-dark-theme);
+    }
+    .add-person-controls button { /* Кнопка "Добавить человека" */
+         background-color: var(--primary-color); /* Яркая */
+         color: var(--white-color-dark-theme); /* Текст почти черный */
+         border: none;
+     }
+     .add-person-controls button:hover {
+         background-color: var(--dark-green);
+     }
+
+    /* Стили для долей (Темная тема) */
+     .person-share-details {
+         border-top-color: var(--light-grey-border-dark-theme);
+     }
+     .person-share-details h3 {
+         color: var(--dark-green-dark-theme);
+     }
+     .person-share-item {
+         border-bottom-color: var(--border-green-dark-theme);
+     }
+     .share-person-btn { /* Маленькая кнопка "Поделиться" */
+         background-color: #555;
+         color: var(--text-color-dark-theme);
+     }
+     .share-person-btn:hover {
+         background-color: #383838;
+     }
+     .share-person-btn:disabled {
+         background-color: var(--disabled-button-bg-dark);
+         color: var(--disabled-button-text-dark);
+         opacity: 0.7;
+     }
+
     /* Переопределяем верхний отступ для мобильной темной темы */
     @media (max-width: 600px) {
         body {
-             padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+             padding-top: calc(100px + env(safe-area-inset-top));
         }
         body.share-page-body {
-             padding-top: calc(100px + env(safe-area-inset-top)); /* Уменьшенный верхний */
+             padding-top: calc(100px + env(safe-area-inset-top));
         }
-         /* Адаптируем max-height для темных мобильных */
          .share-widgets-wrapper {
             max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px);
          }
@@ -619,4 +936,4 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         }
     }
 
-} /* End @media (prefers-color-scheme: dark) */
+} /* === Конец блока @media (prefers-color-scheme: dark) === */
