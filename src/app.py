@@ -229,13 +229,29 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
     - `shares`: Объект со следующими полями (все **целые числа int**, округленные рубли): `equally`, `who_more_eat_then_more_pay`, `who_more_cost_then_more_pay`, `proportional_division_by_the_cost_of_orders`.
 
 Верни результат СТРОГО в формате JSON, соответствующем структуре:""" + """
-{{
+{
   "peoples_list": [
-    {{ "name": "Имя1", "shares": {{ "equally": ЦЕЛОЕ, ... }} }},
-    ...
-  ],
-  "final_total_calculated": ЦЕЛОЕ_ЧИСЛО
-}}
+    {
+      "name": "Имя1",
+      "shares": {
+        "equally": ЦЕЛОЕ,
+        "who_more_eat_then_more_pay": ЦЕЛОЕ,
+        "who_more_cost_then_more_pay": ЦЕЛОЕ,
+        "proportional_division_by_the_cost_of_orders": ЦЕЛОЕ
+      }
+    },
+    {
+      "name": "Имя2",
+      "shares": {
+        "equally": ЦЕЛОЕ,
+        "who_more_eat_then_more_pay": ЦЕЛОЕ,
+        "who_more_cost_then_more_pay": ЦЕЛОЕ,
+        "proportional_division_by_the_cost_of_orders": ЦЕЛОЕ
+      }
+    }
+  ]
+}
+и так далее
 **Все числовые значения сумм должны быть ЦЕЛЫМИ ЧИСЛАМИ (int).** Не добавляй никаких других пояснений или текста вне JSON. Валюта по умолчанию - RUB.
 """
     # --- КОНЕЦ ОБНОВЛЕННОГО ПРОМПТА ---
@@ -262,8 +278,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
                             }
                         }
                     }
-                },
-                "final_total_calculated": {"type": "integer"}
+                }
             }
         }
 
@@ -276,8 +291,10 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
             },
         )
 
+        logger = logging.getLogger(__name__)
+
         try:
-            # Попытка напрямую получить объект Recommendation
+            # Попытка получить объект Recommendation
             if hasattr(response, 'parsed') and isinstance(response.parsed, Recommendation):
                 recommendation_obj = response.parsed
             else:
@@ -299,9 +316,6 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
                     try:
                         parsed_data = json.loads(raw_text)
 
-                        # Проверяем, есть ли `final_total_calculated`, иначе заполняем 0
-                        parsed_data.setdefault("final_total_calculated", 0)
-
                         # Создаем объект через Pydantic
                         recommendation_obj = Recommendation(**parsed_data)
 
@@ -317,7 +331,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
                 logger.warning("Parsed 'peoples_list' is not a list. Setting to empty list.")
                 recommendation_obj.peoples_list = []
 
-            logger.info(f"Successfully accessed parsed recommendations. Final total: {recommendation_obj.final_total_calculated}, people count: {len(recommendation_obj.peoples_list)}")
+            logger.info(f"Successfully accessed parsed recommendations. People count: {len(recommendation_obj.peoples_list)}")
 
             return recommendation_obj
 
