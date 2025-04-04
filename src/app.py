@@ -1,7 +1,7 @@
 # --- START OF FILE app.py ---
 
 from flask import Flask, request, render_template, jsonify, send_from_directory
-import os
+import os,re
 import google.generativeai as genai
 from google import genai as genai_module
 from ocr_module import process_image_with_gemini
@@ -125,10 +125,9 @@ def is_restaurant_check(extracted_text: str) -> Optional[bool]:
 def get_positions(extracted_text: str) -> Optional[Positions]:
     if not extracted_text:
         logger.warning("No extracted text provided to get_positions.")
-        # Возвращаем объект с значениями по умолчанию int
-        return Positions(positions_list=[], total_amount_detected=0) # Используем 0
+        return Positions(positions_list=[], total_amount_detected=0)
 
-    # Обновленный промпт
+    # Обновленный промпт (инструкция №4 уточнена)
     prompt = f"""
 Анализируй следующий текст, извлеченный из изображения чека:
 --- ТЕКСТ ЧЕКА ---
@@ -139,6 +138,7 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
 1.  Извлеки все позиции (блюда, напитки) с их ценами. Игнорируй строки типа "Итого", "Скидка", "Обслуживание", "НДС", "Официант" и т.п. Формируй результат как СПИСОК объектов в поле 'positions_list'. Каждый объект в списке должен содержать два поля: 'name' (строка, название позиции) и 'price' (**целое число int**, округленная цена в рублях). Если позиций нет, верни ПУСТОЙ СПИСОК `[]` для 'positions_list'. Старайся нормализовать названия.
 2.  Найди и извлеки итоговую сумму чека. **ВСЕГДА возвращай поле 'total_amount_detected' как целое число int (округленная сумма в рублях).** Если итоговая сумма найдена, верни ее значение. Если итоговая сумма НЕ найдена, верни `0`.
 3.  Верни результат СТРОГО в формате JSON, соответствующем структуре: {{ "positions_list": [{{ "name": "...", "price": ЦЕЛОЕ_ЧИСЛО }}], "total_amount_detected": ЦЕЛОЕ_ЧИСЛО }}. **Оба поля ('positions_list', 'total_amount_detected') ДОЛЖНЫ присутствовать в ответе.** Не добавляй никаких других пояснений или текста вне JSON.
+4.  Любые кавычки (одинарные и двойные) и другие символы, которые могут вызвать ошибки типа Invalid or unexpected token в JavaScript не должны присутствовать в твоем ответе, замени на что-то другое.
 """
     try:
         model = get_gemini_model()
@@ -149,46 +149,65 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
                 response_schema=Positions # Используем модель с int
             )
         )
-        # ... (логика парсинга и валидации остается прежней, Pydantic обработает int) ...
+
+        positions_obj: Optional[Positions] = None # Инициализируем переменную
+
+        # --- Логика парсинга ответа ---
         if hasattr(response, 'candidates') and response.candidates and hasattr(response.candidates[0], 'content') and hasattr(response.candidates[0].content, 'parts') and response.candidates[0].content.parts:
              json_text = response.candidates[0].content.parts[0].text
              logger.info(f"Received JSON from Gemini for positions/total: {json_text[:500]}...")
              parsed_data = json.loads(json_text)
              try:
+                 # Сначала валидируем структуру с помощью Pydantic
                  positions_obj = Positions(**parsed_data)
-                 if not isinstance(positions_obj.positions_list, list):
-                     logger.warning("Parsed 'positions_list' is not a list. Setting to empty list.")
-                     positions_obj.positions_list = []
                  logger.info(f"Successfully parsed positions/total: {len(positions_obj.positions_list)} items, total={positions_obj.total_amount_detected}")
-                 return positions_obj
+
              except ValidationError as e:
                  logger.error(f"Pydantic validation failed for positions/total: {e}. JSON: {json_text}")
-                 return None
-        elif response.text: # Fallback
+                 return None # Ошибка валидации, выходим
+
+        elif response.text: # Fallback на response.text
              try:
                  logger.info(f"Trying to parse positions/total from response.text: {response.text[:500]}...")
                  parsed_data = json.loads(response.text)
                  try:
+                     # Сначала валидируем структуру с помощью Pydantic
                      positions_obj = Positions(**parsed_data)
-                     if not isinstance(positions_obj.positions_list, list):
-                         logger.warning("Parsed 'positions_list' from response.text is not a list. Setting to empty list.")
-                         positions_obj.positions_list = []
                      logger.info(f"Successfully parsed positions/total from response.text: {len(positions_obj.positions_list)} items, total={positions_obj.total_amount_detected}")
-                     return positions_obj
+
                  except ValidationError as e:
                      logger.error(f"Pydantic validation failed for positions/total response.text: {e}. JSON: {response.text}")
-                     return None
+                     return None # Ошибка валидации, выходим
              except Exception as parse_err:
                  logger.error(f"Failed to parse JSON positions/total from response.text: {parse_err}")
-                 return None
+                 return None # Ошибка парсинга JSON, выходим
         else:
              logger.error("No usable content found in Gemini response for positions/total.")
-             return None
+             return None # Нет данных от модели, выходим
+
+        # --- Очистка имен позиций ПОСЛЕ успешного парсинга и валидации ---
+        if positions_obj and isinstance(positions_obj.positions_list, list):
+            cleaned_count = 0
+            for item in positions_obj.positions_list:
+                if isinstance(item.name, str):
+                    original_name = item.name
+                    # Удаляем символы: & " ' < > ` с помощью регулярного выражения
+                    item.name = re.sub(r'[&"\'<>`]', '', item.name)
+                    if item.name != original_name:
+                        cleaned_count += 1
+                        logger.debug(f"Cleaned item name: '{original_name}' -> '{item.name}'")
+            if cleaned_count > 0:
+                logger.info(f"Cleaned names for {cleaned_count} position(s).")
+        elif positions_obj and not isinstance(positions_obj.positions_list, list):
+             logger.warning("Parsed 'positions_list' is not a list after validation. Setting to empty list.")
+             positions_obj.positions_list = [] # Гарантируем, что это список
+
+        # Возвращаем объект (возможно, с очищенными именами)
+        return positions_obj
 
     except Exception as e:
-        logger.error(f"Error during Gemini API call for positions/total: {e}", exc_info=True)
+        logger.error(f"Error during Gemini API call or processing for positions/total: {e}", exc_info=True)
         return None
-
 # --- Обновленная функция get_recommendations ---
 def get_recommendations(extracted_text: str, num_people: int, tea_money: float, item_assignments: Dict[str, List[str]]) -> Optional[Recommendation]:
     if not extracted_text or num_people <= 0:

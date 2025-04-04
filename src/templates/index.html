@@ -515,28 +515,45 @@
         }
 
         function addPersonCard(name, assignedItems = []) {
-             currentPeopleAssignments[name] = [...assignedItems];
+             currentPeopleAssignments[name] = [...assignedItems]; // Храним оригинальное имя
 
              const card = document.createElement('div');
              card.classList.add('assignment-person-card');
-             card.dataset.personName = name;
+             card.dataset.personName = name; // Используем оригинальное имя для data-атрибута
+
+             // Экранируем имя ТОЛЬКО для вставки в JS-строку (onclick/onchange)
+             const escapedNameJs = escapeJsString(name);
 
              let itemsHtml = '<div class="assignment-items-list">';
              if (Object.keys(currentPositions).length > 0) {
-                 // Используем Object.entries, так как currentPositions снова словарь
                  const sortedItems = Object.entries(currentPositions).sort((a, b) => a[0].localeCompare(b[0]));
 
-                 sortedItems.forEach(([itemName, itemPrice]) => { // Итерация по словарю
-                     const itemId = `item-${name}-${itemName.replace(/[^a-zA-Z0-9]/g, '')}`;
+                 sortedItems.forEach(([itemName, itemPrice]) => {
+                     // Генерируем ID (стараемся сделать его безопасным, но могут быть коллизии при очень странных именах)
+                     const safeNamePart = name.replace(/[^a-zA-Z0-9_-]/g, '');
+                     const safeItemNamePart = itemName.replace(/[^a-zA-Z0-9_-]/g, '');
+                     const itemId = `item-${safeNamePart}-${safeItemNamePart}`;
+
                      const isChecked = assignedItems.includes(itemName) ? 'checked' : '';
-                     // Убедимся, что itemPrice это число перед форматированием
                      const priceValue = typeof itemPrice === 'number' ? itemPrice : 0;
                      const priceFormatted = priceValue.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
+
+                     // Экранируем название блюда для JS-строки (onchange)
+                     const escapedItemNameJs = escapeJsString(itemName);
+                     // Экранируем название блюда для HTML-атрибута (value)
+                     const escapedItemNameHtml = escapeHtmlAttr(itemName);
+
+                     // Используем экранированные версии в атрибутах
                      itemsHtml += `
                          <div class="assignment-item">
-                             <input type="checkbox" id="${itemId}" value="${itemName}" ${isChecked} onchange="updateAssignment('${name}', '${itemName}', this.checked)">
+                             <input
+                               type="checkbox"
+                               id="${itemId}"
+                               value="${escapedItemNameHtml}"
+                               ${isChecked}
+                               onchange="updateAssignment('${escapedNameJs}', '${escapedItemNameJs}', this.checked)">
                              <label for="${itemId}">
-                                 ${itemName}
+                                 ${itemName} <!-- Отображаем оригинальное имя -->
                                  <span class="item-price">(${priceFormatted})</span>
                              </label>
                          </div>
@@ -547,16 +564,21 @@
              }
              itemsHtml += '</div>';
 
+             // Используем экранированное имя для JS в onclick кнопки удаления
              card.innerHTML = `
                  <div class="assignment-person-name">
-                     <span>${name}</span>
-                     <button class="remove-person-btn" title="Удалить человека" onclick="removePerson('${name}')">×</button>
+                     <span>${name}</span> <!-- Отображаем оригинальное имя -->
+                     <button class="remove-person-btn" title="Удалить человека" onclick="removePerson('${escapedNameJs}')">×</button>
                  </div>
                  ${itemsHtml}
              `;
              assignedPeopleContainer.appendChild(card);
         }
 
+        // Важно: Функции updateAssignment и removePerson будут получать уже
+        // РАСШИФРОВАННЫЕ строки из JavaScript. То есть внутри этих функций
+        // name и itemName будут содержать оригинальные кавычки.
+        // Это правильно, так как мы работаем с ними уже в контексте JS, а не HTML.
         function removePerson(name) {
             if (confirm(`Удалить "${name}" из списка распределения?`)) {
                 delete currentPeopleAssignments[name]; // Удаляем из объекта
@@ -1164,7 +1186,25 @@
                 showStatus(`Не удалось создать ссылку для ${method.toUpperCase()} для ${contact.name}.`, 'error', 4000);
             }
         }
+        // --- Вспомогательная функция для экранирования строк для JS внутри HTML ---
+        function escapeJsString(str) {
+            if (!str) return '';
+            return str
+                .replace(/\\/g, '\\\\') // Сначала экранируем сами обратные слеши
+                .replace(/'/g, "\\'")  // Экранируем одинарные кавычки
+                .replace(/"/g, '\\"'); // Экранируем двойные кавычки
+                // Можно добавить .replace(/\n/g, '\\n') и т.д., если нужны переносы строк
+        }
 
+        // --- Вспомогательная функция для экранирования строк для HTML атрибутов ---
+        // --- Вспомогательная функция для УДАЛЕНИЯ спецсимволов HTML из строки ---
+        function escapeHtmlAttr(str) {
+            if (!str) return '';
+            // Используем регулярное выражение для поиска любого из символов &, ", ', <, >
+            // и заменяем его на пустую строку '' (т.е. удаляем)
+            // Флаг 'g' означает глобальный поиск (заменить все вхождения)
+            return str.replace(/[&"'<>]/g, '');
+        }
         // --- Конец новых функций ---
 
         // --- Инициализация при загрузке ---
