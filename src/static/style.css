@@ -771,7 +771,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     :root {
         --primary-color-dark-theme: #12c26a;
         --text-color-dark-theme: #e0e0e0;
-        --card-background-dark: #121212;
+        --card-background-dark: #000000;
         --body-background-dark: #000000;
         --shadow-color-dark: rgba(180, 180, 180, 0.1);
         --disabled-button-bg-dark: #2a2a2a; /* Темно-серый фон */
