@@ -219,8 +219,7 @@
                             ${hasVk ? `<button data-link="${contact.vk}" data-type="vk" class="action-button vk-request-btn" title="Сделать запрос в VK">Запрос VK</button>` : ''}
                             ${hasTg ? `<button data-username="${contact.tg}" data-type="tg" class="action-button tg-request-btn" title="Сделать запрос в Telegram">Запрос TG</button>` : ''}
                              <button class="action-button delete-button" title="Удалить контакт">Удалить</button>
-                             <!-- Можно добавить кнопку редактирования сюда же -->
-                             <!-- <button class="action-button edit-button">Редакт.</button> -->
+                             <button class="action-button edit-button">Редактировать</button>
                          </div>
                     </div>
                 `;
@@ -668,7 +667,7 @@
 
             const deleteBtn = event.target.closest('.delete-button');
             const requestBtn = event.target.closest('.vk-request-btn, .tg-request-btn');
-            // const editBtn = event.target.closest('.edit-button'); // Если будет кнопка редактирования
+            const editBtn = event.target.closest('.edit-button'); // Если будет кнопка редактирования
 
             if (deleteBtn) {
                 event.stopPropagation(); // Предотвратить раскрытие/закрытие карточки
@@ -687,11 +686,11 @@
                 return; // Выйти после обработки кнопки
             }
 
-            // if (editBtn) {
-            //     event.stopPropagation();
-            //     showAddContactModal(contactId); // Открыть модалку для редактирования
-            //     return;
-            // }
+            if (editBtn) {
+                event.stopPropagation();
+                showAddContactModal(contactId); // Открыть модалку для редактирования
+                return;
+            }
 
             // Если клик был не по кнопке, а по самой карточке - переключаем класс active
             const wasActive = card.classList.contains('active');

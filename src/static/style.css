@@ -233,6 +233,23 @@ input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-in
 .action-button { display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; font-size: 0.85em; font-weight: bold; text-decoration: none; text-align: center; transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); white-space: nowrap; }
 .action-button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
 .action-button i { margin-right: 5px; }
+/* --- Стили для кнопки Редактировать (Зеленый стиль) --- */
+.edit-button {
+    background-color: var(--primary-color); /* Основной зеленый */
+    color: var(--white-color);              /* !!! Белый текст */
+    border: none;                           /* Убираем рамку */
+    /* Наследует остальные стили от .action-button */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Тень как у других */
+}
+
+.edit-button:hover {
+    background-color: var(--dark-green); /* Темно-зеленый при наведении */
+    color: var(--white-color);           /* Оставляем белый текст */
+    /* Сохраняем стандартные эффекты наведения */
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 .vk-request-btn { background-color: var(--vk-color); }
 .tg-request-btn { background-color: var(--tg-color); }
 .delete-button { background-color: var(--delete-color); }
@@ -857,6 +874,30 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .contact-phone-display { color: var(--grey-color-dark-theme); }
     .action-button { color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     .action-button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    /* --- Стили для кнопки Редактировать (Зеленый стиль - Темная тема) --- */
+    .edit-button {
+        background-color: var(--primary-color); /* Основной зеленый (он переопределен для темной темы) */
+        color: #fff;                            /* !!! Белый текст */
+        border: none;                           /* Убираем рамку */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Темная тень */
+    }
+
+    .edit-button:hover {
+        background-color: var(--dark-green); /* Темно-зеленый (также может быть переопределен, проверим) */
+        /* В переменных темной темы нет явного --dark-green-dark-theme,
+        но есть --dark-green-dark-theme: #30d070; он светлее.
+        Давайте использовать --dark-green из светлой темы (#1e8a52)
+        или просто чуть затемним основной темный зеленый (#12c26a -> например #0f9a54)
+        Или используем логику кнопки #add-contact-btn:hover { background-color: var(--dark-green); } - это сработает,
+        так как --dark-green не переопределен в темной теме явно и возьмется #1e8a52.
+        Это будет консистентно с кнопкой "Добавить контакт".
+        */
+        color: #fff;                            /* Оставляем белый текст */
+        /* Сохраняем стандартные эффекты наведения */
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
     .delete-button { background-color: var(--delete-color-dark-theme); }
     .no-links-placeholder { color: var(--grey-color-dark-theme); }
     .bottom-actions button { color: var(--white-color-dark-theme); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
