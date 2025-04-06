@@ -622,10 +622,6 @@
                 alert("Не удалось автоматически открыть ссылку. Возможно, браузер заблокировал это действие. Пожалуйста, проверьте настройки блокировщика.");
             }
             // --- Конец попытки обхода ---
-
-// Добавляем запись в историю (это остается)
-addHistoryEntry(historyType, contact, amount);
-closeModal(amountRequestModal); // Закрываем модальное окно (это остается)
             // Добавляем запись в историю
             addHistoryEntry(historyType, contact, amount);
             closeModal(amountRequestModal); // Закрываем модальное окно
