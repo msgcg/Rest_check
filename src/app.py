@@ -32,7 +32,6 @@ class PositionItem(BaseModel):
 
 class Positions(BaseModel):
     positions_list: List[PositionItem]
-    total_amount_detected: int # <--- Изменено на int
 
 class PersonShare(BaseModel):
     equally: int
@@ -46,7 +45,7 @@ class PersonShareItem(BaseModel):
 
 class Recommendation(BaseModel):
     peoples_list: List[PersonShareItem]
-    final_total_calculated: Optional[int] = 0
+
 
 
 
@@ -121,13 +120,13 @@ def is_restaurant_check(extracted_text: str) -> Optional[bool]:
         logger.error(f"Error during Gemini API call for restaurant check: {e}", exc_info=True)
         return None
 
-# --- Обновленная функция get_positions ---
+# --- Обновленная функция get_positions (только позиции) ---
 def get_positions(extracted_text: str) -> Optional[Positions]:
     if not extracted_text:
         logger.warning("No extracted text provided to get_positions.")
-        return Positions(positions_list=[], total_amount_detected=0)
+        return Positions(positions_list=[]) # Возвращаем пустой список
 
-    # Обновленный промпт (инструкция №4 уточнена)
+    # --- ИЗМЕНЕНО: Упрощенный промпт ---
     prompt = f"""
 Анализируй следующий текст, извлеченный из изображения чека:
 --- ТЕКСТ ЧЕКА ---
@@ -135,10 +134,9 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
 --- КОНЕЦ ТЕКСТА ЧЕКА ---""" + """
 
 Твоя задача:
-1.  Извлеки все позиции (блюда, напитки) с их ценами. Игнорируй строки типа "Итого", "Скидка", "Обслуживание", "НДС", "Официант" и т.п. Формируй результат как СПИСОК объектов в поле 'positions_list'. Каждый объект в списке должен содержать два поля: 'name' (строка, название позиции) и 'price' (**целое число int**, округленная цена). Если позиций нет, верни ПУСТОЙ СПИСОК `[]` для 'positions_list'. Старайся нормализовать названия.
-2.  Найди и извлеки итоговую сумму чека. **ВСЕГДА возвращай поле 'total_amount_detected' как целое число int (округленная сумма в рублях).** Если итоговая сумма найдена, верни ее значение. Если итоговая сумма НЕ найдена, верни `0`.
-3.  Верни результат СТРОГО в формате JSON, соответствующем структуре: {{ "positions_list": [{{ "name": "...", "price": ЦЕЛОЕ_ЧИСЛО }}], "total_amount_detected": ЦЕЛОЕ_ЧИСЛО }}. **Оба поля ('positions_list', 'total_amount_detected') ДОЛЖНЫ присутствовать в ответе.** Не добавляй никаких других пояснений или текста вне JSON.
-4.  Любые кавычки (одинарные и двойные) и другие символы, которые могут вызвать ошибки типа Invalid or unexpected token в JavaScript не должны присутствовать в твоем ответе, замени на что-то другое.
+1.  Извлеки все позиции (блюда, напитки) с их ценами. Игнорируй строки типа "Итого", "Скидка", "Обслуживание", "НДС", "Официант" и т.п. Формируй результат как СПИСОК объектов в поле 'positions_list'. Каждый объект в списке должен содержать два поля: 'name' (строка, название позиции) и 'price' (**целое число int**, округленная цена в рублях). Если позиций нет, верни ПУСТОЙ СПИСОК `[]` для 'positions_list'. Старайся нормализовать названия.
+2.  Верни результат СТРОГО в формате JSON, соответствующем структуре: {{ "positions_list": [{{ "name": "...", "price": ЦЕЛОЕ_ЧИСЛО }}] }}. **Только поле 'positions_list' должно присутствовать в ответе.** Не добавляй никаких других пояснений или текста вне JSON.
+3.  Любые кавычки (одинарные и двойные) и другие символы, которые могут вызвать ошибки типа Invalid or unexpected token в JavaScript, не должны присутствовать в твоем ответе, замени на что-то другое или удали.
 """
     try:
         model = get_gemini_model()
@@ -146,53 +144,38 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
             prompt,
             generation_config=genai.types.GenerationConfig(
                 response_mime_type="application/json",
-                response_schema=Positions # Используем модель с int
+                # response_schema=Positions # Можно использовать Pydantic модель
             )
         )
 
-        positions_obj: Optional[Positions] = None # Инициализируем переменную
+        positions_obj: Optional[Positions] = None
 
-        # --- Логика парсинга ответа ---
-        if hasattr(response, 'candidates') and response.candidates and hasattr(response.candidates[0], 'content') and hasattr(response.candidates[0].content, 'parts') and response.candidates[0].content.parts:
-             json_text = response.candidates[0].content.parts[0].text
-             logger.info(f"Received JSON from Gemini for positions/total: {json_text[:500]}...")
-             parsed_data = json.loads(json_text)
+        # --- Логика парсинга ответа (остается похожей, но ожидает только positions_list) ---
+        if hasattr(response, 'text') and response.text:
+             json_text = response.text
+             logger.info(f"Received JSON from Gemini for positions: {json_text[:500]}...")
+             # Удаляем возможные артефакты ```json ... ```
+             cleaned_json_text = re.sub(r'^```json\s*|\s*```$', '', json_text, flags=re.MULTILINE | re.DOTALL).strip()
              try:
-                 # Сначала валидируем структуру с помощью Pydantic
+                 parsed_data = json.loads(cleaned_json_text)
+                 # Валидируем структуру с помощью Pydantic
                  positions_obj = Positions(**parsed_data)
-                 logger.info(f"Successfully parsed positions/total: {len(positions_obj.positions_list)} items, total={positions_obj.total_amount_detected}")
+                 logger.info(f"Successfully parsed positions: {len(positions_obj.positions_list)} items")
 
-             except ValidationError as e:
-                 logger.error(f"Pydantic validation failed for positions/total: {e}. JSON: {json_text}")
-                 return None # Ошибка валидации, выходим
-
-        elif response.text: # Fallback на response.text
-             try:
-                 logger.info(f"Trying to parse positions/total from response.text: {response.text[:500]}...")
-                 parsed_data = json.loads(response.text)
-                 try:
-                     # Сначала валидируем структуру с помощью Pydantic
-                     positions_obj = Positions(**parsed_data)
-                     logger.info(f"Successfully parsed positions/total from response.text: {len(positions_obj.positions_list)} items, total={positions_obj.total_amount_detected}")
-
-                 except ValidationError as e:
-                     logger.error(f"Pydantic validation failed for positions/total response.text: {e}. JSON: {response.text}")
-                     return None # Ошибка валидации, выходим
-             except Exception as parse_err:
-                 logger.error(f"Failed to parse JSON positions/total from response.text: {parse_err}")
-                 return None # Ошибка парсинга JSON, выходим
+             except (json.JSONDecodeError, ValidationError) as e:
+                 logger.error(f"Pydantic validation or JSON parsing failed for positions: {e}. JSON: {cleaned_json_text}")
+                 return None # Ошибка валидации или парсинга, выходим
         else:
-             logger.error("No usable content found in Gemini response for positions/total.")
+             logger.error("No usable content found in Gemini response for positions.")
              return None # Нет данных от модели, выходим
 
-        # --- Очистка имен позиций ПОСЛЕ успешного парсинга и валидации ---
+        # --- Очистка имен позиций (остается без изменений) ---
         if positions_obj and isinstance(positions_obj.positions_list, list):
             cleaned_count = 0
             for item in positions_obj.positions_list:
                 if isinstance(item.name, str):
                     original_name = item.name
-                    # Удаляем символы: & " ' < > ` с помощью регулярного выражения
-                    item.name = re.sub(r'[&"\'<>`]', '', item.name)
+                    item.name = re.sub(r'[&"\'<>`]', '', item.name) # Удаляем небезопасные символы
                     if item.name != original_name:
                         cleaned_count += 1
                         logger.debug(f"Cleaned item name: '{original_name}' -> '{item.name}'")
@@ -200,14 +183,76 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
                 logger.info(f"Cleaned names for {cleaned_count} position(s).")
         elif positions_obj and not isinstance(positions_obj.positions_list, list):
              logger.warning("Parsed 'positions_list' is not a list after validation. Setting to empty list.")
-             positions_obj.positions_list = [] # Гарантируем, что это список
+             positions_obj.positions_list = []
 
-        # Возвращаем объект (возможно, с очищенными именами)
         return positions_obj
 
     except Exception as e:
-        logger.error(f"Error during Gemini API call or processing for positions/total: {e}", exc_info=True)
+        logger.error(f"Error during Gemini API call or processing for positions: {e}", exc_info=True)
         return None
+
+# --- Новая функция get_total_amount (как ты предложил) ---
+def get_total_amount(extracted_text: str) -> int:
+    """Извлекает итоговую сумму из текста чека как целое число."""
+    if not extracted_text:
+        logger.warning("No extracted text provided to get_total_amount.")
+        return 0
+
+    prompt = f"""
+Тебе дан текст чека:
+---Начало текста чека---
+{extracted_text}
+---Конец текста чека---
+Извлеки из этого чека итоговую сумму (обычно находится в поле "Итого", "ИТОГ", "ВСЕГО К ОПЛАТЕ" или похожем).
+Ответ выдай СТРОГО в формате JSON с одним полем "total_amount", значение которого - ЦЕЛОЕ ЧИСЛО (int). Если в чеке указана десятичная часть суммы, округли до ближайшего целого числа рублей. Если итоговая сумма не найдена, верни 0.
+Пример ответа: {{ "total_amount": 1234 }}
+Не давай никаких пояснений, только JSON."""
+
+    try:
+        model = get_gemini_model()
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json",
+                # response_schema={"type": "object", "properties": {"total_amount": {"type": "integer"}}} # Можно указать схему
+            ),
+        )
+
+        # Парсинг ответа
+        if hasattr(response, 'text') and response.text:
+            json_text = response.text
+            logger.info(f"Received JSON from Gemini for total amount: {json_text}")
+            # Удаляем возможные артефакты ```json ... ```
+            cleaned_json_text = re.sub(r'^```json\s*|\s*```$', '', json_text, flags=re.MULTILINE | re.DOTALL).strip()
+            try:
+                parsed_data = json.loads(cleaned_json_text)
+                total_amount = parsed_data.get("total_amount")
+                if isinstance(total_amount, int):
+                    logger.info(f"Successfully parsed total amount: {total_amount}")
+                    return total_amount
+                elif isinstance(total_amount, (float, str)): # Попытка преобразовать, если пришло не int
+                    try:
+                        amount_int = int(round(float(str(total_amount).replace(',','.'))))
+                        logger.warning(f"Parsed total_amount was not int ({type(total_amount)}), converted to: {amount_int}")
+                        return amount_int
+                    except (ValueError, TypeError):
+                         logger.error(f"Could not convert parsed total_amount '{total_amount}' to int.")
+                         return 0
+                else:
+                    logger.error("Field 'total_amount' is missing or not a number in parsed data.")
+                    return 0
+            except (json.JSONDecodeError, ValidationError) as e:
+                logger.error(f"JSON parsing or validation failed for total amount: {e}. JSON: {cleaned_json_text}")
+                return 0
+        else:
+            logger.error("No usable content found in Gemini response for total amount.")
+            return 0
+
+    except Exception as e:
+        logger.error(f"Error during Gemini API call for total amount: {e}", exc_info=True)
+        return 0
+
+
 # --- Обновленная функция get_recommendations ---
 def get_recommendations(extracted_text: str, num_people: int, tea_money: float, item_assignments: Dict[str, List[str]]) -> Optional[Recommendation]:
     if not extracted_text or num_people <= 0:
@@ -230,13 +275,13 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 
 --- ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ---
 - Количество человек: {num_people}
-- Желаемые чаевые (добавить к итогу, если не включены): {tea_money_int} (целое число). Проверь, нет ли строк "Сервисный сбор", "Чаевые", или им подобных с этой же суммой (если округлять до целых) в тексте счета - если есть, НЕ добавляй эти {tea_money_int} повторно.
+- Желаемые чаевые (добавить к итогу, если не включены): {tea_money_int} (целое число рублей). Проверь, нет ли строк "Сервисный сбор", "Чаевые", или им подобных с этой же суммой (если округлять до целых рублей) в тексте счета - если есть, НЕ добавляй эти {tea_money_int} повторно.
 - Кто что ел/пил (если указано):
 {assignments_str}
 
 --- ЗАДАЧА ---
 
-Рассчитай доли для КАЖДОГО человека (с учетом скидок из чека и добавленных чаевых, если они не были включены в сам чек) по следующим методам деления (все суммы округляй до целых):
+Рассчитай доли для КАЖДОГО человека (с учетом скидок из чека и добавленных чаевых, если они не были включены в сам чек) по следующим методам деления (все суммы округляй до целых рублей):
 1.  `equally`: Разделить итоговую сумму поровну.
 2.  `who_more_eat_then_more_pay`: Разделить так, чтобы те, кто съел БОЛЬШЕ позиций (по количеству штук), заплатили больше. Если распределение блюд по людям не указано, используй равное деление.
 3.  `who_more_cost_then_more_pay`: Разделить так, чтобы те, кто заказал на БОЛЬШУЮ СУММУ (сумма их блюд), заплатили больше. Если распределение блюд по людям не указано, используй равное деление.
@@ -312,37 +357,35 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
         logger = logging.getLogger(__name__)
 
         try:
-            # Попытка получить объект Recommendation
-            if hasattr(response, 'parsed') and isinstance(response.parsed, Recommendation):
-                recommendation_obj = response.parsed
+            # Попытка получить объект Recommendation вручную
+            logger.error("Direct parsing of Recommendation object. Skipping attribute check.")
+            raw_text = None
+
+            # Извлекаем текстовый ответ
+            if hasattr(response, 'text') and response.text:
+                raw_text = response.text
+            elif (hasattr(response, 'candidates') and response.candidates and 
+                hasattr(response.candidates[0], 'content') and hasattr(response.candidates[0].content, 'parts') and 
+                response.candidates[0].content.parts):
+                raw_text = response.candidates[0].content.parts[0].text
+
+            if raw_text:
+                logger.info(f"Raw response text received: {raw_text[:1000]}...")
+
+                # Попытка распарсить JSON вручную
+                try:
+                    parsed_data = json.loads(raw_text)
+
+                    # Создаем объект через Pydantic
+                    recommendation_obj = Recommendation(**parsed_data)
+
+                except (json.JSONDecodeError, ValidationError) as parse_err:
+                    logger.error(f"Failed to parse response into Recommendation: {parse_err}")
+                    recommendation_obj = None
             else:
-                logger.error("Failed to access parsed Recommendation object. Attempting manual JSON parsing.")
-                raw_text = None
+                logger.error("Could not retrieve raw response text.")
+                recommendation_obj = None
 
-                # Извлекаем текстовый ответ
-                if hasattr(response, 'text') and response.text:
-                    raw_text = response.text
-                elif (hasattr(response, 'candidates') and response.candidates and 
-                    hasattr(response.candidates[0], 'content') and hasattr(response.candidates[0].content, 'parts') and 
-                    response.candidates[0].content.parts):
-                    raw_text = response.candidates[0].content.parts[0].text
-
-                if raw_text:
-                    logger.info(f"Raw response text received: {raw_text[:1000]}...")
-
-                    # Попытка распарсить JSON вручную
-                    try:
-                        parsed_data = json.loads(raw_text)
-
-                        # Создаем объект через Pydantic
-                        recommendation_obj = Recommendation(**parsed_data)
-
-                    except (json.JSONDecodeError, ValidationError) as parse_err:
-                        logger.error(f"Failed to parse response into Recommendation: {parse_err}")
-                        return None
-                else:
-                    logger.error("Could not retrieve raw response text.")
-                    return None
 
             # Проверяем список людей
             if not isinstance(recommendation_obj.peoples_list, list):
@@ -361,7 +404,6 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
     except Exception as e:
         logger.error(f"Error during Gemini API call for recommendations: {e}", exc_info=True)
         return None
-
 
 # --- Маршруты Flask ---
 
@@ -393,7 +435,9 @@ def preprocess_receipt():
     if not image_file:
         logger.warning("Preprocess request failed: No image file provided.")
         return jsonify({'error': 'No image file provided'}), 400
-    original_filename = image_file.filename
+
+    # Сохраняем файл временно (путь можно сделать уникальным при необходимости)
+    original_filename = image_file.filename # Безопаснее использовать secure_filename, но для простоты оставим так
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
 
     try:
@@ -407,44 +451,50 @@ def preprocess_receipt():
              return jsonify({'error': 'Failed to process image with OCR'}), 500
         if not extracted_text:
              logger.warning("OCR resulted in empty text.")
-             # Возвращаем с значениями по умолчанию
-             return jsonify({"positions_list": [], "is_restaurant": False, "extracted_text": "", "total_amount_detected": 0.0}), 200
+             # Возвращаем пустые данные, но с успехом
+             return jsonify({"positions_list": [], "is_restaurant": False, "extracted_text": "", "total_amount_detected": 0}), 200
 
-        logger.info(f"OCR extracted text (first 100 chars): {extracted_text[:100]}")
+        logger.info(f"OCR extracted text (first 100 chars): {extracted_text[:100]}...")
 
         # Шаг 2: Проверка на ресторан
         is_restaurant_flag = is_restaurant_check(extracted_text)
 
-        # Обработка ошибки при проверке или если это не ресторан
         if is_restaurant_flag is None:
             logger.error("Failed to determine if image is a restaurant check.")
-            # Можно вернуть ошибку или считать, что это не ресторан
-            # return jsonify({'error': 'Failed to analyze check type'}), 500
             is_restaurant_flag = False # Считаем не рестораном при ошибке
         elif is_restaurant_flag is False:
             logger.info("Image determined not to be a restaurant check.")
-            # Возвращаем результат с флагом False и пустыми позициями
-            return jsonify({"positions_list": [], "is_restaurant": False, "extracted_text": extracted_text, "total_amount_detected": 0.0}), 200
+            # Возвращаем результат с флагом False и пустыми данными
+            return jsonify({"positions_list": [], "is_restaurant": False, "extracted_text": extracted_text, "total_amount_detected": 0}), 200
 
-        # Шаг 3: Если это ресторан, извлекаем позиции и сумму
+        # --- Шаг 3: Если это ресторан, извлекаем ПОЗИЦИИ ---
         logger.info("Check identified as restaurant, proceeding to get positions.")
         positions_data = get_positions(extracted_text)
 
         if positions_data is None:
-            logger.error("Failed to get positions/total data from Gemini even though it's a restaurant check.")
-            return jsonify({'error': 'Failed to extract items/total from the restaurant check'}), 500
+            logger.error("Failed to get positions data from Gemini.")
+            # Можно вернуть ошибку или пустой список позиций
+            positions_data = Positions(positions_list=[]) # Возвращаем пустой список при ошибке
+            # return jsonify({'error': 'Failed to extract items from the restaurant check'}), 500
 
-        # Шаг 4: Собираем финальный ответ
-        response_data = positions_data.dict()
-        response_data['is_restaurant'] = True # Мы уже знаем, что это ресторан
+        # --- Шаг 4: Извлекаем ИТОГОВУЮ СУММУ ОТДЕЛЬНО ---
+        logger.info("Proceeding to get total amount.")
+        total_amount = get_total_amount(extracted_text) # Возвращает int, 0 при ошибке
+
+        # --- Шаг 5: Собираем финальный ответ ---
+        response_data = positions_data.dict() # Получаем {'positions_list': [...]}
+        response_data['is_restaurant'] = True
         response_data['extracted_text'] = extracted_text
-        logger.info(f"Preprocess successful. is_restaurant=True, items={len(response_data['positions_list'])}")
+        response_data['total_amount_detected'] = total_amount # Добавляем сумму
+
+        logger.info(f"Preprocess successful. is_restaurant=True, items={len(response_data['positions_list'])}, total_amount={total_amount}")
         return jsonify(response_data), 200
 
     except Exception as e:
         logger.error(f"Error during preprocess_receipt: {e}", exc_info=True)
         return jsonify({'error': 'An internal server error occurred during preprocessing.'}), 500
     finally:
+        # Удаляем временный файл
         if os.path.exists(filepath):
             try:
                 os.remove(filepath)

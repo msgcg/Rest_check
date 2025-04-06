@@ -26,7 +26,23 @@
                 </div>
             </div>
         </div>
-
+        <!-- <<< НОВЫЙ БЛОК: Последняя обработанная сумма >>> -->
+        <div class="container last-amount-container" id="lastAmountCard" style="display: none;"> <!-- Скрыт по умолчанию -->
+            <div class="container-content last-amount-content">
+                <div class="last-amount-title">Последняя сумма из чека</div>
+                <div class="last-amount-value-wrapper">
+                    <span id="lastAmountDisplay" class="last-amount-value">0.00</span>
+                    <span class="currency-symbol">₽</span>
+                </div>
+                <!-- Обертка для кнопки -->
+                <div class="last-amount-button-wrapper">
+                     <button id="copyLastAmountBtn" class="result-action-btn copy-last-amount-btn" title="Скопировать сумму">
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                     </button>
+                </div>
+            </div>
+        </div>
+        <!-- <<< КОНЕЦ НОВОГО БЛОКА >>> -->
         <!-- Вторая карточка: Кнопки Поделиться -->
         <div class="container share-container">
             <div class="container-content share-content">
@@ -57,50 +73,50 @@
         const amountInput = document.getElementById('receiptAmountInput');
         const shareVkButton = document.getElementById('shareVk');
         const shareTelegramButton = document.getElementById('shareTelegram');
+        // --- Новые элементы для последней суммы ---
+        const lastAmountCard = document.getElementById('lastAmountCard');
+        const lastAmountDisplay = document.getElementById('lastAmountDisplay');
+        const copyLastAmountButton = document.getElementById('copyLastAmountBtn');
+        const LAST_PROCESSED_AMOUNT_KEY = 'lastProcessedTotalAmount_v1'; // Тот же ключ, что и в index.html
+        // --- Конец новых элементов --
 
-
+        // Функция парсинга: убирает пробелы, заменяет запятую, удаляет мусор
         function parseAmount(text) {
             if (text === null || text === undefined || text === '') return null;
-            // Allow spaces, replace comma, remove invalid chars except dot
-            let cleanedText = String(text).replace(/\s/g, '').replace(',', '.').replace(/[^0-9.]/g, '');
+            // 1. Убрать все пробелы
+            // 2. Заменить запятую на точку
+            // 3. Удалить все, кроме цифр и одной точки
+            let cleanedText = String(text)
+                .replace(/\s+/g, '')     // Убираем все пробелы (включая множественные)
+                .replace(',', '.');     // Заменяем запятую на точку
 
-            // Ensure only one decimal point exists
+            // Оставляем только цифры и первую точку
             const parts = cleanedText.split('.');
-            if (parts.length > 2) {
-                 // Reconstruct with only the first decimal point
-                 cleanedText = parts[0] + '.' + parts.slice(1).join('');
+            let finalCleanedText = parts[0].replace(/[^0-9]/g, ''); // Очищаем целую часть
+
+            if (parts.length > 1) {
+                // Очищаем дробную часть (только цифры) и добавляем точку
+                finalCleanedText += '.' + parts.slice(1).join('').replace(/[^0-9]/g, '');
             }
-             // If it ends with just '.', treat it as integer for now during typing
-             if (cleanedText.endsWith('.') && cleanedText.length > 1) {
-                  // Allow typing e.g. "12." without immediately parsing as NaN
-                  // But parseFloat will handle this correctly anyway
-             } else if (cleanedText === '.') {
-                return 0; // Treat just "." as 0 for parsing purpose
-             }
 
+             // Обработка случая ввода просто "."
+             if (finalCleanedText === '.') return 0;
 
-            const value = parseFloat(cleanedText);
-            // Return null if NaN or negative
+            const value = parseFloat(finalCleanedText);
+            // Возвращаем null если NaN или отрицательное
             return isNaN(value) || value < 0 ? null : value;
         }
 
-        // Updates share button state and links based on a numeric value
+        // Обновляет состояние кнопок шаринга
         function updateShareState(numericAmount) {
-            // Buttons enabled only if >= 0.01
-            // Check if numericAmount is a valid number and meets the minimum threshold
             const isValidForSharing = (typeof numericAmount === 'number' && numericAmount >= 0.01);
 
-            // --- Button Enabling/Disabling Logic ---
             shareVkButton.disabled = !isValidForSharing;
             shareTelegramButton.disabled = !isValidForSharing;
-            // --- End Button Logic ---
 
-            // Only generate share links and set handlers if the amount is valid for sharing
             if (isValidForSharing) {
-                // Format for display in the message, always 2 decimals
-                // No need to re-check the value here, as it's already >= 0.01
                 const formattedAmountForDisplay = numericAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                const shareTextBase = `Твоя доля за недавние посиделки: ${formattedAmountForDisplay}₽ 😊`; // Simplified text
+                const shareTextBase = `Твоя доля за недавние посиделки: ${formattedAmountForDisplay}₽ 😊`;
 
                 const shareUrlVk = `https://vk.com/share.php?title=${encodeURIComponent('ПоДЕЛИ!: Сумма чека')}&comment=${encodeURIComponent(shareTextBase)}`;
                 const shareUrlTelegram = `https://t.me/share/url?url=${encodeURIComponent('Привет! ')}&text=${encodeURIComponent(shareTextBase)}`;
@@ -108,9 +124,87 @@
                 shareVkButton.onclick = () => window.open(shareUrlVk, '_blank', 'width=600,height=450,noopener,noreferrer');
                 shareTelegramButton.onclick = () => window.open(shareUrlTelegram, '_blank', 'width=600,height=450,noopener,noreferrer');
             } else {
-                // Clear onclick handlers when buttons are disabled
                 shareVkButton.onclick = null;
                 shareTelegramButton.onclick = null;
+            }
+        }
+        
+        // --- Функция для загрузки и отображения последней суммы ---
+        function loadAndDisplayLastProcessedAmount() {
+            try {
+                const storedAmountStr = localStorage.getItem(LAST_PROCESSED_AMOUNT_KEY);
+                if (storedAmountStr !== null) {
+                    const storedAmount = parseFloat(storedAmountStr);
+                    if (!isNaN(storedAmount) && storedAmount >= 0) {
+                        // Форматируем сумму с двумя знаками после запятой
+                        const formattedAmount = storedAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        lastAmountDisplay.textContent = formattedAmount;
+                        lastAmountCard.style.display = 'block'; // Показываем карточку
+                        copyLastAmountButton.disabled = false; // Включаем кнопку копирования
+                        console.log(`Загружена последняя сумма из localStorage: ${formattedAmount}`);
+                        return; // Выходим, если сумма найдена и отображена
+                    } else {
+                        console.warn("Сохраненное значение lastProcessedTotalAmount не является корректным числом:", storedAmountStr);
+                    }
+                } else {
+                    console.log("Ключ lastProcessedTotalAmount не найден в localStorage.");
+                }
+            } catch (e) {
+                console.error("Ошибка чтения lastProcessedTotalAmount из localStorage:", e);
+            }
+
+            // Если сумма не найдена или некорректна, скрываем блок и выключаем кнопку
+            lastAmountCard.style.display = 'none';
+            copyLastAmountButton.disabled = true;
+        }
+        // --- Конец функции ---
+
+        // --- Функция для копирования последней суммы ---
+        async function copyLastProcessedAmount() {
+            const amountText = lastAmountDisplay.textContent;
+            if (!amountText || copyLastAmountButton.disabled) {
+                console.warn("Нет суммы для копирования или кнопка выключена.");
+                return;
+            }
+
+            // Убираем символ валюты и пробелы для копирования чистого числа (если нужно)
+            // const amountToCopy = amountText.replace(/[₽\s]/g, '').replace(',', '.');
+            // Или копируем как есть с форматированием и валютой:
+            const amountToCopy = `${amountText} ₽`; // Копируем с символом валюты
+
+            try {
+                await navigator.clipboard.writeText(amountToCopy);
+                const originalContent = copyLastAmountButton.innerHTML;
+                const originalTitle = copyLastAmountButton.title;
+                copyLastAmountButton.innerHTML = '✅'; // Галочка
+                copyLastAmountButton.title = 'Скопировано!';
+                copyLastAmountButton.style.color = 'var(--primary-green)'; // Зеленый цвет для галочки
+
+                setTimeout(() => {
+                    // Проверяем, существует ли еще кнопка
+                    const currentButton = document.getElementById('copyLastAmountBtn');
+                    if (currentButton) {
+                        currentButton.innerHTML = originalContent;
+                        currentButton.title = originalTitle;
+                        currentButton.style.color = ''; // Сброс цвета
+                    }
+                }, 1500);
+            } catch (err) {
+                console.error('Ошибка копирования последней суммы: ', err);
+                const originalContent = copyLastAmountButton.innerHTML;
+                const originalTitle = copyLastAmountButton.title;
+                copyLastAmountButton.innerHTML = '❌'; // Крестик
+                copyLastAmountButton.title = 'Ошибка копирования';
+                copyLastAmountButton.style.color = 'var(--error-color)'; // Красный цвет для ошибки
+
+                setTimeout(() => {
+                    const currentButton = document.getElementById('copyLastAmountBtn');
+                    if (currentButton) {
+                        currentButton.innerHTML = originalContent;
+                        currentButton.title = originalTitle;
+                        currentButton.style.color = ''; // Сброс цвета
+                    }
+                }, 2000);
             }
         }
 
@@ -136,57 +230,65 @@
         // Set initial button state based on the potentially adjusted initial amount
         updateShareState(initialNumericValue);
 
+        // Вызываем загрузку последней суммы при загрузке страницы
+        loadAndDisplayLastProcessedAmount();
+        // Устанавливаем обработчик для кнопки копирования
+        copyLastAmountButton.addEventListener('click', copyLastProcessedAmount);
 
         // --- Event Listeners ---
+        // Слушатель 'input': Минимальная чистка для предотвращения невалидных символов *во время ввода*
         amountInput.addEventListener('input', (event) => {
-            // Filter input to allow only digits and one decimal point using regex replacement
             let value = event.target.value;
-            value = value.replace(/[^0-9.]/g, ''); // Remove invalid chars
-             const parts = value.split('.');
-             if (parts.length > 2) { // If more than one dot
-                 value = parts[0] + '.' + parts.slice(1).join(''); // Keep only first dot
-             }
+            // Убираем все, КРОМЕ цифр, точки, запятой
+            let cleanedValue = value.replace(/[^0-9.,]/g, '');
 
-             // Update input value *if* it was cleaned
-             if (event.target.value !== value) {
-                // Store cursor position
-                const start = event.target.selectionStart;
-                const end = event.target.selectionEnd;
-                event.target.value = value;
-                // Restore cursor position (relative to changes)
-                // This might not be perfect if characters were removed before the cursor
-                event.target.setSelectionRange(start - (event.target.value.length - value.length), end - (event.target.value.length - value.length));
-             }
-
-            // Parse the current (potentially unformatted) value for state update
-            const parsedForState = parseAmount(value);
-            // Update button state based on live value, checking the >= 0.01 threshold
-            updateShareState(parsedForState); // Update button state based on live value
-        });
-
-         amountInput.addEventListener('change', (event) => {
-            // User finished editing (blur/enter). Now format, enforce minimum, and sync state.
-            const parsedValue = parseAmount(event.target.value);
-            let finalNumericValue;
-
-            // Determine the final numeric value, enforcing the 0.01 minimum threshold
-            if (parsedValue !== null && parsedValue > 0 && parsedValue < 0.01) {
-                // If the value is positive but less than 0.01, treat it as 0.
-                finalNumericValue = 0;
-            } else if (parsedValue !== null && parsedValue >= 0.01) {
-                // If the value is 0.01 or more, use it.
-                finalNumericValue = parsedValue;
-            } else {
-                // Otherwise (negative, NaN, or exactly 0 initially), treat as 0.
-                finalNumericValue = 0;
+            // Простая проверка на множественные разделители (можно улучшить)
+            const separators = (cleanedValue.match(/[.,]/g) || []).length;
+            if (separators > 1) {
+                // Если ввели второй разделитель, пытаемся его убрать (не идеально, но лучше чем ничего)
+                 const firstSeparatorIndex = cleanedValue.search(/[.,]/);
+                 if (firstSeparatorIndex !== -1) {
+                     const integerPart = cleanedValue.substring(0, firstSeparatorIndex + 1);
+                     const fractionalPart = cleanedValue.substring(firstSeparatorIndex + 1).replace(/[.,]/g, '');
+                     cleanedValue = integerPart + fractionalPart;
+                 }
             }
 
-            // Format the input field visually based on the final corrected value
+            // Обновляем значение в поле, если оно изменилось после чистки
+            if (event.target.value !== cleanedValue) {
+                const start = event.target.selectionStart;
+                const diff = event.target.value.length - cleanedValue.length;
+                event.target.value = cleanedValue;
+                // Пытаемся восстановить позицию курсора
+                try { event.target.setSelectionRange(start - diff, start - diff); } catch(e) {}
+            }
+
+            // Обновляем состояние кнопок на основе *попытки* парсинга текущего значения
+            // parseAmount справится с запятой/точкой
+            const parsedForState = parseAmount(cleanedValue);
+            updateShareState(parsedForState);
+        });
+
+        // Слушатель 'change': Финальная обработка после потери фокуса или Enter (включая вставку)
+        amountInput.addEventListener('change', (event) => {
+            const parsedValue = parseAmount(event.target.value); // Используем улучшенный parseAmount
+            let finalNumericValue;
+
+            // Применяем порог 0.01
+            if (parsedValue !== null && parsedValue > 0 && parsedValue < 0.01) {
+                finalNumericValue = 0;
+            } else if (parsedValue !== null && parsedValue >= 0.01) {
+                finalNumericValue = parsedValue;
+            } else {
+                finalNumericValue = 0; // NaN, null, < 0 или 0 -> 0
+            }
+
+            // Форматируем поле ввода до двух знаков после запятой
             amountInput.value = finalNumericValue.toFixed(2);
 
-            // Update share state based on the final corrected numeric value
+            // Обновляем состояние кнопок на основе финального значения
             updateShareState(finalNumericValue);
-         });
+        });
 
         // --- Paste Button Code Removed ---
 

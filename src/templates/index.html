@@ -441,7 +441,22 @@
                     });
                 }
                 console.log("Позиции получены и преобразованы в словарь:", currentPositions);
-
+                
+                // --- Сохранение последней обработанной суммы чека ---
+                if (typeof data.total_amount_detected === 'number') {
+                    try {
+                        // Используем консистентный ключ
+                        const LAST_PROCESSED_AMOUNT_KEY = 'lastProcessedTotalAmount_v1';
+                        localStorage.setItem(LAST_PROCESSED_AMOUNT_KEY, data.total_amount_detected.toString());
+                        console.log(`Сохранено total_amount_detected в localStorage: ${data.total_amount_detected}`);
+                    } catch (e) {
+                        console.error("Ошибка сохранения total_amount_detected в localStorage:", e);
+                        // Не критично, просто логируем
+                    }
+                } else {
+                    console.warn("total_amount_detected не является числом или отсутствует в ответе:", data.total_amount_detected);
+                }
+                // --- Конец сохранения ---
                 // Переход ко второму шагу
                 initialUploadSection.style.display = 'none';
                 resultsSection.style.display = 'none';
@@ -721,8 +736,8 @@
         }
 
         function displayRecommendations(filterType = 'equally') {
-             // Проверяем только peoples_list и final_total_calculated
-             if (!finalRecommendations || !finalRecommendations.peoples_list || typeof finalRecommendations.final_total_calculated !== 'number') {
+             // Проверяем только peoples_list
+             if (!finalRecommendations || !finalRecommendations.peoples_list) {
                  resultElement.innerHTML = "Нет данных для отображения."; // Можно оставить сообщение об ошибке здесь
                  personShareDetailsContainer.innerHTML = '';
                  // Скрыть кнопки и фильтры, если нет данных

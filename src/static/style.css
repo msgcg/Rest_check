@@ -1067,3 +1067,264 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     }
 
 } /* === Конец блока @media (prefers-color-scheme: dark) === */
+
+/* --- Стили для нового блока "Последняя сумма из чека" --- */
+.last-amount-container {
+    margin-bottom: 25px; /* Отступ снизу */
+    flex-shrink: 0;
+    /* --- ЯВНО ЗАДАЕМ ШИРИНУ И ЦЕНТРИРОВАНИЕ --- */
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%; /* Как у других контейнеров на share.html */
+    max-width: 600px; /* Как у других контейнеров на share.html */
+    /* Убедимся, что базовые стили .container применяются */
+    padding: 4px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    position: relative;
+    z-index: 0;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    box-sizing: border-box;
+}
+
+.last-amount-content {
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* --- Добавляем стили из .container-content --- */
+    width: 100%;
+    background-color: var(--card-background);
+    border-radius: 10px; /* Внутреннее скругление */
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+.last-amount-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--primary-green);
+    font-weight: 600;
+    flex-shrink: 0; /* Не сжимать заголовок */
+}
+
+/* Обертка для суммы и валюты */
+.last-amount-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-top: 5px;
+    margin-bottom: 15px; /* Отступ до кнопки */
+    gap: 8px;
+    flex-shrink: 0; /* Не сжимать */
+}
+
+.last-amount-value {
+    font-size: 38px;
+    font-weight: bold;
+    color: var(--text-dark);
+    line-height: 1.1;
+}
+
+/* Символ валюты */
+.last-amount-value-wrapper .currency-symbol {
+    font-size: 38px;
+    font-weight: bold;
+    color: var(--primary-green);
+    line-height: 1.1;
+}
+
+/* Обертка для кнопки */
+.last-amount-button-wrapper {
+    margin-top: 5px; /* <<< ДОБАВЛЕН ОТСТУП СВЕРХУ ДЛЯ КНОПКИ >>> */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0; /* Не сжимать */
+}
+
+/* Кнопка копирования */
+.copy-last-amount-btn {
+    /* --- ВОЗВРАЩАЕМ НАСЛЕДОВАНИЕ СТИЛЕЙ --- */
+    /* Наследует background, color, border, shadow, transition от .result-action-btn */
+
+    /* --- Специфичные стили для размера и выравнивания --- */
+    padding: 6px;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    /* Убираем position: absolute, если он был в базовом классе */
+    position: static;
+}
+.copy-last-amount-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor; /* Иконка берет цвет текста кнопки */
+}
+
+/* Стили для состояния копирования (галочка/крестик) - цвет текста */
+.copy-last-amount-btn[title="Скопировано!"] {
+    color: var(--primary-green);
+    /* border-color не меняем здесь, пусть наследуется или задается темой */
+}
+.copy-last-amount-btn[title="Ошибка копирования"] {
+    color: var(--error-color);
+    /* border-color не меняем здесь */
+}
+
+
+/* --- Стили для темной темы --- */
+@media (prefers-color-scheme: dark) {
+    /* --- Переопределяем стили контейнера для темной темы --- */
+     .last-amount-container {
+        background: var(--border-gradient); /* Оставляем градиент */
+        box-shadow: 0 4px 15px var(--shadow-color-dark);
+    }
+    .last-amount-content {
+        background-color: var(--card-background-dark); /* Темный фон контента */
+    }
+    /* --- Остальные стили темной темы для этого блока --- */
+    .last-amount-title {
+        color: var(--primary-color-dark-theme);
+    }
+    .last-amount-value {
+        color: var(--text-color-dark-theme);
+    }
+    .last-amount-value-wrapper .currency-symbol {
+        color: var(--primary-color-dark-theme);
+    }
+    /* Кнопка копирования в темной теме наследует стили .result-action-btn */
+    /* Стили для галочки/крестика в темной теме */
+    .copy-last-amount-btn[title="Скопировано!"] {
+        color: var(--primary-color-dark-theme);
+    }
+    .copy-last-amount-btn[title="Ошибка копирования"] {
+        color: var(--error-color-dark-theme);
+    }
+}
+
+/* --- Адаптация для мобильных --- */
+@media (max-width: 600px) {
+    /* --- Ширина контейнера на мобильных --- */
+    .last-amount-container {
+        padding: 3px;
+        border-radius: 13px;
+        margin-bottom: 20px;
+    }
+    .last-amount-content {
+        padding: 15px 20px;
+        border-radius: 10px; /* Внутреннее скругление */
+    }
+    /* --- Остальные мобильные стили --- */
+    .last-amount-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    .last-amount-value-wrapper {
+        margin-bottom: 12px;
+        gap: 6px;
+    }
+    .last-amount-value {
+        font-size: 32px;
+    }
+    .last-amount-value-wrapper .currency-symbol {
+        font-size: 32px;
+    }
+    .last-amount-button-wrapper {
+        margin-top: 3px; /* Чуть меньше отступ на мобильных */
+    }
+    .copy-last-amount-btn {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+    }
+    .copy-last-amount-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* --- Уточнение базовых стилей .result-action-btn --- */
+/* Убедимся, что базовый стиль НЕ содержит position: absolute */
+.result-action-btn {
+    position: static; /* Явно указываем НЕ абсолютное позиционирование по умолчанию */
+    /* Стили по умолчанию для СВЕТЛОЙ темы */
+    background-color: var(--card-background);
+    color: #555;
+    border: 1px solid var(--light-grey-border);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    transition: color 0.2s, background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+    line-height: 1;
+    font-weight: normal;
+    display: inline-flex; /* Добавим для корректного рендеринга */
+    align-items: center;
+    justify-content: center;
+}
+.result-action-btn:hover {
+    color: var(--primary-color);
+    background-color: #f0f0f0;
+    border-color: #bbb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.result-action-btn:active {
+    color: var(--dark-green);
+    background-color: #e0e0e0;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Стили .result-action-btn для ТЕМНОЙ темы */
+@media (prefers-color-scheme: dark) {
+    .result-action-btn {
+        background-color: var(--input-bg-color-dark-theme);
+        color: var(--grey-color-dark-theme);
+        border: 1px solid var(--light-grey-border-dark-theme);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .result-action-btn:hover {
+        color: var(--primary-color-dark-theme);
+        background-color: #333;
+        border-color: #555;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .result-action-btn:active {
+        color: var(--dark-green-dark-theme);
+        background-color: var(--border-green-dark-theme);
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+    }
+}
+
+/* --- ВОЗВРАЩАЕМ АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ ТОЛЬКО ДЛЯ КНОПОК В РЕЗУЛЬТАТАХ INDEX.HTML --- */
+#result-container .result-action-btn {
+     position: absolute;
+     bottom: 10px;
+     z-index: 5;
+     width: auto; /* Сброс на авто */
+     height: auto;
+     padding: 5px; /* Стандартный паддинг */
+     border-radius: 8px; /* Стандартное скругление */
+}
+#result-container #copy-result-btn { right: 50px; }
+#result-container #share-result-btn { right: 10px; }
+
+/* Мобильные стили для кнопок в результатах index.html (остаются без изменений) */
+@media (max-width: 600px) {
+    #result-container .result-action-btn {
+        bottom: 8px;
+        padding: 4px;
+        border-radius: 6px;
+    }
+    #result-container .result-action-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+    #result-container #copy-result-btn { right: 45px; }
+    #result-container #share-result-btn { right: 8px; }
+}
