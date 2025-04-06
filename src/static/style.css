@@ -186,7 +186,20 @@ h2 { color: var(--primary-color); text-align: center; margin-top: 20px; margin-b
 input[type="file"] { border: 2px solid var(--light-grey-border); display: block; width: 100%; padding: 10px; box-sizing: border-box; font-size: 16px; color: var(--text-dark); background-color: var(--card-background); border-radius: 10px; overflow: hidden; margin: 10px 0 5px 0; }
 input[type="file"]::file-selector-button { padding: 10px 15px; margin-right: 10px; background-color: var(--primary-color); color: var(--white-color); border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
 input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
-input[type="number"], input[type="text"].numeric-input { padding: 12px 15px; border: 2px solid var(--light-grey-border); border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 16px; background-color: var(--card-background); color: var(--text-dark); margin: 5px 0; }
+
+input[type="number"], input[type="text"].numeric-input {
+    padding: 12px 15px;
+    /* ИЗМЕНИТЬ ЭТУ СТРОКУ */
+    border: 1px solid var(--input-border-color); /* Было: 2px solid var(--light-grey-border) */
+    border-radius: 10px; width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: var(--card-background);
+    color: var(--text-dark);
+    margin: 5px 0;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
 input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-input-placeholder { color: var(--placeholder-color); } input::-ms-input-placeholder { color: var(--placeholder-color); }
 .input-container { width: 100%; }
@@ -238,8 +251,30 @@ input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-in
 .modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.8em; color: var(--grey-color); cursor: pointer; line-height: 1; padding: 5px; }
 .modal-close-btn:hover { color: var(--text-color); }
 .modal-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: var(--dark-green); }
-.modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { width: 100%; padding: 10px 12px; margin-bottom: 15px; border: 1px solid var(--input-border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; background-color: var(--input-bg-color); transition: border-color 0.3s ease; }
-.modal-form input:focus { border-color: var(--input-focus-border-color); outline: none; }
+.modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { 
+    width: 100%; 
+    padding: 10px 12px; 
+    margin-bottom: 15px; 
+    border: 1px solid var(--input-border-color); 
+    border-radius: 8px; 
+    box-sizing: border-box; 
+    font-size: 1em; 
+    background-color: var(--input-bg-color); 
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+}
+/* === ОБЩИЙ СТИЛЬ ФОКУСА ДЛЯ ИНПУТОВ === */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="email"]:focus,
+.numeric-input:focus,
+#receiptAmountInput:focus { /* << ДОБАВИТЬ СЮДА */
+    outline: none;
+    border-color: var(--input-focus-border-color);
+    /* Можно сделать тень чуть заметнее, увеличив spread (последнее значение) или уменьшив прозрачность */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07), 0 0 5px var(--input-focus-border-color);
+}
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
 .modal-actions button { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, box-shadow 0.3s; }
 .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color); border: none; }
@@ -328,8 +363,26 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 /* Содержимое карточек Share */
 .receipt-title { font-size: 22px; margin-bottom: 20px; text-align: center; color: var(--primary-green); font-weight: 600; }
 .amount-container { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 30px; margin-bottom: 30px; }
-#receiptAmountInput { font-size: 42px; font-weight: bold; color: var(--primary-green); border: 2px solid var(--primary-green); border-radius: 10px; padding: 8px 12px; width: auto; min-width: 120px; max-width: 220px; text-align: right; background-color: #fdfdfd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); -webkit-appearance: none; margin: 0; -moz-appearance: textfield; transition: border-color 0.3s, box-shadow 0.3s; }
-#receiptAmountInput:focus { outline: none; border-color: var(--accent-green-yellow); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--accent-green-yellow); }
+#receiptAmountInput {
+    font-size: 42px;
+    font-weight: bold;
+    color: var(--primary-green);
+    /* ИЗМЕНИТЬ ЭТУ СТРОКУ */
+    border: 1px solid var(--input-border-color); /* Было: 2px solid var(--primary-green) */
+    border-radius: 10px;
+    padding: 8px 12px;
+    width: auto;
+    min-width: 120px;
+    max-width: 220px;
+    text-align: right;
+    background-color: #fdfdfd;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
 #receiptAmountInput::-webkit-outer-spin-button, #receiptAmountInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .currency-symbol { font-size: 42px; font-weight: bold; color: var(--primary-green); padding-left: 5px; }
 .share-title { margin-bottom: 20px; font-size: 20px; color: var(--primary-green); font-weight: 600; text-align: center; }
@@ -763,7 +816,26 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     input[type="file"] { color: var(--text-color-dark-theme); background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); } /* Уменьшил толщину рамки */
     input[type="file"]::file-selector-button { background-color: var(--primary-color); color: var(--white-color-dark-theme); border-radius: 8px; border: none; }
     input[type="file"]::file-selector-button:hover { background-color: var(--dark-green); }
-    input[type="number"], input[type="text"].numeric-input { background-color: var(--input-bg-color-dark-theme); color: var(--text-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); } /* Уменьшил толщину рамки */
+    input[type="number"], input[type="text"].numeric-input { 
+        background-color: var(--input-bg-color-dark-theme); 
+        color: var(--text-color-dark-theme); 
+        border: 1px solid var(--input-border-color-dark-theme);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+    } /* Уменьшил толщину рамки */
+    /* === ОБЩИЙ СТИЛЬ ФОКУСА ДЛЯ ИНПУТОВ (ТЕМНАЯ ТЕМА) === */
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="tel"]:focus,
+    input[type="url"]:focus,
+    input[type="email"]:focus,
+    .numeric-input:focus,
+    #receiptAmountInput:focus { /* << ДОБАВИТЬ СЮДА */
+        outline: none;
+        border-color: var(--input-focus-border-color-dark-theme);
+        /* Можно сделать тень чуть заметнее */
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.04), 0 0 5px var(--input-focus-border-color-dark-theme);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
     input::placeholder { color: var(--placeholder-color-dark-theme); }
     .filters button { background-color: var(--hover-green-bg-dark-theme); color: var(--primary-color-dark-theme); border: 1px solid var(--border-green-dark-theme); }
     .filters button:hover { background-color: var(--active-green-bg-dark-theme); color: var(--dark-green-dark-theme); }
@@ -798,9 +870,13 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .modal-close-btn { color: var(--grey-color-dark-theme); }
     .modal-close-btn:hover { color: var(--text-color-dark-theme); }
     .modal-form label { color: var(--dark-green-dark-theme); }
-    .modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); color: var(--text-color-dark-theme); }
+    .modal-form input[type="text"], .modal-form input[type="tel"], .modal-form input[type="url"], .modal-form input[type="number"], .modal-form input[type="email"] { 
+        background-color: var(--input-bg-color-dark-theme); 
+        border: 1px solid var(--input-border-color-dark-theme); 
+        color: var(--text-color-dark-theme);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
     .modal-form input::placeholder { color: var(--placeholder-color-dark-theme); opacity: 1; }
-    .modal-form input:focus { border-color: var(--input-focus-border-color-dark-theme); }
     .modal-actions .submit-btn { background-color: var(--primary-color); color: var(--white-color-dark-theme); }
     .modal-actions .submit-btn:hover { background-color: var(--dark-green); }
     .modal-actions .cancel-btn { background-color: #555; color: var(--white-color-dark-theme); }
@@ -834,8 +910,14 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     .receipt-container .container-content { padding: 25px; }
     .share-container .container-content { padding: 20px; }
     .receipt-title, .share-title { color: var(--primary-color-dark-theme); }
-    #receiptAmountInput { background-color: var(--input-bg-color-dark-theme); border: 1px solid var(--input-border-color-dark-theme); box-shadow: none; color: var(--text-color-dark-theme); } /* Уменьшил толщину рамки */
-    #receiptAmountInput:focus { border-color: var(--primary-color-dark-theme); box-shadow: inset 0 1px 2px rgba(255,255,255,0.03), 0 0 5px var(--primary-color-dark-theme); }
+    #receiptAmountInput { 
+        background-color: var(--input-bg-color-dark-theme); 
+        border: 1px solid var(--input-border-color-dark-theme); 
+        box-shadow: none; color: var(--text-color-dark-theme);
+        transition: border-color 0.3s ease, box-shadow inset 0 1px 3px rgba(0,0,0,0.05), 0 0 5px var(--dark-green); 
+     
+    } /* Уменьшил толщину рамки */
+   
     .currency-symbol { color: var(--primary-color-dark-theme); }
     .share-button { background-color: var(--primary-color); color: var(--white-color-dark-theme); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); }
     .share-button:hover:not(:disabled) { opacity: var(--button-hover-opacity); transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5); }
