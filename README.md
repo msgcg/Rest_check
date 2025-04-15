@@ -11,7 +11,6 @@
 
 - Flask
 - requests
-- openai
 - google
 - google.genai
 - google-generativeai
