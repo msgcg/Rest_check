@@ -69,12 +69,10 @@ def process_image_with_gemini(filepath):
     except Exception as e:
         logger.error(f"Error processing image with Gemini: {e}", exc_info=True)
         # Попытка удалить файл, если он был загружен, но произошла ошибка
-        # if 'sample_file' in locals() and sample_file:
-        #     try:
-        #         genai.delete_file(sample_file.name)
-        #         logger.info(f"File {sample_file.name} deleted after error.")
-        #     except Exception as delete_err:
-        #         logger.error(f"Error deleting file {sample_file.name} after error: {delete_err}")
-        return None # Возвращаем None в случае серьезной ошибки
-
-# --- END OF FILE ocr_module.py ---
+        if 'sample_file' in locals() and sample_file:
+            try:
+                genai.delete_file(sample_file.name)
+                logger.info(f"File {sample_file.name} deleted after error.")
+            except Exception as delete_err:
+                logger.error(f"Error deleting file {sample_file.name} after error: {delete_err}")
+        return None
