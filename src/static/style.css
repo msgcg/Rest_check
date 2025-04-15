@@ -89,6 +89,7 @@ body {
     align-items: center;
     width: 100%;
     box-sizing: border-box;
+    /* Убери align-self: center у .input-wrapper, если добавлял его */
 }
 /* --- Специфичные стили для Body на странице Share --- */
 body.share-page-body {
@@ -161,7 +162,7 @@ body.results-shown .index-header {
     overflow-y: auto; /* << ОСНОВНОЙ СКРОЛЛ КОНТЕНТА ЗДЕСЬ */
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* <<< ДОБАВЛЕНО ДЛЯ ГОРИЗОНТАЛЬНОГО ЦЕНТРИРОВАНИЯ */
     position: relative;
     z-index: 1;
     max-height: 100%;
@@ -188,6 +189,7 @@ input[type="file"]::file-selector-button:hover { background-color: var(--dark-gr
 
 input[type="number"], input[type="text"].numeric-input {
     padding: 12px 15px;
+    /* ИЗМЕНИТЬ ЭТУ СТРОКУ */
     border: 1px solid var(--input-border-color); /* Было: 2px solid var(--light-grey-border) */
     border-radius: 10px; width: 100%;
     box-sizing: border-box;
@@ -202,6 +204,7 @@ input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
 input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-input-placeholder { color: var(--placeholder-color); } input::-ms-input-placeholder { color: var(--placeholder-color); }
 .input-container { width: 100%; }
 .file-btn-wrapper { margin-top: 10px; width: 100%; }
+/* Убрали #upload-btn, стили теперь общие для кнопок ниже */
 .result-action-btn { position: absolute; bottom: 10px; z-index: 5; background-color: var(--card-background); color: #555; cursor: pointer; padding: 5px; line-height: 1; border-radius: 8px; border: 2px solid var(--light-grey-border); width: auto; height: auto; font-weight: normal; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: color 0.2s, background-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
 .result-action-btn:hover { color: var(--primary-color); background-color: #f0f0f0; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
 .result-action-btn:active { color: var(--dark-green); background-color: #e0e0e0;}
@@ -234,14 +237,15 @@ input::placeholder { color: var(--placeholder-color); opacity: 1; } input:-ms-in
 .edit-button {
     background-color: var(--primary-color); /* Основной зеленый */
     color: var(--white-color);              /* !!! Белый текст */
-    border: none;
+    border: none;                           /* Убираем рамку */
     /* Наследует остальные стили от .action-button */
     box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Тень как у других */
 }
 
 .edit-button:hover {
     background-color: var(--dark-green); /* Темно-зеленый при наведении */
-    color: var(--white-color);
+    color: var(--white-color);           /* Оставляем белый текст */
+    /* Сохраняем стандартные эффекты наведения */
     opacity: 0.9;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
@@ -281,12 +285,13 @@ input[type="number"]:focus,
 input[type="tel"]:focus,
 input[type="url"]:focus,
 input[type="email"]:focus,
-select:focus,
+select:focus, /* <<< ДОБАВЛЕНО ЗДЕСЬ >>> */
 .numeric-input:focus,
 #receiptAmountInput:focus {
     outline: none;
     border-color: var(--input-focus-border-color);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07), 0 0 5px var(--input-focus-border-color);
+    /* Добавим transition для плавности, если его нет у select по умолчанию */
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
@@ -381,6 +386,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     font-size: 42px;
     font-weight: bold;
     color: var(--primary-green);
+    /* ИЗМЕНИТЬ ЭТУ СТРОКУ */
     border: 1px solid var(--input-border-color); /* Было: 2px solid var(--primary-green) */
     border-radius: 10px;
     padding: 8px 12px;
@@ -495,15 +501,15 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 .assignment-item input[type="checkbox"] {
     margin-right: 8px;
     cursor: pointer;
-    width: 18px;
-    height: 18px;
+    width: 18px; /* <<< ЗАДАЕМ РАЗМЕР >>> */
+    height: 18px; /* <<< ЗАДАЕМ РАЗМЕР >>> */
     vertical-align: middle; /* Выравниваем по центру строки */
     flex-shrink: 0; /* Не сжимаем чекбокс */
     border-radius: 3px; /* Небольшое скругление */
 }
 .assignment-item input[type="checkbox"]:checked + label {
      color: var(--primary-color);
-     font-weight: 500; /* небольшое выделение */
+     font-weight: 500; /* Оставляем небольшое выделение */
 }
 .assignment-item label {
     font-size: 0.95em;
@@ -1069,10 +1075,12 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 .last-amount-container {
     margin-bottom: 25px; /* Отступ снизу */
     flex-shrink: 0;
+    /* --- ЯВНО ЗАДАЕМ ШИРИНУ И ЦЕНТРИРОВАНИЕ --- */
     margin-left: auto;
     margin-right: auto;
     width: 90%; /* Как у других контейнеров на share.html */
     max-width: 600px; /* Как у других контейнеров на share.html */
+    /* Убедимся, что базовые стили .container применяются */
     padding: 4px;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -1088,6 +1096,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* --- Добавляем стили из .container-content --- */
     width: 100%;
     background-color: var(--card-background);
     border-radius: 10px; /* Внутреннее скругление */
@@ -1133,7 +1142,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
 /* Обертка для кнопки */
 .last-amount-button-wrapper {
-    margin-top: 5px;
+    margin-top: 5px; /* <<< ДОБАВЛЕН ОТСТУП СВЕРХУ ДЛЯ КНОПКИ >>> */
     width: 100%;
     display: flex;
     justify-content: center;
@@ -1142,7 +1151,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
 /* Кнопка копирования */
 .copy-last-amount-btn {
-
+    /* --- ВОЗВРАЩАЕМ НАСЛЕДОВАНИЕ СТИЛЕЙ --- */
     /* Наследует background, color, border, shadow, transition от .result-action-btn */
 
     /* --- Специфичные стили для размера и выравнивания --- */
@@ -1154,7 +1163,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-
+    /* Убираем position: absolute, если он был в базовом классе */
     position: static;
 }
 .copy-last-amount-btn svg {
@@ -1176,7 +1185,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
 /* --- Стили для темной темы --- */
 @media (prefers-color-scheme: dark) {
-
+    /* --- Переопределяем стили контейнера для темной темы --- */
      .last-amount-container {
         background: var(--border-gradient); /* Оставляем градиент */
         box-shadow: 0 4px 15px var(--shadow-color-dark);
@@ -1246,9 +1255,9 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 }
 
 /* --- Уточнение базовых стилей .result-action-btn --- */
-
+/* Убедимся, что базовый стиль НЕ содержит position: absolute */
 .result-action-btn {
-    position: static; /* НЕ абсолютное позиционирование по умолчанию */
+    position: static; /* Явно указываем НЕ абсолютное позиционирование по умолчанию */
     /* Стили по умолчанию для СВЕТЛОЙ темы */
     background-color: var(--card-background);
     color: #555;
@@ -1258,7 +1267,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     cursor: pointer;
     line-height: 1;
     font-weight: normal;
-    display: inline-flex; /* для корректного рендеринга */
+    display: inline-flex; /* Добавим для корректного рендеринга */
     align-items: center;
     justify-content: center;
 }
@@ -1295,7 +1304,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     }
 }
 
-/* --- АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ ТОЛЬКО ДЛЯ КНОПОК В РЕЗУЛЬТАТАХ INDEX.HTML --- */
+/* --- ВОЗВРАЩАЕМ АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ ТОЛЬКО ДЛЯ КНОПОК В РЕЗУЛЬТАТАХ INDEX.HTML --- */
 #result-container .result-action-btn {
      position: absolute;
      bottom: 10px;
@@ -1308,7 +1317,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 #result-container #copy-result-btn { right: 50px; }
 #result-container #share-result-btn { right: 10px; }
 
-/* Мобильные стили для кнопок в результатах index.html */
+/* Мобильные стили для кнопок в результатах index.html (остаются без изменений) */
 @media (max-width: 600px) {
     #result-container .result-action-btn {
         bottom: 8px;

@@ -1,3 +1,5 @@
+# --- START OF FILE app.py ---
+
 from flask import Flask, request, render_template, jsonify, send_from_directory
 import os,re
 import google.generativeai as genai
@@ -6,7 +8,7 @@ from ocr_module import process_image_with_gemini
 from pydantic import BaseModel, ValidationError  
 from typing import Dict, List, Optional
 import logging
-import json
+import json # Для обработки данных от фронтенда
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -19,14 +21,14 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# ---  Pydantic Модели ---
-
+# --- Упрощенные Pydantic Модели ---
+# --- Новая Pydantic модель для проверки ---
 class RestaurantCheckResult(BaseModel):
     is_restaurant: bool
 
 class PositionItem(BaseModel):
     name: str
-    price: int
+    price: int # <--- Изменено на int
 
 class Positions(BaseModel):
     positions_list: List[PositionItem]
@@ -47,7 +49,7 @@ class Recommendation(BaseModel):
 
 
 
-# --- Настройка Gemini ---
+# --- Настройка Gemini (без изменений) ---
 def get_gemini_model(model_name="models/gemini-2.0-flash"):
     # ... (код функции без изменений) ...
     api_key = os.getenv('GOOGLE_API_KEY')
@@ -57,7 +59,7 @@ def get_gemini_model(model_name="models/gemini-2.0-flash"):
     genai.configure(api_key=api_key)
     return genai.GenerativeModel(model_name)
 
-# --- функция для проверки ---
+# --- Новая функция для проверки ---
 def is_restaurant_check(extracted_text: str) -> Optional[bool]:
     """
     Проверяет, является ли текст чеком из ресторана, используя Gemini.
@@ -118,6 +120,7 @@ def is_restaurant_check(extracted_text: str) -> Optional[bool]:
         logger.error(f"Error during Gemini API call for restaurant check: {e}", exc_info=True)
         return None
 
+# --- Обновленная функция get_positions (только позиции) ---
 def get_positions(extracted_text: str) -> Optional[Positions]:
     if not extracted_text:
         logger.warning("No extracted text provided to get_positions.")
@@ -188,6 +191,7 @@ def get_positions(extracted_text: str) -> Optional[Positions]:
         logger.error(f"Error during Gemini API call or processing for positions: {e}", exc_info=True)
         return None
 
+# --- Новая функция get_total_amount (как ты предложил) ---
 def get_total_amount(extracted_text: str) -> int:
     """Извлекает итоговую сумму из текста чека как целое число."""
     if not extracted_text:
@@ -248,6 +252,8 @@ def get_total_amount(extracted_text: str) -> int:
         logger.error(f"Error during Gemini API call for total amount: {e}", exc_info=True)
         return 0
 
+
+# --- Обновленная функция get_recommendations ---
 def get_recommendations(extracted_text: str, num_people: int, tea_money: float, item_assignments: Dict[str, List[str]]) -> Optional[Recommendation]:
     if not extracted_text or num_people <= 0:
         logger.warning("Invalid input for get_recommendations.")
@@ -259,7 +265,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 
     tea_money_int = int(round(tea_money))
 
-
+    # --- ОБНОВЛЕННЫЙ ПРОМПТ без описаний ---
     prompt = f"""
 Проанализируй счет из ресторана/кафе и рассчитай варианты его разделения на {num_people} человек.
 
@@ -311,7 +317,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 и так далее
 **Все числовые значения сумм должны быть ЦЕЛЫМИ ЧИСЛАМИ (int).** Не добавляй никаких других пояснений или текста вне JSON. Валюта по умолчанию, если другая явно не указана в чеке - Российский рубль.
 """
- 
+    # --- КОНЕЦ ОБНОВЛЕННОГО ПРОМПТА ---
     try:
         client = genai_module.Client(api_key=os.getenv('GOOGLE_API_KEY'))
 
@@ -403,6 +409,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 
 @app.route('/favicon.ico')
 def favicon():
+    # Убедитесь, что favicon.png находится в static/
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.png', mimetype='image/png')
 
@@ -412,6 +419,8 @@ def index():
 
 @app.route('/share')
 def share():
+    # Эта страница может больше не понадобиться в старом виде,
+    # но оставим маршрут, если она используется для чего-то еще.
     return render_template('share.html')
 
 @app.route('/contacts')
@@ -419,7 +428,7 @@ def contacts():
     return render_template('contacts.html')
 
 
-# --- маршрут /preprocess_receipt ---
+# --- Обновленный маршрут /preprocess_receipt ---
 @app.route('/preprocess_receipt', methods=['POST'])
 def preprocess_receipt():
     image_file = request.files.get('receipt_image')
@@ -427,7 +436,8 @@ def preprocess_receipt():
         logger.warning("Preprocess request failed: No image file provided.")
         return jsonify({'error': 'No image file provided'}), 400
 
-    original_filename = image_file.filename 
+    # Сохраняем файл временно (путь можно сделать уникальным при необходимости)
+    original_filename = image_file.filename # Безопаснее использовать secure_filename, но для простоты оставим так
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
 
     try:
@@ -492,7 +502,7 @@ def preprocess_receipt():
             except Exception as e:
                 logger.error(f"Error deleting temporary file {filepath}: {e}")
 
-# --- МАРШРУТ ДЛЯ РАСЧЕТА ---
+# --- НОВЫЙ МАРШРУТ ДЛЯ РАСЧЕТА ---
 @app.route('/calculate_split', methods=['POST'])
 def calculate_split():
     """
@@ -562,5 +572,8 @@ def calculate_split():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    # Установите debug=False для продакшена
+    app.run(host='0.0.0.0', port=port, debug=True)
     app.run(host='0.0.0.0', port=port, debug=True)
 
+# --- END OF FILE app.py ---
