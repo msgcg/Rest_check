@@ -5,3 +5,4 @@ google
 google.genai
 google-generativeai
 pydantic
+typing-extensions
