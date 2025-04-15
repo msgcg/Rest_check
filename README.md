@@ -17,7 +17,8 @@
 - google-generativeai
 - pydantic
 - typing-extensions
-
+- python-dotenv
+- waitress (для продакшна)
 ---
 
 ## **Настройка**
@@ -53,6 +54,9 @@
 
         ```dotenv
         GOOGLE_API_KEY='ВАШ_GOOGLE_API_KEY'
+        ENV=prod (или dev для отладки)
+        PORT=5000
+        DEBUG=False (или True для отладки)
         ```
         *(Замените `ВАШ_GOOGLE_API_KEY` на реальный ключ. Создайте папку `uploads` - она будет использоваться для временного хранения загруженных изображений чеков).*
 

@@ -9,6 +9,9 @@ from pydantic import BaseModel, ValidationError
 from typing import Dict, List, Optional
 import logging
 import json # Для обработки данных от фронтенда
+# run_prod.py
+from dotenv import load_dotenv
+from waitress import serve
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -337,12 +340,15 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
                                     "who_more_eat_then_more_pay": {"type": "integer"},
                                     "who_more_cost_then_more_pay": {"type": "integer"},
                                     "proportional_division_by_the_cost_of_orders": {"type": "integer"}
-                                }
+                                },
+                                "required": ["equally", "who_more_eat_then_more_pay", "who_more_cost_then_more_pay", "proportional_division_by_the_cost_of_orders"]
                             }
-                        }
+                        },
+                        "required": ["name", "shares"]
                     }
                 }
-            }
+            },
+            "required": ["peoples_list"]
         }
 
         response = client.models.generate_content(
@@ -358,7 +364,7 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 
         try:
             # Попытка получить объект Recommendation вручную
-            logger.error("Direct parsing of Recommendation object. Skipping attribute check.")
+            logger.info("Direct parsing of Recommendation object.")
             raw_text = None
 
             # Извлекаем текстовый ответ
@@ -371,20 +377,21 @@ def get_recommendations(extracted_text: str, num_people: int, tea_money: float, 
 
             if raw_text:
                 logger.info(f"Raw response text received: {raw_text[:1000]}...")
-
+                # Удаляем возможные артефакты ```json ... ```
+                cleaned_json_text = re.sub(r'^```json\s*|\s*```$', '', raw_text, flags=re.MULTILINE | re.DOTALL).strip()
                 # Попытка распарсить JSON вручную
                 try:
-                    parsed_data = json.loads(raw_text)
+                    parsed_data = json.loads(cleaned_json_text)
 
                     # Создаем объект через Pydantic
                     recommendation_obj = Recommendation(**parsed_data)
 
                 except (json.JSONDecodeError, ValidationError) as parse_err:
-                    logger.error(f"Failed to parse response into Recommendation: {parse_err}")
-                    recommendation_obj = None
+                    logger.error(f"Failed to parse response into Recommendation: {parse_err}. JSON: {cleaned_json_text}")
+                    return None
             else:
                 logger.error("Could not retrieve raw response text.")
-                recommendation_obj = None
+                return None
 
 
             # Проверяем список людей
@@ -568,12 +575,17 @@ def calculate_split():
         logger.error(f"Error during calculate_split: {e}", exc_info=True)
         return jsonify({'error': 'An internal server error occurred during calculation.'}), 500
 
-# --- КОНЕЦ ДОБАВЛЕНИЯ ---
+# Загрузка переменных окружения из .env
+load_dotenv()
+
+env = os.getenv("ENV", "dev")
+port = int(os.getenv("PORT", 5000))
+debug = os.getenv("DEBUG", "False").lower() == "true"
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    # Установите debug=False для продакшена
-    app.run(host='0.0.0.0', port=port, debug=True)
-    app.run(host='0.0.0.0', port=port, debug=True)
-
-# --- END OF FILE app.py ---
+    if env == "dev":
+        print(f"🔧 Запуск в режиме разработки на http://127.0.0.1:{port}")
+        app.run(host="0.0.0.0", port=port, debug=debug)
+    else:
+        print(f"🚀 Запуск в продакшн на http://0.0.0.0:{port} через Waitress")
+        serve(app, host="0.0.0.0", port=port)

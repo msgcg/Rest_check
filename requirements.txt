@@ -5,3 +5,5 @@ google
 google.genai
 google-generativeai
 pydantic
+python-dotenv
+waitress
