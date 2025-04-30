@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПоДЕЛИ!</title>
@@ -101,7 +102,7 @@
         }
     </style>
 </head>
-<body > <!-- Класс results-shown будет добавляться/удаляться сюда -->
+<body id="page-index"> <!-- Класс results-shown будет добавляться/удаляться сюда -->
     <!-- Status Indicator Moved Outside Container -->
     <div id="status" class="status"></div>
 
@@ -188,6 +189,24 @@
     <div id="person-share-options-popup" class="share-options-popup">
         <!-- Кнопки будут добавлены сюда динамически JS -->
     </div>
+        <!-- Нижний навигационный бар -->
+        <footer class="footer-nav">
+            <a href="{{ url_for('index') }}" class="nav-item">
+                <!-- Иконка Сканер (ЗАМЕНЕНА) -->
+                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"> <path d="M80-720v-200h200v80H160v120H80Zm720 0v-120H680v-80h200v200h-80ZM80-40v-200h80v120h120v80H80Zm600 0v-80h120v-120h80v200H680ZM280-240h400v-480H280v480Zm0 80q-33 0-56.5-23.5T200-240v-480q0-33 23.5-56.5T280-800h400q33 0 56.5 23.5T760-720v480q0 33-23.5 56.5T680-160H280Zm80-400h240v-80H360v80Zm0 120h240v-80H360v80Zm0 120h240v-80H360v80Zm-80 80v-480 480Z"/></svg>
+                <span class="nav-label">Сканер</span>
+            </a>
+            <a href="{{ url_for('contacts') }}" class="nav-item">
+                 <!-- Иконка Контакты (ЗАМЕНЕНА) -->
+                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"/></svg>
+                <span class="nav-label">Контакты</span>
+            </a>
+            <a href="{{ url_for('share') }}" class="nav-item">
+                 <!-- Иконка Поделиться (ЗАМЕНЕНА) -->
+                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm480-280q17 0 28.5-11.5T720-760q0-17-11.5-28.5T680-800q-17 0-28.5 11.5T640-760q0 17 11.5 28.5T680-720Zm0 520ZM200-480Zm480-280Z"/></svg>
+                <span class="nav-label">Поделиться</span>
+            </a>
+        </footer>
     <script>
         // --- Глобальные переменные состояния ---
         let currentExtractedText = null;
@@ -1258,6 +1277,7 @@
                 // --- Логика скрытия нашего нового попапа обрабатывается в handleClickOutsideSharePopup ---
 
             }, true); // Используем capture фазу
+            
         };
 
     </script>

@@ -54,13 +54,8 @@
 
 /* --- Global Styles --- */
 html, body {
-    height: 100vh;
-    overflow: hidden;
     margin: 0;
-}
-
-html {
-     overflow-x: hidden;
+    overflow-x: hidden; /* Горизонтальный скролл не нужен */
 }
 
 body {
@@ -78,10 +73,10 @@ body {
     box-sizing: border-box;
     position: relative;
     padding-right: 20px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     padding-left: 20px;
-    padding-top: calc(300px + env(safe-area-inset-top));
-    overflow-x: hidden;
+    padding-top: calc(10vh + env(safe-area-inset-top));
+    min-height: 100vh; /* <<< ДОБАВИТЬ: Гарантирует минимальную высоту экрана */
 }
 #initial-upload-section {
     display: flex;           /* Для первоначальной отрисовки и как базовый стиль */
@@ -98,17 +93,19 @@ body.share-page-body {
     padding-right: 20px;
     padding-bottom: 25px;
     padding-left: 20px;
-    padding-top: calc(300px + env(safe-area-inset-top));
+    padding-top: calc(10vh + env(safe-area-inset-top));
+    min-height: 100vh; /* <<< ДОБАВИТЬ */
 }
 
 /* --- Новая обертка для карточек на странице Share --- */
 .share-widgets-wrapper {
-    margin-top: auto;
+    /* margin-top: auto; <<< УДАЛИТЬ ЭТУ СТРОКУ ИЗ ГЛОБАЛЬНЫХ СТИЛЕЙ */
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    /* max-height оставляем, если нужен скролл внутри обертки */
     max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 25px);
 }
 
@@ -134,13 +131,13 @@ body.results-shown .index-header {
 
 /* --- Main Container (Podeli/Index/Contacts - Общий стиль) --- */
 .container {
-    margin-top: auto;
+    /* margin-top: auto; <<< УДАЛИТЬ ЭТУ СТРОКУ ИЗ ГЛОБАЛЬНЫХ СТИЛЕЙ */
     width: 90%;
     max-width: 600px;
     padding: 4px;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    margin-bottom: 0;
+    margin-bottom: 0; /* Оставляем, если нужно */
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -149,7 +146,8 @@ body.results-shown .index-header {
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     box-sizing: border-box;
     flex-shrink: 0;
-    max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 20px - 40px);
+    /* Убираем max-height, если он мешает прижатию вниз, или оставляем, если нужен скролл внутри */
+    /* max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 20px - 40px); */
 }
 
 /* Inner container for content (Общий стиль) */
@@ -689,26 +687,39 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
      /* Стили Podeli/Index/Contacts */
      body {
         padding-right: 10px;
-        padding-bottom: 10px;
+        min-height: 100vh; /* <<< ДОБАВИТЬ */
         padding-left: 10px;
-        padding-top: calc(100px + env(safe-area-inset-top));
+        padding-top: calc(64vh + env(safe-area-inset-top));
+        /* Убираем отступ снизу у body, если он мешает footer-nav */
+        /* padding-bottom: 10px; */
      }
      body.share-page-body {
+        min-height: 100vh; /* <<< ДОБАВИТЬ */
         padding-right: 10px;
-        padding-bottom: 15px;
         padding-left: 10px;
-        padding-top: calc(100px + env(safe-area-inset-top));
+        padding-top: calc(64vh + env(safe-area-inset-top));
+        /* Убираем отступ снизу у body, если он мешает footer-nav */
+        /* padding-bottom: 25px; */
      }
-     .share-widgets-wrapper {
-        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px);
-     }
+
+     /* === ДОБАВЛЯЕМ ПРИЖАТИЕ ОСНОВНОГО КОНТЕНТА К НИЗУ НА МОБИЛЬНЫХ === */
      .container {
+        margin-top: auto; /* <<< ДОБАВЛЕНО ЗДЕСЬ: Прижимает контейнер вниз на мобильных (index/contacts) */
         width: 95%;
         padding: 3px;
         border-radius: 13px;
-        margin-bottom: 15px;
-        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - 30px);
-    }
+        /* margin-bottom: 15px; <<< УДАЛИТЬ или уменьшить, чтобы не было двойного отступа с footer-nav */
+        margin-bottom: 5px; /* Небольшой отступ над подвалом */
+        /* max-height обновляем для мобильных, если нужен скролл внутри */
+        /* max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - (60px + 15px)); */ /* Учитываем футер */
+     }
+     .share-widgets-wrapper {
+        margin-top: auto; /* <<< ДОБАВЛЕНО ЗДЕСЬ: Прижимает виджеты вниз на мобильных (share) */
+        max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px - (60px + 15px)); /* Учитываем футер */
+        margin-bottom: 5px; /* Небольшой отступ над подвалом */
+     }
+     /* ================================================================== */
+
      .container-content { padding: 12px; border-radius: 10px; }
      #status { font-size: 1.2em; width: 85%; padding: 20px; top: 75.9%; }
      .input-wrapper { max-width: 90%; padding-top: 15px; }
@@ -807,10 +818,10 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         background-color: var(--body-background-dark);
         color: var(--text-color-dark-theme);
         background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("/static/images/splash.png");
-        padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп */
+        padding-top: calc(10vh + env(safe-area-inset-top)); /* Десктоп */
     }
     body.share-page-body {
-        padding-top: calc(300px + env(safe-area-inset-top)); /* Десктоп Share */
+        padding-top: calc(10vh + env(safe-area-inset-top)); /* Десктоп Share */
     }
 
     /* Контейнер темной темы */
@@ -1056,10 +1067,10 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     /* Переопределяем верхний отступ для мобильной темной темы */
     @media (max-width: 600px) {
         body {
-             padding-top: calc(100px + env(safe-area-inset-top));
+             padding-top: calc(64vh + env(safe-area-inset-top));
         }
         body.share-page-body {
-             padding-top: calc(100px + env(safe-area-inset-top));
+             padding-top: calc(64vh + env(safe-area-inset-top));
         }
          .share-widgets-wrapper {
             max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px);
@@ -1128,7 +1139,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 .last-amount-value {
     font-size: 38px;
     font-weight: bold;
-    color: var(--text-dark);
+    color: var(--primary-green);
     line-height: 1.1;
 }
 
@@ -1198,7 +1209,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         color: var(--primary-color-dark-theme);
     }
     .last-amount-value {
-        color: var(--text-color-dark-theme);
+        color: var(--primary-color-dark-theme);
     }
     .last-amount-value-wrapper .currency-symbol {
         color: var(--primary-color-dark-theme);
@@ -1330,4 +1341,95 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     }
     #result-container #copy-result-btn { right: 45px; }
     #result-container #share-result-btn { right: 8px; }
+}
+/* =============================================== */
+/* Стили для нижнего навигационного бара (подвала) - НЕ ФИКСИРОВАННЫЙ */
+/* =============================================== */
+
+.footer-nav {
+    /* Убираем ненужное для нефиксированного */
+    /* position: fixed; bottom: 0; left: 0; z-index: 100; */
+
+    width: 95%; /* Ширина парящего блока */
+    max-width: 600px; /* Максимальная ширина как у .container */
+    height: 65px; /* Высота бара */
+    background-color: var(--card-background);
+    border-radius: 15px; /* <<< СКРУГЛЕНИЕ УГЛОВ */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* <<< ТЕНЬ для парящего эффекта */
+    margin-top: auto; /* <<< ОСТАВЛЯЕМ: Прижимает к низу body */
+    margin-bottom: 20px; /* <<< ДОБАВЛЯЕМ: Отступ от нижнего края экрана */
+    /* Центрируем по горизонтали */
+    margin-left: auto;
+    margin-right: auto;
+    /* Внутренние отступы */
+    padding: 5px 10px; /* Добавляем боковые отступы внутри */
+    /* Учитываем безопасную зону iPhone внутри */
+    padding-bottom: calc(5px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    flex-shrink: 0;
+     /* border-top: 1px solid var(--light-grey-border); */ /* <<< УБИРАЕМ верхнюю границу */
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--grey-color); /* Цвет неактивной вкладки (светлая тема) */
+    flex-grow: 1;
+    padding: 5px 0;
+    transition: color 0.2s ease;
+    font-size: 11px; /* Размер подписи */
+    text-align: center;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3px;
+    fill: currentColor; /* Иконка наследует цвет текста */
+}
+
+.nav-label {
+    line-height: 1.1;
+}
+
+/* --- Стиль активной вкладки (Светлая тема) --- */
+#page-index .footer-nav .nav-item[href$="/"],
+#page-contacts .footer-nav .nav-item[href$="/contacts"],
+#page-share .footer-nav .nav-item[href$="/share"]
+{
+    color: var(--primary-color); /* Цвет активной вкладки (зеленый) */
+    font-weight: 600;
+}
+
+/* --- Темная тема для ПАРЯЩЕГО подвала --- */
+@media (prefers-color-scheme: dark) {
+    .footer-nav {
+        background-color: #111111; /* <<< Можно сделать чуть темнее #1c1c1e */
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* <<< Более заметная тень */
+         /* border-top: ...; */ /* Убрана */
+    }
+    /* Стили цвета текста/активной вкладки остаются прежними для темной темы */
+}
+
+/* --- Мобильные стили для ПАРЯЩЕГО подвала --- */
+@media (max-width: 600px) {
+    .footer-nav {
+        height: 60px;
+        width: 95%; /* Можно оставить 95% или сделать чуть шире */
+        border-radius: 12px; /* Чуть меньше скругление */
+        margin-bottom: 15px; /* Меньше отступ снизу */
+        padding-bottom: calc(5px + env(safe-area-inset-bottom));
+    }
+    /* Стили иконок/текста остаются прежними */
+
+    /* Не забываем про отступ для основного контента на мобильных */
+    .input-wrapper, .container, .share-widgets-wrapper {
+        margin-bottom: 15px; /* Уменьшаем отступ над подвалом */
+    }
 }
