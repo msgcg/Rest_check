@@ -1410,7 +1410,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 /* --- Темная тема для ПАРЯЩЕГО подвала --- */
 @media (prefers-color-scheme: dark) {
     .footer-nav {
-        background-color: #111111; /* <<< Можно сделать чуть темнее #1c1c1e */
+        background-color: #000000; /* <<< Можно сделать чуть темнее #1c1c1e */
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* <<< Более заметная тень */
          /* border-top: ...; */ /* Убрана */
     }
