@@ -427,19 +427,16 @@ def favicon():
                                'favicon.png', mimetype='image/png')
 
 @app.route('/')
-@sitemap.include() # <<< Пометить для включения в sitemap
 def index():
     return render_template('index.html')
 
 @app.route('/share')
-@sitemap.include() # <<< Пометить для включения в sitemap
 def share():
     # Эта страница может больше не понадобиться в старом виде,
     # но оставим маршрут, если она используется для чего-то еще.
     return render_template('share.html')
 
 @app.route('/contacts')
-@sitemap.include() # <<< Пометить для включения в sitemap
 def contacts():
     return render_template('contacts.html')
 
