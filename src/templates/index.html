@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- Yandex.RTB -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
     <meta name="google-site-verification" content="iPPY4JNrZyn4IRC2pNlAVTgFIq5AoG-KfLD8jAJkJqc" />
     <meta name="yandex-verification" content="0d3d253bf0368a74" />
     <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
@@ -105,6 +108,16 @@
     </style>
 </head>
 <body id="page-index"> <!-- Класс results-shown будет добавляться/удаляться сюда -->
+    <!-- Yandex.RTB R-A-15332884-1 -->
+    <script>
+        window.yaContextCb.push(() => {
+            Ya.Context.AdvManager.render({
+                "blockId": "R-A-15332884-1",
+                "type": "fullscreen",
+                "platform": "touch"
+            })
+        })
+    </script>
     <!-- Status Indicator Moved Outside Container -->
     <div id="status" class="status"></div>
 
