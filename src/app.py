@@ -1,6 +1,7 @@
 # --- START OF FILE app.py ---
 
 from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask_sitemap import Sitemap
 import os,re
 import google.generativeai as genai
 from google import genai as genai_module
@@ -23,6 +24,11 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Настройки для Flask-Sitemap
+app.config['SITEMAP_INCLUDE_RULES_WITHOUT_PARAMS'] = True # Включать правила без параметров (например, '/')
+app.config['SITEMAP_URL_SCHEME'] = 'https' # Используйте 'https', если ваш сайт работает по HTTPS
+
+sitemap = Sitemap(app=app) # <<< Инициализация Sitemap
 
 # --- Упрощенные Pydantic Модели ---
 # --- Новая Pydantic модель для проверки ---
@@ -421,16 +427,19 @@ def favicon():
                                'favicon.png', mimetype='image/png')
 
 @app.route('/')
+@sitemap.include() # <<< Пометить для включения в sitemap
 def index():
     return render_template('index.html')
 
 @app.route('/share')
+@sitemap.include() # <<< Пометить для включения в sitemap
 def share():
     # Эта страница может больше не понадобиться в старом виде,
     # но оставим маршрут, если она используется для чего-то еще.
     return render_template('share.html')
 
 @app.route('/contacts')
+@sitemap.include() # <<< Пометить для включения в sitemap
 def contacts():
     return render_template('contacts.html')
 
@@ -574,6 +583,18 @@ def calculate_split():
     except Exception as e:
         logger.error(f"Error during calculate_split: {e}", exc_info=True)
         return jsonify({'error': 'An internal server error occurred during calculation.'}), 500
+    
+@app.route('/sitemap.xml')
+def site_map():
+    # Важно: Flask-Sitemap сам использует request.url_root для определения домена.
+    # Убедитесь, что Flask правильно определяет ваш домен, особенно если используете прокси (nginx/Waitress).
+    # Иногда может потребоваться явная настройка SERVER_NAME в app.config,
+    # или передача base_url='https://yourdomain.com' в sitemap.sitemap_xml().
+    return sitemap.sitemap_xml()
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.root_path, 'robots.txt')
 
 # Загрузка переменных окружения из .env
 load_dotenv()

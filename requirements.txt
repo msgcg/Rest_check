@@ -6,3 +6,4 @@ google-generativeai
 pydantic
 python-dotenv
 waitress
+Flask-Sitemap
