@@ -122,6 +122,36 @@
                 <span class="nav-label">Поделиться</span>
             </a>
         </footer>
+        <script>
+            (function() { // Используем IIFE для изоляции переменных
+              const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage
+              const title = "ВНИМАНИЕ!"; // Ваш заголовок
+              const body = "Приложение использует cookies, систему Appilix и рекламную сеть AADS. Используя приложение, вы соглашаетесь с правилами этих систем и площадок и сбором ими и нами различных данных!";
+          
+              // Собираем сообщение: Заголовок + две новые строки + тело сообщения
+              const message = title + "\n\n" + body;
+          
+              function showConsentMessage() {
+                if (localStorage.getItem(CONSENT_KEY) !== 'true') {
+                  alert(message); // Показываем собранное сообщение (с заголовком)
+                  try {
+                    localStorage.setItem(CONSENT_KEY, 'true');
+                    console.log('Флаг согласия (consentMessageShown) установлен.');
+                  } catch (e) {
+                    console.error('Не удалось сохранить флаг согласия в localStorage:', e);
+                  }
+                }
+              }
+          
+              if (localStorage.getItem(CONSENT_KEY) !== 'true') {
+                console.log('Флаг согласия не найден. Добавляем обработчик первого клика.');
+                document.addEventListener('click', showConsentMessage, { once: true, capture: true });
+              } else {
+                console.log('Флаг согласия уже установлен. Сообщение не будет показано.');
+              }
+          
+            })(); // Конец IIFE
+        </script>
     <!-- Основной скрипт приложения -->
     <script>
         // --- DOM Элементы ---
