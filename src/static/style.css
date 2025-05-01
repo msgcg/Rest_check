@@ -105,6 +105,7 @@ body.share-page-body {
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    margin-bottom: 20px;
     /* max-height оставляем, если нужен скролл внутри обертки */
     max-height: calc(100vh - (300px + env(safe-area-inset-top)) - 25px);
 }
@@ -137,7 +138,7 @@ body.results-shown .index-header {
     padding: 4px;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    margin-bottom: 0; /* Оставляем, если нужно */
+    margin-bottom: 20px; /* Оставляем, если нужно */
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -709,7 +710,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         padding: 3px;
         border-radius: 13px;
         /* margin-bottom: 15px; <<< УДАЛИТЬ или уменьшить, чтобы не было двойного отступа с footer-nav */
-        margin-bottom: 5px; /* Небольшой отступ над подвалом */
+ 
         /* max-height обновляем для мобильных, если нужен скролл внутри */
         /* max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 10px - (60px + 15px)); */ /* Учитываем футер */
      }
@@ -721,7 +722,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
      .share-widgets-wrapper {
         margin-top: auto; /* <<< ДОБАВЛЕНО ЗДЕСЬ: Прижимает виджеты вниз на мобильных (share) */
         max-height: calc(100vh - (100px + env(safe-area-inset-top)) - 15px - (60px + 15px)); /* Учитываем футер */
-        margin-bottom: 5px; /* Небольшой отступ над подвалом */
+    
      }
      /* ================================================================== */
 
@@ -1366,7 +1367,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     align-items: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* <<< ТЕНЬ для парящего эффекта */
     margin-top: auto; /* <<< ОСТАВЛЯЕМ: Прижимает к низу body */
-    margin-bottom: 20px; /* <<< ДОБАВЛЯЕМ: Отступ от нижнего края экрана */
+    margin-bottom: 2vh; /* <<< ДОБАВЛЯЕМ: Отступ от нижнего края экрана */
     /* Центрируем по горизонтали */
     margin-left: auto;
     margin-right: auto;
@@ -1429,15 +1430,10 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         height: 60px;
         width: 95%; /* Можно оставить 95% или сделать чуть шире */
         border-radius: 12px; /* Чуть меньше скругление */
-        margin-bottom: 15px; /* Меньше отступ снизу */
-        padding-bottom: calc(5px + env(safe-area-inset-bottom));
+        margin-bottom: 2px; /* Меньше отступ снизу */
+        padding-bottom: calc(env(safe-area-inset-bottom));
     }
     /* Стили иконок/текста остаются прежними */
-
-    /* Не забываем про отступ для основного контента на мобильных */
-    .input-wrapper, .container, .share-widgets-wrapper {
-        margin-bottom: 15px; /* Уменьшаем отступ над подвалом */
-    }
 }
 /* --- Стили для виджета рекламы AADS --- */
 .ad-widget {
@@ -1458,7 +1454,7 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
 
     /* Отступы */
     margin-top: 20px; /* Отступ сверху */
-    margin-bottom: 15px; /* Отступ снизу (запрошенный "маленький отступ") */
+    margin-bottom: 20px; /* Отступ снизу (запрошенный "маленький отступ") */
 }
 
 .ad-widget-content {
