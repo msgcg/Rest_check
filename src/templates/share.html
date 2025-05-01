@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body id="page-share" class="share-page-body">
-    
+    <!---
     <div class="ad-widget">
         <div class="ad-widget-content">
             
         </div>
     </div>
-    <!-- ============================================ -->
+    ============================================ -->
     <div class="header">
         <div class="logo">ПоДЕЛИ!</div>
         <div>Поделитесь суммой из чека легко</div>
@@ -96,7 +96,7 @@
             (function() { // Используем IIFE для изоляции переменных
               const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage
               const title = "ВНИМАНИЕ!"; // Ваш заголовок
-              const body = "Приложение использует cookies, систему Appilix и рекламную сеть. Используя приложение, вы соглашаетесь с правилами этих систем и площадок и сбором ими и нами различных данных!";
+              const body = "Приложение использует cookies, систему Appilix и другие системы (подразумеваются и сервисы). Используя приложение, вы соглашаетесь с правилами этих систем и площадок и сбором ими и нами различных данных!";
           
               // Собираем сообщение: Заголовок + две новые строки + тело сообщения
               const message = title + "\n\n" + body;

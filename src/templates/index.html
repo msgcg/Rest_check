@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta name="verify-admitad" content="44d1f5d8ea" />
     <meta name="google-site-verification" content="iPPY4JNrZyn4IRC2pNlAVTgFIq5AoG-KfLD8jAJkJqc" />
     <meta name="yandex-verification" content="0d3d253bf0368a74" />
     <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
@@ -108,13 +107,13 @@
 <body id="page-index"> <!-- Класс results-shown будет добавляться/удаляться сюда -->
     <!-- Status Indicator Moved Outside Container -->
     <div id="status" class="status"></div>
-    <!-- === Новый контейнер для виджета рекламы === -->
+    <!-- === Новый контейнер для виджета рекламы ===
     <div class="ad-widget">
         <div class="ad-widget-content">
                      
         </div>
     </div>
-    <!-- ============================================ -->
+    ============================================ -->
     <!-- Хедер находится ПЕРЕД контейнером -->
     <div class="header index-header">
         <div class="logo">ПоДЕЛИ!</div>
@@ -220,7 +219,7 @@
             (function() { // Используем IIFE для изоляции переменных
               const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage
               const title = "ВНИМАНИЕ!"; // Ваш заголовок
-              const body = "Приложение использует cookies, систему Appilix и рекламную сеть. Используя приложение, вы соглашаетесь с правилами этих систем и площадок и сбором ими и нами различных данных!";
+              const body = "Приложение использует cookies, систему Appilix и другие системы (подразумеваются и сервисы). Используя приложение, вы соглашаетесь с правилами этих систем и площадок и сбором ими и нами различных данных!";
           
               // Собираем сообщение: Заголовок + две новые строки + тело сообщения
               const message = title + "\n\n" + body;
