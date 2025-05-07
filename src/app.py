@@ -440,6 +440,9 @@ def share():
 def contacts():
     return render_template('contacts.html')
 
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
 
 # --- Обновленный маршрут /preprocess_receipt ---
 @app.route('/preprocess_receipt', methods=['POST'])
