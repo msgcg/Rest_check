@@ -3,6 +3,7 @@
 <head>
     <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
     <meta charset="UTF-8">
+    <meta name="description" content="Добавьте или отредактируйте контакты для разделения чека на ПоДЕЛИ!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Контакты</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -31,6 +32,9 @@
         <div>Ваши контакты для запросов</div> <!-- Подпись для страницы контактов -->
     </div>
     <!-- <<< КОНЕЦ ХЕДЕРА >>> -->
+    <div class="policy-footer">
+        <a href="/privacy">Политика конфиденциальности</a>
+    </div>
     <div class="container">
         <div class="container-content"> <!-- <<< НОВАЯ ОБЕРТКА >>> -->
             <div id="contact-list">
@@ -122,6 +126,7 @@
                 <span class="nav-label">Поделиться</span>
             </a>
         </footer>
+        
         <script>
             (function() { // Используем IIFE для изоляции переменных
               const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage

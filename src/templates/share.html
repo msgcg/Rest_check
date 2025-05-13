@@ -3,6 +3,7 @@
 <head>
     <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
     <meta charset="UTF-8">
+    <meta name="description" content="Поделитесь результатами разделения счета из кафе и ресторанов с друзьями через ПоДЕЛИ!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПоДЕЛИ! - Поделиться чеком</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -20,7 +21,9 @@
         <div class="logo">ПоДЕЛИ!</div>
         <div>Поделитесь суммой из чека легко</div>
     </div>
-
+    <div class="policy-footer">
+        <a href="/privacy">Политика конфиденциальности</a>
+    </div>
     <!-- <<< НОВАЯ ОБЕРТКА для карточек >>> -->
     <div class="share-widgets-wrapper">
 
@@ -93,6 +96,7 @@
                 <span class="nav-label">Поделиться</span>
             </a>
         </footer>
+        
         <script>
             (function() { // Используем IIFE для изоляции переменных
               const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage

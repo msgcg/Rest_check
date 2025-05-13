@@ -50,6 +50,8 @@
     --shadow-color: rgba(8, 165, 82, 0.15);
     --border-thickness: 3px;
     --widget-border-radius: 18px;
+
+    --policy-link-color: #aaa; /* светло-серый для светлой темы */
 }
 
 /* --- Global Styles --- */
@@ -817,6 +819,8 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
         --primary-green-dark: var(--primary-color-dark-theme);
         --accent-green-yellow-dark: #c8ff4d;
         --text-light-dark-theme: var(--white-color-dark-theme);
+
+        --policy-link-color: #444; /* почти чёрный для тёмной темы */
     }
 
     /* Глобальные стили темной темы */
@@ -1536,5 +1540,46 @@ label.required::after { content: '*'; color: var(--error-color); margin-left: 3p
     }
     .ad-widget-content #frame-link {
         font-size: 11px; /* Чуть меньше шрифт ссылки */
+    }
+}
+.policy-footer {
+    text-align: center;
+    font-size: 0.9em;
+    padding-bottom: 10px;
+    color: var(--policy-link-color);  /* цвет ссылки берется из переменной */
+}
+
+.policy-footer a {
+    text-decoration: none;
+    outline: none; /* убирает синий фокус */
+    color: var(--policy-link-color);  /* цвет не нажатой ссылки */
+}
+
+/* При наведении на ссылку */
+.policy-footer a:hover {
+    text-decoration: underline;
+}
+
+/* При фокусе или активации */
+.policy-footer a:focus,
+.policy-footer a:active {
+    color: #08a552;
+    font-size: inherit;
+    outline: none;
+    text-decoration: underline;
+}
+
+/* После посещения */
+.policy-footer a:visited {
+    color: #08a5517a;  /* темно-зеленый цвет после посещения */
+    text-decoration: none; /* не подчеркиваем после посещения */
+    font-size: 0.8em;  /* сохраняем размер шрифта */
+    padding-bottom: 10px; /* сохраняем отступ */
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    .policy-footer a:visited {
+        color: #6d946d25;  /* более темный зеленый для посещенных ссылок в темной теме */
     }
 }

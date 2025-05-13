@@ -5,6 +5,7 @@
     <meta name="yandex-verification" content="0d3d253bf0368a74" />
     <script src="{{ url_for('static', filename='js/global_scroll.js') }}"></script>
     <meta charset="UTF-8">
+    <meta name="description" content="Загрузите чек из кафе или ресторана и легко разделите сумму между участниками с помощью сервиса ПоДЕЛИ!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПоДЕЛИ!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -119,7 +120,10 @@
         <div class="logo">ПоДЕЛИ!</div>
         <div>Загрузите чек для разделения суммы</div>
     </div>
-
+    <div class="policy-footer">
+        <a href="/privacy">Политика конфиденциальности</a>
+    </div>    
+    
     <!-- Основной контейнер -->
     <div class="container">
         <div class="container-content">
@@ -215,6 +219,7 @@
                 <span class="nav-label">Поделиться</span>
             </a>
         </footer>
+        
         <script>
             (function() { // Используем IIFE для изоляции переменных
               const CONSENT_KEY = 'consentMessageShown_v1'; // Ключ для localStorage
