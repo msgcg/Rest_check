@@ -601,6 +601,7 @@ load_dotenv()
 
 env = os.getenv("ENV", "dev")
 port = int(os.getenv("PORT", 5000))
+host = os.getenv("HOST", "0.0.0.0")
 debug = os.getenv("DEBUG", "False").lower() == "true"
 
 if __name__ == '__main__':
@@ -609,4 +610,4 @@ if __name__ == '__main__':
         app.run(host="0.0.0.0", port=port, debug=debug)
     else:
         print(f"🚀 Запуск в продакшн на http://0.0.0.0:{port} через Waitress")
-        serve(app, host="0.0.0.0", port=port)
+        serve(app, host=host, port=port)
