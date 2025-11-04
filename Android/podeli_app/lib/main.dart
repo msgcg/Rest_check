@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
-// Для Completer
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 // Для разрешений
 void main() {
@@ -114,8 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _initWebView() {
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is AndroidWebViewPlatform) {
-      // Просто создаем пустые параметры, useHybridComposition больше не нужен
-      params = AndroidWebViewControllerCreationParams(); 
+      params = AndroidWebViewControllerCreationParams();
     } else {
       params = const PlatformWebViewControllerCreationParams();
     }
@@ -177,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 url.startsWith('https://vk.me/') ||
                 url.startsWith('https://t.me/') || // Для персональных ссылок
                 url.startsWith('sms:')) {
-              
+
               // Запрещаем WebView переходить по этой ссылке
               // и передаем управление url_launcher'у
               _launchExternalUrl(Uri.parse(url));
@@ -188,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (url.startsWith('https://podeli.oneserver.linkpc.net/')) {
               return NavigationDecision.navigate;
             }
-            
+
             // 3. Блокируем все остальные переходы для безопасности
             return NavigationDecision.prevent;
           },
@@ -204,18 +205,80 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (WebViewPlatform.instance is AndroidWebViewPlatform) {
       final androidController = _controller.platform as AndroidWebViewController;
-      androidController.setOnShowFileSelector((params) async {
-        final result = await FilePicker.platform.pickFiles(
-          type: FileType.image,
-        );
-
-        if (result != null && result.files.isNotEmpty) {
-          return result.files.map((file) => Uri.file(file.path!).toString()).toList();
-        }
-        return [];
-      });
+      androidController.setOnShowFileSelector(_androidFilePicker);
     }
   }
+
+  Future<List<String>> _androidFilePicker(FileSelectorParams params) async {
+    final source = await _showImageSourceDialog();
+
+    if (source == null) {
+      return [];
+    }
+
+    if (source == ImageSource.camera) {
+      final cameraStatus = await Permission.camera.request();
+      if (cameraStatus.isGranted) {
+        final picker = ImagePicker();
+        
+        // Добавляем параметры для сжатия и изменения размера
+        final photo = await picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1920,      // Ограничиваем ширину до Full HD
+          maxHeight: 1080,     // Ограничиваем высоту до Full HD
+          imageQuality: 85,    // Сжимаем до 85% качества (хороший баланс)
+        );
+        // ------------------------
+
+        if (photo != null) {
+          return [Uri.file(photo.path).toString()];
+        }
+      } else {
+        // Обработка отказа в разрешении
+      }
+    } else if (source == ImageSource.gallery) {
+      // Для галереи тоже можно добавить сжатие, если нужно,
+      // но пока оставим как есть, раз это работает.
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        return result.files.map((file) => Uri.file(file.path!).toString()).toList();
+      }
+    }
+
+    return [];
+  }
+
+  Future<ImageSource?> _showImageSourceDialog() async {
+    return await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Галерея'),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Камера'),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   Future<void> _launchExternalUrl(Uri url) async {
     if (await canLaunchUrl(url)) {
@@ -301,7 +364,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (_isLoading)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: Colors.black..withValues(alpha: 0.3),
                 child: const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -358,10 +421,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ? [const Color.fromARGB(255, 0, 0, 0), const Color(0xFF08A552)] // Черно-зеленый для темной темы
         : [Colors.white, const Color(0xFF12C26A)]; // Бело-зеленый для светлой темы
 
-    // 2. ИСПРАВЛЕНО: Обновляем логику цвета иконки согласно вашему запросу
-    // В темной теме - черная иконка, в светлой - белая.
-    // Примечание: белая иконка на бело-зеленом градиенте может быть плохо видна.
-    // Если контраст будет недостаточным, возможно, стоит вернуть Colors.black для светлой темы.
     final iconColor = isDarkMode ? Colors.black : Colors.white;
 
     // Радиус скругления для получения квадрата с закругленными углами
@@ -377,16 +436,14 @@ class _MyHomePageState extends State<MyHomePage> {
         borderRadius: BorderRadius.circular(borderRadiusValue),
         boxShadow: [
           BoxShadow(
-            // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
-            color: colors[1].withValues(alpha: 0.3),
+            color: colors[1]..withValues(alpha: 0.3), 
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
-          color: isDarkMode ? Colors.transparent : Colors.grey.withValues(alpha: 0.3),
+          color: isDarkMode ? Colors.transparent : Colors.grey..withValues(alpha: 0.3), 
           width: 1,
         ),
       ),
@@ -396,8 +453,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(borderRadiusValue),
           onTap: onPressed,
-          // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
-          splashColor: colors[1].withValues(alpha: 0.3),
+          splashColor: colors[1]..withValues(alpha: 0.3), 
           highlightColor: Colors.transparent,
           child: SizedBox(
             width: 50,
@@ -434,7 +490,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF12C26A).withValues(alpha: 0.2),
+              color: const Color(0xFF12C26A)..withValues(alpha: 0.2), 
               spreadRadius: 2,
               blurRadius: 15,
               offset: const Offset(0, 4),
@@ -462,7 +518,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: EdgeInsets.zero,
               children: [
                 DrawerHeader(
-                  decoration: BoxDecoration(color: Colors.transparent),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                   child: Text(
                     'Настройки',
                     style: TextStyle(
@@ -511,25 +567,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildDrawerItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    required bool isDarkMode,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required VoidCallback onTap,
+        required bool isDarkMode,
+      }) {
     return ListTile(
       leading: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [const Color(0xFF08A552), const Color(0xFF12C26A)],
+          gradient: const LinearGradient(
+            colors: [Color(0xFF08A552), Color(0xFF12C26A)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF12C26A).withValues(alpha: 0.5),
+            color: const Color(0xFF12C26A).withValues(alpha: 0.5), 
             width: 1,
           ),
         ),
