@@ -287,6 +287,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Получаем информацию о текущей теме
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -321,6 +324,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icons.menu,
                 onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                 isPrimary: false,
+                // Передаем информацию о теме
+                isDarkMode: isDarkMode,
               ),
             ),
           ),
@@ -336,6 +341,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     _controller.loadRequest(Uri.parse('https://podeli.oneserver.linkpc.net/'));
                   },
                   isPrimary: false,
+                  // Передаем информацию о теме
+                  isDarkMode: isDarkMode,
                 ),
               ),
             ),
@@ -349,10 +356,21 @@ class _MyHomePageState extends State<MyHomePage> {
     required IconData icon,
     required VoidCallback onPressed,
     required bool isPrimary,
+    required bool isDarkMode, // Параметр для определения темы
   }) {
-    final colors = isPrimary
-        ? [const Color(0xFF08A552), const Color(0xFF12C26A)]
-        : [const Color.fromARGB(255, 0, 0, 0), const Color(0xFF08A552)];
+    // 1. Определяем цвета для градиента в зависимости от темы
+    final colors = isDarkMode
+        ? [const Color.fromARGB(255, 0, 0, 0), const Color(0xFF08A552)] // Черно-зеленый для темной темы
+        : [Colors.white, const Color(0xFF12C26A)]; // Бело-зеленый для светлой темы
+
+    // 2. ИСПРАВЛЕНО: Обновляем логику цвета иконки согласно вашему запросу
+    // В темной теме - черная иконка, в светлой - белая.
+    // Примечание: белая иконка на бело-зеленом градиенте может быть плохо видна.
+    // Если контраст будет недостаточным, возможно, стоит вернуть Colors.black для светлой темы.
+    final iconColor = isDarkMode ? Colors.black : Colors.white;
+
+    // Радиус скругления для получения квадрата с закругленными углами
+    const borderRadiusValue = 15.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -361,9 +379,10 @@ class _MyHomePageState extends State<MyHomePage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(borderRadiusValue),
         boxShadow: [
           BoxShadow(
+            // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
             color: colors[1].withValues(alpha: 0.3),
             spreadRadius: 1,
             blurRadius: 8,
@@ -371,22 +390,24 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
         border: Border.all(
-          color: Colors.transparent,
-          width: 1.5,
+          // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
+          color: isDarkMode ? Colors.transparent : Colors.grey.withValues(alpha: 0.3),
+          width: 1,
         ),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(borderRadiusValue),
         child: InkWell(
-          borderRadius: BorderRadius.circular(25.0),
+          borderRadius: BorderRadius.circular(borderRadiusValue),
           onTap: onPressed,
+          // 3. ИСПРАВЛЕНО: Заменяем withOpacity на withValues
           splashColor: colors[1].withValues(alpha: 0.3),
           highlightColor: Colors.transparent,
           child: SizedBox(
             width: 50,
             height: 50,
-            child: Icon(icon, color: Colors.white, size: 30),
+            child: Icon(icon, color: iconColor, size: 30),
           ),
         ),
       ),
