@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rest-check.onrender.com/sitemap.xml
+Sitemap: https://podeli.oneserver.linkpc.net/sitemap.xml
