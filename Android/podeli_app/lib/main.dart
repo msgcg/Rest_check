@@ -296,12 +296,7 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: () async {
-              await _controller.reload();
-            },
-            child: WebViewWidget(controller: _controller),
-          ),
+          WebViewWidget(controller: _controller),
 
           if (_isLoading)
             Positioned.fill(
@@ -476,6 +471,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.refresh, // Иконка обновления
+                  title: 'Обновить страницу',
+                  onTap: () {
+                    _controller.reload(); // Перезагружаем WebView
+                    Navigator.pop(context); // Закрываем меню
+                  },
+                  isDarkMode: isDarkMode,
                 ),
                 _buildDrawerItem(
                   context,
