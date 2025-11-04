@@ -168,9 +168,28 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://podeli.oneserver.linkpc.net/')) {
+            final url = request.url;
+
+            // 1. Проверяем ссылки для шаринга и внешние протоколы
+            if (url.startsWith('https://vk.com/share.php') ||
+                url.startsWith('https://t.me/share/url') ||
+                url.startsWith('https://vk.com/im') ||
+                url.startsWith('https://vk.me/') ||
+                url.startsWith('https://t.me/') || // Для персональных ссылок
+                url.startsWith('sms:')) {
+              
+              // Запрещаем WebView переходить по этой ссылке
+              // и передаем управление url_launcher'у
+              _launchExternalUrl(Uri.parse(url));
+              return NavigationDecision.prevent;
+            }
+
+            // 2. Разрешаем навигацию только внутри вашего сайта
+            if (url.startsWith('https://podeli.oneserver.linkpc.net/')) {
               return NavigationDecision.navigate;
             }
+            
+            // 3. Блокируем все остальные переходы для безопасности
             return NavigationDecision.prevent;
           },
         ),
@@ -198,6 +217,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _launchExternalUrl(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      // Используем LaunchMode.externalApplication, чтобы гарантированно
+      // открыть внешнее приложение (браузер, VK, TG), а не внутри WebView.
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
   void _syncSystemThemeWithWebView() async {
     final brightness = ui.PlatformDispatcher.instance.platformBrightness;
     final isDarkMode = brightness == Brightness.dark;
