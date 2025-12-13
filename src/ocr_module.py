@@ -28,21 +28,16 @@ def process_image_with_gemini(filepath):
         genai.configure(api_key=api_key)
 
         # Определяем MIME-тип файла
-        ext = os.path.splitext(filepath)[1].lower()
-
-        mime_map = {
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-            ".png": "image/png",
-            ".webp": "image/webp",
-            ".heic": "image/heic",
-        }
-        
-        mime_type = mime_map.get(ext)
-        if not mime_type:
-            logger.error(f"Unsupported image extension: {ext}")
-            return None
-
+        mime_type, _ = mimetypes.guess_type(filepath)
+        if not mime_type or not mime_type.startswith('image/'):
+             logger.error(f"Invalid or unsupported MIME type: {mime_type} for file {filepath}")
+             # Можно вернуть ошибку или пустую строку, в зависимости от желаемого поведения
+             # return None # Или вернуть специфичную ошибку
+             # Попробуем загрузить как application/octet-stream, если тип не определен
+             mime_type = 'application/octet-stream'
+             logger.warning(f"Could not determine image MIME type for {filepath}. Trying {mime_type}.")
+             # Если все равно не удается, можно вернуть ошибку
+             # return None
 
         logger.info(f"Uploading file: {filepath} with MIME type: {mime_type}")
         # Загружаем файл
