@@ -8,6 +8,7 @@ import logging # Добавим логирование
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logging.getLogger("googleapiclient").setLevel(logging.DEBUG)
 
 def process_image_with_gemini(filepath):
     """
